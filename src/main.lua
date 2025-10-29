@@ -9,7 +9,6 @@ height=32  -- area height
 margin=2   -- left / right margin
 
 -- vars
-player=nil -- player entity
 cam_x=0    -- camera y position
 cam_y=0    -- camera x position
 no=1       -- turn number
@@ -35,6 +34,7 @@ flags={
 log={
     -- initialize log entries table
     entries={"welcome to game"},
+
     -- add message to log
     add = function(self, message)
         add(self.entries,no .. ": " .. message)
@@ -49,15 +49,29 @@ log={
 ui = {
     -- draw ui
     draw = function(self)
-        rectfill(0,104,128,128,0)
-        line(0,104,128,104,6)
-        print("pos:" .. player.x .. "-" .. player.y,margin,128-7*3,6)
-        print("hp: " .. player.hp,margin,128-7*2,6)
-        print(log.entries[#log.entries],margin,128-7*1,6)
+        -- bottom ui box
+        rectfill(0,104,127,127,0)
+        line(0,104,127,104,6)
+        line(0,119,128,119,6)
+        -- left
+        print("pos:" .. player.x .. "-" .. player.y,margin,127-7*3,6)
+        print("hp: " .. player.hp,margin,127-7*2,6)
+        -- right
         ui_z="🅾️ wait"
-        print(ui_z,128-strw(ui_z)-margin,128-7*3,6)
         ui_x="❎ menu"
-        print(ui_x,128-strw(ui_x)-margin,128-7*2,6)
+        print(ui_z,128-strw(ui_z)-margin,127-7*3,6)
+        print(ui_x,128-strw(ui_x)-margin,127-7*2,6)
+        -- bottom text
+        print(log.entries[#log.entries],margin,127-6*1,6)
+        -- frame
+        line(0,0,127,0,6)     -- top
+        line(127,0,127,127,6) -- right
+        line(0,127,127,127,6) -- bottom
+        line(0,0,0,127,6)     -- left
+        pset(0,0,0)
+        pset(127,0,0)
+        pset(0,127,0)
+        pset(127,127,0)
     end,
 }
 
@@ -74,7 +88,7 @@ end
 -- built-in update function
 function _update()
     -- get player input and perform turn
-    if (input()) turn()
+    if (player:input()) turn()
     -- set animation frame
     frame = flr(t() * 2 % 2)
 end
@@ -100,6 +114,11 @@ function dist(a,b)
     return sqrt((b.x-a.x)^2 + (b.y-a.y)^2)
 end
 
+-- calculate distance between two points (simple)
+function dist_simp(a,b)
+    return max(abs(b.x-a.x),abs(b.y-a.y))
+end
+
 -- calculate string width
 function strw(s)
     return print(s,0,-10)
@@ -122,12 +141,12 @@ end
 
 -- update camera position
 function update_camera()
-    if (player.x - cam_x > 16-5 and cam_x < width-16) then
-        cam_x = player.x - (16-5)
+    if (player.x - cam_x > 11 and cam_x < width-16) then
+        cam_x = player.x - 11
     elseif (player.x - cam_x < 4 and cam_x > 0) then
         cam_x = player.x - 4
-    elseif (player.y - cam_y > 16-8 and cam_y < height-16) then
-        cam_y = player.y - (16-8)
+    elseif (player.y - cam_y > 8 and cam_y < height-16) then
+        cam_y = player.y - 8
     elseif (player.y - cam_y < 4 and cam_y > 0) then
         cam_y = player.y - 4
     end
@@ -154,46 +173,4 @@ function collision(x,y)
     e = entity.get(x,y)
     if (e ~= nil and e.collision) return true
     return false
-end
-
-
--------------------------------------------------------------------------------
--- player
--------------------------------------------------------------------------------
-
--- handle input
-function input()
-    valid = false
-    if (btnp(⬆️)) valid = action_dir(player.x, player.y-1)
-    if (btnp(➡️)) valid = action_dir(player.x+1,player.y)
-    if (btnp(⬇️)) valid = action_dir(player.x, player.y+1)
-    if (btnp(⬅️)) valid = action_dir(player.x-1,player.y)
-    if (btnp(🅾️)) valid = action_wait()
-    return valid
-end
-
--- move the player or attack if enemy in target tile
-function action_dir(x,y)
-    if (player:move(x,y)) then
-        log:add("you moved")
-        return true
-    else
-        e = entity.get(x,y)
-        if (e ~= nil and e.hostile) then
-            player:attack(e)
-            return true
-        end
-    end
-    return false
-end
-
--- wait one turn
-function action_wait()
-    log:add("you waited")
-    return true
-end
-
--- calculate distance between two points
-function dist(a,b)
-    return sqrt((b.x-a.x)^2 + (b.y-a.y)^2)
 end

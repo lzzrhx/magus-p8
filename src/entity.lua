@@ -19,6 +19,7 @@ object = {
 -------------------------------------------------------------------------------
 
 entity = object:inherit({
+    class="entity",
     entities={},
     name="unknown",
     x=0,
@@ -92,73 +93,109 @@ entity = object:inherit({
     -- spawn entity on map
     spawn = function(sprite,x,y)
         mset(x,y,empty)
-        table = {x=x,y=y,sprite=sprite}
-        
-        -- player
-        if (sprite == 16) then
-            table.name="you"
-            table.xp=0
-            player = entity:new(table)
-
-        -- green guy
-        elseif (sprite == 17) then
-            table.name="green guy"
-            npc:new(table)
-        
-        -- dino
-        elseif (sprite == 18) then
-            table.name="dino"
-            npc:new(table)
-
-        -- cat
-        elseif (sprite == 19) then
-            table.name="cat"
-            npc:new(table)
-
-        -- dog
-        elseif (sprite == 20) then
-            table.name="dog"
-            npc:new(table)
-
-        -- man
-        elseif (sprite == 21) then
-            table.name="man"
-            npc:new(table)
-
-        -- blob
-        elseif (sprite == 22) then
-            table.name="blob"
-            npc:new(table)
-
-        -- goblin
-        elseif (sprite == 23) then
-            table.name="goblin"
-            npc:new(table)
-
-        -- skully
-        elseif (sprite == 24) then
-            table.name="skully"
-            enemy:new(table)
-
-        -- ghoul
-        elseif (sprite == 25) then
-            table.name="ghoul"
-            npc:new(table)
-
-        -- bat
-        elseif (sprite == 26) then
-            table.name="bat"
-            npc:new(table)
-
-        -- vampire
-        elseif (sprite == 27) then
-            table.name="vampire"
-            npc:new(table)
-        
-        else
-            entity:new(table)
+        -- get entity data
+        entity_data = data.entities[sprite]
+        if (entity_data ~= nil) then
+            -- set up player
+            if (entity_data.class == player.class) then
+                player.x=x
+                player.y=y
+                player.sprite=sprite
+            else
+                -- set up data table
+                table = {x=x,y=y,sprite=sprite}
+                -- add data to table
+                for k,v in pairs(entity_data) do
+                    if (k ~= "class") table[k] = v
+                end
+                -- create new entity of given class
+                if (entity_data.class == pet.class) then
+                    pet:new(table)
+                elseif (entity_data.class == interactable.class) then
+                    interactable:new(table)
+                elseif (entity_data.class == item.class) then 
+                    item:new(table)
+                elseif (entity_data.class == npc.class) then 
+                    npc:new(table)
+                elseif (entity_data.class == enemy.class) then 
+                    enemy:new(table)
+                else
+                    entity:new(table)
+                end
+            end
         end
     end,
+})
+
+
+-------------------------------------------------------------------------------
+-- player
+-------------------------------------------------------------------------------
+
+player = entity:new({
+    class="player",
+    name="you",
+    xp=0,
+    -- handle input
+    input = function(self)
+        valid = false
+        if (btnp(⬆️)) valid = self:action_dir(self.x,self.y-1)
+        if (btnp(➡️)) valid = self:action_dir(self.x+1,self.y)
+        if (btnp(⬇️)) valid = self:action_dir(self.x,self.y+1)
+        if (btnp(⬅️)) valid = self:action_dir(self.x-1,self.y)
+        if (btnp(🅾️)) valid = self:action_wait()
+        return valid
+    end,
+
+    -- move the player or attack if enemy in target tile
+    action_dir = function(self, x,y)
+        if (self:move(x,y)) then
+            log:add("you moved")
+            return true
+        else
+            e = entity.get(x,y)
+            if (e ~= nil) then
+                if (e.hostile) then
+                    self:attack(e)
+                    return true
+                end
+            end
+        end
+        return false
+    end,
+
+    -- wait one turn
+    action_wait = function(self)
+        log:add("you waited")
+        return true
+    end,
+})
+
+
+-------------------------------------------------------------------------------
+-- pet
+-------------------------------------------------------------------------------
+
+pet = entity:inherit({
+    class="pet",
+})
+
+
+-------------------------------------------------------------------------------
+-- interactable
+-------------------------------------------------------------------------------
+
+interactable = entity:inherit({
+    class="interactable",
+})
+
+
+-------------------------------------------------------------------------------
+-- item
+-------------------------------------------------------------------------------
+
+item = entity:inherit({
+    class="item",
 })
 
 
@@ -167,6 +204,7 @@ entity = object:inherit({
 -------------------------------------------------------------------------------
 
 npc = entity:inherit({
+    class="npc",
 })
 
 
@@ -175,6 +213,7 @@ npc = entity:inherit({
 -------------------------------------------------------------------------------
 
 enemy = entity:inherit({
+    class="enemy",
     hostile = true,
     ap = 1,
     hp = 5,
@@ -184,7 +223,7 @@ enemy = entity:inherit({
     update = function(self)
         entity.update(self)
         if (self.hostile) then
-            if (dist(self,player) <= 1) then
+            if (dist_simp(self,player) <= 1) then
                 self:attack(player)
             else
                 self:move_towards(player)
