@@ -4,8 +4,8 @@
 
 -- constants
 empty=1    -- sprite no for the empty map tile
-width=64   -- area width
-height=32  -- area height
+width=128   -- area width
+height=64  -- area height
 margin=2   -- left / right margin
 
 -- vars
@@ -59,8 +59,8 @@ ui = {
         -- right
         ui_z="🅾️ wait"
         ui_x="❎ menu"
-        print(ui_z,128-strw(ui_z)-margin,127-7*3,6)
-        print(ui_x,128-strw(ui_x)-margin,127-7*2,6)
+        print(ui_z,128-str_width(ui_z)-margin,127-7*3,6)
+        print(ui_x,128-str_width(ui_x)-margin,127-7*2,6)
         -- bottom text
         print(log.entries[#log.entries],margin,127-6*1,6)
         -- frame
@@ -120,8 +120,15 @@ function dist_simp(a,b)
 end
 
 -- calculate string width
-function strw(s)
+function str_width(s)
     return print(s,0,-10)
+end
+
+-- merge table b into table a
+function tbl_merge(a,b)
+    for k,v in pairs(b) do
+        a[k] = v
+    end
 end
 
 

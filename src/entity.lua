@@ -105,20 +105,18 @@ entity = object:inherit({
                 -- set up data table
                 table = {x=x,y=y,sprite=sprite}
                 -- add data to table
-                for k,v in pairs(entity_data) do
-                    if (k ~= "class") table[k] = v
-                end
+                tbl_merge(table,entity_data)
                 -- create new entity of given class
-                if (entity_data.class == pet.class) then
+                if (table.class == pet.class) then
                     pet:new(table)
-                elseif (entity_data.class == interactable.class) then
-                    interactable:new(table)
-                elseif (entity_data.class == item.class) then 
-                    item:new(table)
-                elseif (entity_data.class == npc.class) then 
+                elseif (table.class == npc.class) then 
                     npc:new(table)
-                elseif (entity_data.class == enemy.class) then 
+                elseif (table.class == enemy.class) then 
                     enemy:new(table)
+                elseif (table.class == interactable.class) then
+                    interactable:new(table)
+                elseif (table.class == item.class) then 
+                    item:new(table)
                 else
                     entity:new(table)
                 end
@@ -182,24 +180,6 @@ pet = entity:inherit({
 
 
 -------------------------------------------------------------------------------
--- interactable
--------------------------------------------------------------------------------
-
-interactable = entity:inherit({
-    class="interactable",
-})
-
-
--------------------------------------------------------------------------------
--- item
--------------------------------------------------------------------------------
-
-item = entity:inherit({
-    class="item",
-})
-
-
--------------------------------------------------------------------------------
 -- npc
 -------------------------------------------------------------------------------
 
@@ -241,3 +221,20 @@ enemy = entity:inherit({
     end,
 })
 
+
+-------------------------------------------------------------------------------
+-- interactable
+-------------------------------------------------------------------------------
+
+interactable = entity:inherit({
+    class="interactable",
+})
+
+
+-------------------------------------------------------------------------------
+-- item
+-------------------------------------------------------------------------------
+
+item = entity:inherit({
+    class="item",
+})
