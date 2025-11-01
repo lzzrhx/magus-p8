@@ -63,7 +63,7 @@ data = {
 
         [26] = {
             class = "enemy",
-            name = "skull",
+            name = "skully",
         },
 
         [27] = {

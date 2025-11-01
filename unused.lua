@@ -18,3 +18,18 @@ function glitch2(lines)
         memcpy(0x6000+64*row2, 0x4300,64)
     end
 end
+
+-- quartic polynomial smoothstep
+function smoothstep(x)
+  return x*x*(2-x*x)
+end
+
+-- cubic rational smoothstep
+function smoothstep(x)
+  return x*x*x/(3*x*x-3*x+1);
+end
+
+-- quadratic rational smoothstep
+function smoothstep(x)
+    return x*x/(2*x*x-2*x+1);
+end

@@ -58,9 +58,13 @@ entity = object:inherit({
     update = function(self)
     end,
 
+    -- perform turn actions
+    do_turn = function(self)
+    end,
+
     -- check if entity is on screen
     in_frame = function(self)
-        return (self.x >= cam_x and self.x < cam_x+16 and self.y >= cam_y and self.y < cam_y+16-ui_h)
+        return (self.x >= cam_x-1 and self.x < cam_x+17 and self.y >= cam_y-1 and self.y < cam_y+17-ui_h)
     end,
 
     -- draw entity
@@ -146,6 +150,8 @@ creature = entity:inherit({
     -- static vars
     class="creature",
     parent_class=entity.class,
+    anims={move={frames=3,dist=8},attack={frames=5,dist=6}},
+    anim_playing=false,
 
     -- vars
     hostile=false,
@@ -155,6 +161,11 @@ creature = entity:inherit({
     dhp_turn=0,
     ap=2,
     max_hp=10,
+    blink_delay=0,
+    anim=nil,
+    anim_frame=0,
+    anim_x=0,
+    anim_y=0,
 
     -- constructor
     new = function(self, table)
@@ -165,11 +176,43 @@ creature = entity:inherit({
 
     -- update creature
     update = function(self)
+        if (self.anim_frame > 0) then 
+            self:anim_step()
+        elseif (prev_frame~=frame and self.blink_delay > 0) then
+            self.blink_delay-=1
+        end
+    end,
+
+    -- perform turn actions
+    do_turn = function(self)
         if (turn > self.dhp_turn) then
             self.attacked = false
             if (self.dead and (turn-self.dhp_turn) > timer_grave) del(entity.entities, self)
         end
         return (not self.dead and self:in_frame())
+    end,
+
+    -- start playing animation
+    play_anim = function(self,a,x,y)
+        self.anim=a
+        self.anim_frame=a.frames
+        self.anim_x=x*a.dist
+        self.anim_y=y*a.dist
+        entity.anim_playing=true
+    end,
+
+    -- play animation
+    anim_step = function(self)
+        --anim_r=smoothstep(self.anim_frame/4)
+        anim_r=self.anim_frame/self.anim.frames
+        self.anim_x=self.anim.dist*anim_r*((self.anim_x < -0.1 and -1) or (self.anim_x > 0.1 and 1) or 0)
+        self.anim_y=self.anim.dist*anim_r*((self.anim_y < -0.1 and -1) or (self.anim_y > 0.1 and 1) or 0)
+        self.anim_frame-=1
+        if (self.anim_frame<=0) then
+            entity.anim_playing=false
+            self.anim_x=0
+            self.anim_y=0
+        end
     end,
 
     -- draw creature
@@ -179,14 +222,14 @@ creature = entity:inherit({
             -- dead
             if (self.dead) then
                 sprite = sprites.grave
-                if (frame == 1 and (turn - self.dhp_turn) <= 1) sprite = sprites.void
+                if (frame == 1 and (turn - self.dhp_turn) <= 1 and self.blink_delay<=0)  sprite = sprites.void
             -- under attack
-            elseif (self.attacked and frame == 1) then
+            elseif (self.attacked and frame == 1 and self.blink_delay<=0) then
                 sprite = sprites.void
-                print(self.dhp,pos_to_screen(self).x+4-str_width(self.dhp)*0.5,pos_to_screen(self).y+1,self.dhp<0 and 8 or 10)
+                print(abs(self.dhp),pos_to_screen(self).x+self.anim_x+4-str_width(abs(self.dhp))*0.5,pos_to_screen(self).y+self.anim_y+1,self.dhp<0 and 8 or 11)
             end
             -- render sprite and overlay
-            spr(sprite,pos_to_screen(self).x,pos_to_screen(self).y)
+            spr(sprite,pos_to_screen(self).x+self.anim_x,pos_to_screen(self).y+self.anim_y)
         end
     end,
 
@@ -202,6 +245,7 @@ creature = entity:inherit({
         if not collision(x,y) and x >= 0 and x < width and y >= 0 and y < height and (x ~= 0 or y ~= 0) then
             self.prev_x = self.x
             self.prev_y = self.y
+            self:play_anim(creature.anims.move,self.x-x,self.y-y)
             self.x = x
             self.y = y
             return true
@@ -210,7 +254,7 @@ creature = entity:inherit({
     end,
 
     move_towards_and_attack = function(self, other)
-        if (dist_simp(self,other) <= 1 and (self.x==other.x or self.y==other.y)) then
+        if (dist_simp(self,other) <= 1 and ((self.x==other.x or self.y==other.y) or (self.x==other.x and not collision({x=self.x,y=other.y}) or not collision({x=other.x,y=self.y})))) then
             self:attack(other)
         else
             self:move_towards(other)
@@ -242,10 +286,12 @@ creature = entity:inherit({
             log:add(self.name .. " killed " .. other.name)
             if (self == player) self.xp+=other.xp
         end
+        self:play_anim(creature.anims.attack,other.x-self.x,other.y-self.y)
     end,
 
     -- take damage
     take_dmg = function(self,dmg)
+        self.blink_delay=(frame==0 and 2) or 1
         if(self == player) draw:flash()
         self.attacked = true
         self.dhp=(self.dhp_turn==turn and self.dhp - dmg) or dmg*-1
@@ -323,9 +369,9 @@ pet = creature:inherit({
     parent_class=creature.class,
     collision=false,
 
-    -- update function
-    update = function(self)
-        if creature.update(self) then
+    -- perform turn actions
+    do_turn = function(self)
+        if creature.do_turn(self) then
             self:follow(player)
         end
     end
@@ -343,9 +389,9 @@ npc = creature:inherit({
     class="npc",
     parent_class=creature.class,
 
-    -- update function
-    update = function(self)
-        if creature.update(self) then
+    -- perform turn actions
+    do_turn = function(self)
+        if creature.do_turn(self) then
         end
     end
 })
@@ -368,9 +414,9 @@ enemy = creature:inherit({
     max_hp = 5,
     xp=1,
 
-    -- update function
-    update = function(self)
-        if creature.update(self) then
+    -- perform turn actions
+    do_turn = function(self)
+        if creature.do_turn(self) then
             if (self.hostile) then
                 self:move_towards_and_attack(player)
             end

@@ -2,6 +2,7 @@
 -- todo
 -------------------------------------------------------------------------------
 
+-- entities, change black transparancy to other color
 -- animations: move and attack
 -- character screen
 -- inventory screen
@@ -24,6 +25,7 @@
 -- pathfinding
 -- score system
 -- bones file
+-- movement speed
 
 
 -------------------------------------------------------------------------------
@@ -48,6 +50,7 @@ state_menu = "menu"
 state=nil
 dt=0
 frame=0    -- animation frame number
+prev_frame=0
 cam_x=0    -- camera y position
 cam_y=0    -- camera x position
 turn=1     -- turn number
@@ -89,6 +92,7 @@ end
 
 -- built-in update function
 function _update()
+    prev_frame=frame
     -- set animation frame
     frame = flr(t() * 2 % 2)
     -- update for the current state
@@ -99,8 +103,6 @@ end
 function _draw()
     -- draw for the current state
     draw[state]()
-    -- increment animation
-    draw.anim = draw.anim >= 128 and 128 or draw.anim+4
     -- draw flash
     if (draw.flash_n > 0) then
         cls((player.hp < 5 and draw.flash_n==1 and 8) or 7)
@@ -160,7 +162,9 @@ update = {
     -- game state
     game = function()
         -- get input and perform turn
-        if (input.game()) do_turn()
+        if (not creature.anim_playing and input.game()) do_turn()
+        -- update entities
+        for e in all(entity.entities) do e:update() end
     end,
 
     -- look state
@@ -190,8 +194,6 @@ update = {
 -------------------------------------------------------------------------------
 
 draw = {
-
-    anim=0,
 
     -- flash the screen
     flash_n = 0,
@@ -239,11 +241,20 @@ draw = {
     game = function()
         -- clear screen
         cls()
+        -- update camera
+        update_camera()
         -- draw map
-        map(cam_x,cam_y, 0, 0,16,16-ui_h)
+        map(cam_x-1,cam_y-1, -8, -8,18,18-ui_h)
         -- draw entities
         for e in all(entity.entities) do if (not e.collision) e:draw() end
         for e in all(entity.entities) do if (e.collision) e:draw() end
+        -- reset camera offset
+        camera()
+        --poke(0x5f54,0x60)
+        --pal(split'0,1,1,1,1,1,1,1,1,1,1,1,1,1,1')
+        --sspr(unpack(split"0,0,128,128,2,2"))
+        --pal()
+        --poke(0x5f54,0x00)
         -- bottom ui box
         draw.bottom_box()
         --line(0,119,128,119,6)
@@ -267,14 +278,16 @@ draw = {
         
         --clip(0,0,draw.anim+1,128)
         --print(log.entries[#log.entries][2],2,127-7*3,10)
-        clip(0,0,draw.anim,128)
-        print(log.entries[#log.entries][2],2,127-7*2+1,5)
-        print(log.entries[#log.entries][2],2,127-7*2,6)
-        clip(draw.anim,0,3,128)
-        print(log.entries[#log.entries][2],2,127-7*2-1,7)
+        clip(0,0,log.frame,128)
+        print(log.msg,2,127-7*2+1,5)
+        print(log.msg,2,127-7*2,6)
+        clip(log.frame,0,(log.frame>log.msg_w-3 and log.msg_w-log.frame) or 3,128)
+        print(log.msg,2,127-7*2-1,7)
         clip()
         -- draw frame
         draw.frame()
+        -- increment log message animation
+        if (state == state_game or state == state_dead) log:anim()
     end,
 
     -- look state
@@ -465,14 +478,43 @@ sel = {
 -- log
 -------------------------------------------------------------------------------
 
-log={
-    -- initialize log entries table
-    entries={{0,"welcome to game"}},
+log = {
+    msg_w=94,
+    frame=0,
+    delay=0,
+    msg_turn=0,
+    msg="welcome to game",
+    queue={},
 
     -- add message to log
-    add = function(self, message)
-        draw.anim=0
-        add(self.entries,{turn,message})
+    add = function(self, s)
+        if (self.msg_turn<turn) then 
+            self.queue={}
+            self.msg_turn=turn
+            log:msg_set(s)
+        else
+            add(self.queue,s)
+        end
+    end,
+
+    msg_set = function(self,s)
+        self.msg=s
+        self.frame=0
+        self.delay=8
+    end,
+
+    anim = function(self)
+        if self.frame >= self.msg_w then
+            self.frame = self.msg_w
+            if (#self.queue>0) then
+                self.delay-=1
+                if self.delay<=0 then 
+                    log:msg_set(deli(self.queue,1))
+                end
+            end
+        else
+            self.frame+=4
+        end
     end,
 }
 
@@ -551,6 +593,7 @@ end
 function change_state(new_state)
     state=new_state
     init[state]()
+    
 end
 
 
@@ -578,23 +621,31 @@ end
 -- perform turn
 function do_turn()
     -- update entities
-    for e in all(entity.entities) do e:update() end
-    -- update camera
-    update_camera()
+    for e in all(entity.entities) do e:do_turn() end
     -- increment turn counter
     turn+=1
 end
 
 -- update camera position
 function update_camera()
+    t_x=cam_x
+    t_y=cam_y
     if (player.x - cam_x > 11 and cam_x < width-16) then
-        cam_x = player.x - 11
+        t_x=player.x-11
     elseif (player.x - cam_x < 4 and cam_x > 0) then
-        cam_x = player.x - 4
+        t_x = player.x - 4
     elseif (player.y - cam_y > 8 and cam_y < height-16+ui_h) then
-        cam_y = player.y - 8
+        t_y = player.y - 8
     elseif (player.y - cam_y < 4 and cam_y > 0) then
-        cam_y = player.y - 4
+        t_y = player.y - 4
+    end
+    if (t_x~=cam_x or t_y ~= cam_y) then
+        if player.anim_frame>0 then
+            camera((t_x-cam_x)*8+player.anim_x,(t_y-cam_y)*8+player.anim_y)
+        else
+            cam_x=t_x
+            cam_y=t_y
+        end
     end
 end
 
@@ -612,16 +663,20 @@ function change_look()
     tbl.usable=false
     tbl.text="interact"
     tbl.color=5
-    if(tbl.entity~=nil) then
-        tbl.name=(e.name~=nil and e.name) or e.class
-        tbl.usable=e.interactable and dist_simp(player,e) <= e.interact_dist
-        tbl.color=6
-        tbl.text=e.interact_text
-        if(e.class==door.class) then 
-            tbl.usable = (tbl.usable and e.locked==0)
-            tbl.text = (e.collision and "open") or "close"
+    if(e~=nil and e~= player) then 
+        if (e.parent_class==creature.class and e.dead) then
+            tbl.entity=nil
+        else
+            tbl.name=(e.name~=nil and e.name) or e.class
+            tbl.usable=e.interactable and dist_simp(player,e) <= e.interact_dist
+            tbl.color=6
+            tbl.text=e.interact_text
+            if(e.class==door.class) then 
+                tbl.usable = (tbl.usable and e.locked==0)
+                tbl.text = (e.collision and "open") or "close"
+            end
+            if (e.parent_class==creature.class) tbl.color= (e.hostile and 2) or 3
         end
-    if (e.parent_class==creature.class) tbl.color= (e.hostile and 2) or 3
     end
     return properties
 end
