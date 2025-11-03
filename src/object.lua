@@ -36,10 +36,12 @@ entity=object:inherit({
   interactable=true,
   interact_dist=1,
   interact_text="interact",
+  color_swap={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
+  color_swap_enable=false,
 
   -- get name or class name
   get_name=function(self)
-    return(self.name~=nil and self.name) or self.class
+    return(self.name~=nil and self.name) or (self.item_class~=nil and self.item_class) or self.class
   end,
 
   -- constructor
@@ -62,7 +64,13 @@ entity=object:inherit({
   update=function(self) end,
 
   -- draw entity
-  draw=function(self) if (self:in_frame()) spr(self.sprite,pos_to_screen(self).x,pos_to_screen(self).y) end,
+  draw=function(self)
+    if (self:in_frame()) then
+      if(self.color_swap_enable)pal(self.color_swap)
+      spr(self.sprite,pos_to_screen(self).x,pos_to_screen(self).y)
+      if(self.color_swap_enable)pal()
+    end
+  end,
 
   -- interact with entity
   interact=function(self) end,
@@ -87,14 +95,14 @@ entity=object:inherit({
     if (entity_data ~= nil) then
       if (entity_data.class==player.class) then
         tbl_merge(player,tbl)
-        pet_sprite=(rnd()>0.5 and sprites.pet_cat) or sprites.pet_dog
-        pet:new(tbl_merge_new({x=x,y=y,sprite=pet_sprite},data_entities[pet_sprite]))
+        companion_sprite=(rnd()>0.5 and sprites.companion_cat) or sprites.companion_dog
+        companion:new(tbl_merge_new({x=x,y=y,sprite=companion_sprite},data_entities[companion_sprite]))
       else
         tbl_merge(tbl,entity_data)
-        if(tbl.class==pet.class)then pet:new(tbl)
+        if(tbl.class==companion.class)then companion:new(tbl)
         elseif(tbl.class==npc.class)then npc:new(tbl)
         elseif(tbl.class==enemy.class)then enemy:new(tbl)
-        elseif(tbl.class==sign.class)then for e in all(data_signs) do if(e.x==x and e.y==y)then tbl.message=e.message break end end sign:new(tbl)
+        elseif(tbl.class==sign.class)then sign:new(tbl)
         elseif(tbl.class==chest.class)then chest:new(tbl)
         elseif(tbl.class==stairs.class)then stairs:new(tbl)
         elseif(tbl.class==door.class)then door:new(tbl)
@@ -319,11 +327,11 @@ player = creature:new({
 
 
 -------------------------------------------------------------------------------
--- pet
+-- companion
 -------------------------------------------------------------------------------
-pet=creature:inherit({
+companion=creature:inherit({
   -- static vars
-  class="pet",
+  class="companion",
   parent_class=creature.class,
   collision=false,
 
@@ -389,6 +397,46 @@ enemy = creature:inherit({
 
 
 -------------------------------------------------------------------------------
+-- door
+-------------------------------------------------------------------------------
+door=entity:inherit({
+  -- static vars
+  class="door",
+  parent_class=entity.class,
+
+  -- vars
+  lock=0,
+
+  -- constructor
+  new=function(self,tbl)
+    if(tbl.lock~=nil) then
+      tbl["name"]="locked door"
+      if (tbl.lock>0) then
+        for d in all(data_locks.doors) do if(d.x==tbl.x and d.y==tbl.y)then tbl.lock=d.lock or 1 break end end
+        key.set_color_swap(tbl,tbl.lock)
+      end
+    end
+    return entity.new(self,tbl)
+  end,
+
+  -- interact action
+  interact=function(self)
+    if (self.lock>0) then
+      self.lock=0
+      self.color_swap_enable=false
+      msg.add("unlocked door")
+    else
+      msg.add(((self.collision and "closed") or "opened").." door")
+    end
+    self.collision=not self.collision
+    self.sprite=(self.collision and 82) or 81
+    change_state(state_game)
+  end,
+})
+
+
+
+-------------------------------------------------------------------------------
 -- stairs
 -------------------------------------------------------------------------------
 stairs=entity:inherit({
@@ -408,28 +456,6 @@ stairs=entity:inherit({
 
 
 -------------------------------------------------------------------------------
--- door
--------------------------------------------------------------------------------
-door=entity:inherit({
-  -- static vars
-  class="door",
-  parent_class=entity.class,
-
-  -- vars
-  locked=0,
-
-  -- interact action
-  interact=function(self)
-    self.collision=not self.collision
-    self.sprite=(self.collision and 82) or 81
-    msg.add(((self.collision and "closed") or "opened").." door")
-    change_state(state_game)
-  end,
-})
-
-
-
--------------------------------------------------------------------------------
 -- sign
 -------------------------------------------------------------------------------
 sign=entity:inherit({
@@ -442,6 +468,12 @@ sign=entity:inherit({
   message="...",
   bg=15,
   fg=0,
+
+  -- constructor
+  new=function(self,tbl)
+    for d in all(data_signs) do if(d.x==tbl.x and d.y==tbl.y)then tbl.message=d.message break end end
+    return entity.new(self,tbl)
+  end,
 
   -- interact action
   interact=function(self)
@@ -484,6 +516,17 @@ item = entity:inherit({
   collision=false,
   interact_text="pick up",
 
+  -- constructor
+  new=function(self,tbl)
+    tbl.item_data=tbl.item_data~=nil and tbl_copy(tbl.item_data) or {}
+    if (tbl.item_class==key.class) then 
+      for d in all(data_locks.keys) do if(d.x==tbl.x and d.y==tbl.y)then tbl.item_data["lock"]=d.lock or 1 break end end 
+      if (tbl.item_data.lock>1)key.set_color_swap(tbl,tbl.item_data.lock)
+      tbl.name=key.colors[tbl.item_data.lock][1].." key"
+    end
+    return entity.new(self,tbl)
+  end,
+
   -- interact action
   interact=function(self)
     msg.add("picked up "..self:get_name())
@@ -497,26 +540,29 @@ item = entity:inherit({
 
 
 -------------------------------------------------------------------------------
--- item (in inventory)
+-- possession (item in inventory)
 -------------------------------------------------------------------------------
-inv_item=object:inherit({
+possession=object:inherit({
   -- static vars
-  class="inv_item",
+  class="possession",
   parent_class=object.class,
   num=0,
 
   -- vars
   name=nil,
   sprite=0,
-  interactable=false,
+  interactable=true,
 
   -- constructor
   new=function(self,tbl)
-    local new_item=self:inherit(tbl)
-    inv_item.num=inv_item.num+1
-    new_item["id"]=inv_item.num
-    return new_item
+    local itm=self:inherit(tbl)
+    possession.num=possession.num+1
+    itm["id"]=possession.num
+    return itm
   end,
+
+  -- interact with possession
+  interact=function(self) end,
 })
 
 
@@ -524,11 +570,38 @@ inv_item=object:inherit({
 -------------------------------------------------------------------------------
 -- key
 -------------------------------------------------------------------------------
---[[inv_item_key=inv_item:inherit({
+key=possession:inherit({
   -- static vars
-  class="inv_item_key",
-  parent_class=inv_item.class,
-  interactable=true,
+  class="key",
+  parent_class=possession.class,
+  interactable=false,
+  colors={
+    {"steel",6,13},
+    {"gold",10,9},
+    {"green",11,3},
+  },
+  set_color_swap=function(tbl,i)
+    tbl["color_swap_enable"]=true
+    tbl["color_swap"]={[key.colors[1][2]]=key.colors[i][2],[key.colors[1][3]]=key.colors[i][3]}
+  end,
+})
 
-  -- vars
-})]]--
+
+
+-------------------------------------------------------------------------------
+-- consumable
+-------------------------------------------------------------------------------
+consumable=possession:inherit({
+  class="consumable",
+  parent_class=possession.class,
+})
+
+
+
+-------------------------------------------------------------------------------
+-- equippable
+-------------------------------------------------------------------------------
+equippable=possession:inherit({
+  class="equippable",
+  parent_class=possession.class,
+})

@@ -35,8 +35,8 @@ sprites={
   empty=1,
   selection=2,
   grave=3,
-  pet_cat=17,
-  pet_dog=18,
+  companion_cat=17,
+  companion_dog=18,
 }
 
 -- flags
@@ -291,13 +291,13 @@ draw={
     exp=((h>5 and h-5) or 0)*3
     s_off=((h<5 and 5-h) or 0)*3
     -- bg and message text
-    rectfill(23,40-exp,103,70+exp,sel.read.bg)
-    line(24,39-exp,102,39-exp,sel.read.bg)
-    line(24,71+exp,102,71+exp,sel.read.bg)
+    rectfill(23,39-exp,103,71+exp,sel.read.bg)
+    line(24,38-exp,102,38-exp,sel.read.bg)
+    line(24,72+exp,102,72+exp,sel.read.bg)
     print(s_txt,64-w*0.5,41-exp+s_off,sel.read.fg)
     -- button legend
-    print(s_x,64-str_width(s_x)*0.5,80+exp+1,5)
-    print(s_x,64-str_width(s_x)*0.5,80+exp,6)
+    print(s_x,64-str_width(s_x)*0.5,81+exp+1,5)
+    print(s_x,64-str_width(s_x)*0.5,81+exp,6)
   end,
 
   -- dead state
@@ -351,6 +351,7 @@ input={
     end
     if (btnp(❎) and sel.look.usable) then
       sel.look.entity:interact()
+      inventory.remove(sel.look.possession)
       return false
     end
     return true
@@ -426,15 +427,17 @@ inventory={
 
   -- add item to inventory (from world)
   add=function(e)
-    tbl={name=e:get_name(),sprite=e.sprite}
-    add(inventory.items,inv_item:new(tbl))
+    tbl=tbl_merge_new({name=e:get_name(),sprite=e.sprite},e.item_data)
+    if(e.item_class==key.class)add(inventory.items,key:new(tbl))
     inventory.num+=1
   end,
 
   -- remove item from inventory
   remove=function(itm)
-    del(inventory.items,itm)
-    inventory.num-=1
+    if (itm~=nil) then
+      del(inventory.items,itm)
+      inventory.num-=1
+    end
   end
 }
 
@@ -452,6 +455,13 @@ function str_width(s) return print(s,0,128) end
 
 -- calculate string height
 function str_height(s) return tbl_len(split(s,"\n")) end
+
+-- copy a table
+function tbl_copy(a)
+  tbl={}
+  for k,v in pairs(a) do tbl[k]=v end
+  return tbl
+end
 
 -- merge table a and b into a new table
 function tbl_merge_new(a,b)
@@ -570,6 +580,7 @@ function change_look()
   tbl.usable=false
   tbl.text="interact"
   tbl.color=5
+  tbl.possession=nil
   if(e~=nil and e~= player) then 
     if (e.parent_class==creature.class and e.dead) then
       tbl.entity=nil
@@ -579,8 +590,21 @@ function change_look()
       tbl.color=6
       tbl.text=e.interact_text
       if(e.class==door.class) then 
-        tbl.usable=(tbl.usable and e.locked==0)
-        tbl.text=(e.collision and "open") or "close"
+        if (e.lock==0) then
+          tbl.text=(e.collision and "open") or "close"
+        else
+          if (tbl.usable) then
+            tbl.usable=false
+            for itm in all(inventory.items) do 
+              if(itm.class==key.class and itm.lock==e.lock) then 
+                tbl.usable=true 
+                tbl.possession=itm
+                break 
+              end 
+            end
+          end
+          tbl.text="unlock"
+        end
       end
       if(e.parent_class==creature.class)tbl.color=(e.hostile and 2) or 3
     end

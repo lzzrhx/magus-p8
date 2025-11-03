@@ -1,19 +1,19 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- quest items (non usable)
--- locked doors and keys (quest item)
 -- chests
+-- inventory sorting (by class and alphabet)
 -- equipable items
--- usable items (consumables)
--- health potion (usable item)
+-- sword, dagger, bow (equipable items)
+-- consumable items
+-- health potion (consumable item)
 -- ranged combat
 -- talk to npcs
 -- action menu -> wait / magic / ranged
 -- intro screen / main menu
--- make stairs work
 -- add mouse support
 -- debug menu
+-- make stairs work
 -- plan: character stats
     -- xp and levels
     -- movement speed
