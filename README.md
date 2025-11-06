@@ -1,4 +1,4 @@
-# rogue-p8
+# magus-magicus-p8
 
 An unfinished video game for PICO-8.
 

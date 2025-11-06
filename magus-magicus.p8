@@ -1,8 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
--- rogue
+-- magus magicus
 -- by lzzrhx
+#include font.lua
 #include src/utils.lua
 #include src/main.lua
 #include src/object.lua
