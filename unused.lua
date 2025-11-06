@@ -19,12 +19,13 @@ function glitch2(lines)
     end
 end
 
--- quartic polynomial smoothstep
-function smoothstep(x)
-  return x*x*(2-x*x)
-end
-
 -- calculate distance between two points
 function dist(a,b)
   return sqrt((b.x-a.x)^2 + (b.y-a.y)^2)
 end
+
+-- quartic polynomial smoothstep
+function smoothstep(x) return x*x*(2-x*x) end
+
+-- quadratic rational smoothstep
+function smoothstep(x) return x*x/(2*x*x-2*x+1) end

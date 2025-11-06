@@ -43,6 +43,7 @@
 -- (?) palette swapping on enemies
 -- (?) portals (teleport)
 -- (?) score system
+-- (?) player name
 -- (?) variable attack distance for some enemies (1 or 2 tiles)
 -- (?) movement speed stat
 -- (?) food and hunger

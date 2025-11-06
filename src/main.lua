@@ -3,24 +3,15 @@
 -------------------------------------------------------------------------------
 
 -- constants
-timer_corpse=20 -- timeout for grave
-timer_target=3 -- timeout for target
+timer_corpse=20 -- timeout for grave (turns)
+timer_target=3 -- timeout for target (turns)
 width=128 -- area width
 height=64 -- area height
 ui_h=2 -- row height of bottom ui box
 
--- vars
-state=nil -- game state
-turn=1 -- turn number
-frame=0 -- animation frame
-prev_frame=0 -- previous animation frame
-cam_x=0 -- camera x position
-cam_y=0 -- camera y position
-cam_offset=4 -- camera scroll offset
-blink_frame=0
-
 -- game states
 state_reset="reset"
+state_title="title"
 state_game="game"
 state_menu="menu"
 state_look="look"
@@ -28,39 +19,41 @@ state_chest="chest"
 state_read="read"
 state_dead="dead"
 
--- selection
-sel={menu={},look={},chest={},read={},dead=0,}
-
 -- sprites
-sprites={
-  void=0,
-  empty=1,
-  selection=2,
-  grave=3,
-  chest_closed=11,
-  chest_open=12,
-  companion_cat=17,
-  companion_dog=18,
-  door_closed=82,
-  door_open=81,
-}
+sprite_void=0
+sprite_empty=1
+sprite_selection=2
+sprite_grave=3
+sprite_chest_closed=11
+sprite_chest_open=12
+sprite_door_closed=82
+sprite_door_open=81
+sprite_companion_cat=17
+sprite_companion_dog=18
 
--- flags
-flags={
-  collision=0,
-  --unused_one=1,
-  --unused_two=2,
-  --unused_three=3,
-  --unused_four=4,
-  --unused_five=5,
-  variant=6,
-  entity=7,
-}
+-- sprite flags
+flag_collision=0
+--flag_unused_one=1
+--flag_unused_two=2
+--flag_unused_three=3
+--flag_unused_four=4
+--flag_unused_five=5
+--flag_unused_six=6
+flag_entity=7
+
+-- vars
+state=nil -- game state
+turn=1 -- turn number
+frame=0 -- animation frame (increments once per second)
+prev_frame=0 -- previous animation frame (increments once per second)
+blink_frame=0 -- frame for fast blink animations (updates 30 times per soncond)
+blink=false
+cam_x=0 -- camera x position
+cam_y=0 -- camera y position
+cam_offset=4 -- camera scroll offset
 
 -- options
-options={
-  disable_flash=false,
-}
+option_disable_flash=false
 
 -------------------------------------------------------------------------------
 -- built-in functions
@@ -68,7 +61,7 @@ options={
 
 -- init
 function _init()
-  change_state(state_game)
+  change_state(state_title)
   populate_map()
 end
 
@@ -99,30 +92,32 @@ end
 -- init
 -------------------------------------------------------------------------------
 init={
-  -- game state
-  game=function() end,
+  -- title state
+  title=function(sel) sel_title=0 end,
 
   -- menu state
-  menu=function()
-    sel.menu.tab=0
-    sel.menu.i=1
+  menu=function(sel)
+    sel_menu={tab=0,i=1}
   end,
 
   -- look state
-  look=function()
-    sel.look.x=player.x
-    sel.look.y=player.y
+  look=function(sel)
+    sel_look={x=player.x,y=player.y}
     set_look()
   end,
 
   -- chest state
-  chest=function() end,
+  chest=function(sel)
+    sel_chest=sel
+  end,
 
   -- read state
-  read=function() end,
+  read=function(sel)
+    sel_read=sel
+  end,
 
   -- dead state
-  dead=function() sel.dead=0 end,
+  dead=function(sel) sel_dead=0 end,
 }
 
 
@@ -131,29 +126,43 @@ init={
 -- update
 -------------------------------------------------------------------------------
 update={
+  -- title state
+  title=function()
+    input.title()
+  end,
+
   -- game state
   game=function()
-    if(not creature.anim_playing and input.game())do_turn()
     for e in all(entity.entities) do e:update() end
+    if(not creature.anim_playing and input.game())do_turn()
   end,
 
   -- menu state
-  menu=function() input.menu() end,
+  menu=function()
+    input.menu()
+  end,
 
   -- look state
-  look=function() if(input.look())set_look() end,
+  look=function()
+    if(input.look())set_look()
+  end,
 
   -- chest state
   chest=function()
-    if(sel.chest.entity.play_anim)sel.chest.entity:anim_step()
+    if(sel_chest.entity.anim_this)sel_chest.entity:anim_step()
     if(not chest.anim_playing)input.chest()
-    end,
+  end,
 
   -- read state
-  read=function() input.read() end,
+  read=function()
+    input.read()
+  end,
 
   -- dead state
-  dead=function() input.dead() for e in all(entity.entities) do e:update() end end,
+  dead=function()
+    for e in all(entity.entities) do e:update() end
+    input.dead()
+  end,
 }
 
 
@@ -162,12 +171,13 @@ update={
 -- draw
 -------------------------------------------------------------------------------
 draw={
+  flash_frame=0,
+
   -- flash the screen
-  flash_n=0,
   flash_step=function()
-    if(not options.disable_flash and draw.flash_n>0)then
-      cls((state==state_game and player.hp<5 and draw.flash_n==1 and 8) or 7)
-      draw.flash_n-=1
+    if(not option_disable_flash and draw.flash_frame>0)then
+      cls((state==state_game and player.hp<5 and draw.flash_frame==1 and 8) or 7)
+      draw.flash_frame-=1
     end
   end,
 
@@ -176,7 +186,7 @@ draw={
     c=c or 1
     -- screen memory as the sprite sheet
     poke(0x5f54,0x60)
-    pal({0,c,c,c,c,c,c,c,c,c,c,c,c,c,c})
+    pal_all(c)
     sspr(0,0,128,128,0,0)
     pal()
     -- reset spritesheet
@@ -195,7 +205,59 @@ draw={
   end,
 
   -- game state
+  title=function()
+    cls()
+    s_title="magus magicus  "
+    --[[
+    --clip(0,66,128,64)
+    for i=1,#s_title do
+      --y=8*4+smoothstep((sin(t()*0.5+i)+1)*0.5)*16
+      --print(sin(t()*0.75),0,0,7)
+      x=sin(t()/10+i/#s_title)*32
+      y=cos(t()/10+i/#s_title)*4
+      --print("\^w\^t"..sub(s_title,i,i),64-str_width(s_title)*1.5+(i-1)*12,y,7)
+      --print("\^w\^t"..sub(s_title,i,i),64+x,64+y,7)
+      print(sub(s_title,#s_title-i+1,#s_title-i+1),64+x,64+y,7)
+      --print(".",64-str_width("."),30,7)
+    end
+    ]]--
+
+    
+    for i=1,#s_title do
+      x=i*8
+      y=0
+      c=7
+      for j=1,10 do
+        --y+=j+t()%10
+        c=7-j
+        print("\^w\^t"..sub(s_title,i,i),64-str_width(s_title)+x,y,c)
+      end
+      print(".",64-str_width("."),30,7)
+    end
+
+    num_stars=20
+
+    for i=1,num_stars do
+      x=cos(t()/8+i/num_stars)*20
+      y=sin(t()/8+i/num_stars)*3
+      pset(64+x,64+y+5+sel_title*12,7)
+    end
+
+    s_new_game="new game"
+    print(s_new_game,64-str_width(s_new_game)*0.5,65,5)
+    if(sel_title==0)print(s_new_game,64-str_width(s_new_game)*0.5,64,7)
+    s_continue="continue"
+    print(s_continue,64-str_width(s_continue)*0.5,65+12,5)
+    if(sel_title==1)print(s_continue,64-str_width(s_continue)*0.5,64+12,7)
+
+  end,
+
+  -- game state
   game=function()
+    -- vars
+    hp_ratio=max(0,player.hp/player.max_hp)
+    s_btn_z="menu 🅾️"
+    s_btn_x="look ❎"
     -- draw map and entities
     cls()
     update_camera()
@@ -204,10 +266,6 @@ draw={
     for e in all(entity.entities) do if (e.collision) e:draw() end
     camera()
     draw.window_frame()
-    -- vars
-    hp=max(0,player.hp/player.max_hp)
-    s_z="menu 🅾️"
-    s_x="look ❎"
     -- animated message
     clip(0,0,msg.frame,128)
     if(state==state_game)print(msg.txt,2,114,5)
@@ -220,138 +278,150 @@ draw={
     if(state==state_game)then
       print("hp:",2,121,5)
       rectfill(14,120,82,124,5)
-      print(s_z,126-str_width(s_z),114,5)
-      print(s_x,126-str_width(s_x),121,5)
+      print(s_btn_z,126-str_width(s_btn_z),114,5)
+      print(s_btn_x,126-str_width(s_btn_x),121,5)
     end
     -- ui elements
     print("hp:",2,120,6)
-    if(hp>0)rectfill(14,120,14+68*hp,124,(hp<0.25 and 8) or (hp<0.5 and 9) or (hp<0.75 and 10) or 11)
-    print(s_z,126-str_width(s_z),113,6)
-    print(s_x,126-str_width(s_x),120,6)
+    if(hp_ratio>0)rectfill(14,120,14+68*hp_ratio,124,(hp_ratio<0.25 and 8) or (hp_ratio<0.5 and 9) or (hp_ratio<0.75 and 10) or 11)
+    print(s_btn_z,126-str_width(s_btn_z),113,6)
+    print(s_btn_x,126-str_width(s_btn_x),120,6)
   end,
 
   -- menu state
   menu=function()
+    -- vars
+    s_btns="cancel 🅾️  select ❎"
+    s_chr="⬅️ character ➡️"
+    s_inv="⬅️ inventory ➡️"
+    s_itms="empty"
     -- draw map and entities
     draw.game()
     draw.monochrome()
-    -- vars
-    s_btn="cancel 🅾️  select ❎"
-    s_chr="⬅️ character ➡️"
-    s_inv="⬅️ inventory ➡️"
-    s_items="empty"
     -- bg box
     rectfill(23,23,103,103,1)
     line(23,22,103,22,6)
     line(23,104,103,104,6)
     -- button legend
-    print(s_btn,64-str_width(s_btn)*0.5,114,5)
-    clip(64-str_width(s_btn)*0.5,113,(sel.menu.tab==1 and inventory.num>0 and inventory.items[sel.menu.i].interactable and 80) or 40,6)
-    print(s_btn,64-str_width(s_btn)*0.5,113,6)
+    print(s_btns,64-str_width(s_btns)*0.5,114,5)
+    clip(64-str_width(s_btns)*0.5,113,(sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,6)
+    print(s_btns,64-str_width(s_btns)*0.5,113,6)
     clip()
     -- character tab
-    if (sel.menu.tab==0) then
+    if (sel_menu.tab==0) then
       print(s_chr,64-str_width(s_chr)*0.5,26,5)
       print(s_chr,64-str_width(s_chr)*0.5,25,6)
       print("hp: "..player.hp.."/"..player.max_hp.."\nxp: "..player.xp,28,34,6)
     -- inventory tab
-    elseif (sel.menu.tab==1) then
+    elseif (sel_menu.tab==1) then
       print(s_inv,64-str_width(s_inv)*0.5,26,5)
       print(s_inv,64-str_width(s_inv)*0.5,25,6)
-      if (inventory.num>0) do for i=1,inventory.num do s_items=((i==1 and "") or s_items)..((sel.menu.i==i and "▶ ") or " ")..inventory.items[i].name.."\n" end end
-      print(s_items,28,34,5)
-      clip(23,28+6*sel.menu.i,80,6)
-      print(s_items,28,34,6)
+      if (inventory.num>0) do for i=1,inventory.num do s_itms=((i==1 and "") or s_itms)..((sel_menu.i==i and "▶ ") or " ")..inventory.items[i].name.."\n" end end
+      print(s_itms,28,34,5)
+      clip(23,28+6*sel_menu.i,80,6)
+      print(s_itms,28,34,6)
       clip()
     end
   end,
 
   -- look state
   look=function()
+    -- vars
+    s_btn_z="cancel 🅾️"
+    s_btn_x=sel_look.text.." ❎"
     -- draw map, entities and selection
     draw.game()
     if(state==state_look)draw.monochrome()
     player:draw()
-    if(sel.look.entity~=nil)sel.look.entity:draw()
-    if(state==state_look)spr(sprites.selection,pos_to_screen(sel.look).x,pos_to_screen(sel.look).y)
+    if(sel_look.entity)sel_look.entity:draw()
+    if(state==state_look)vec2_spr(sprite_selection,pos_to_screen(sel_look))
     draw.window_frame()
-    -- vars
-    s_z="cancel 🅾️"
-    s_x=sel.look.text.." ❎"
     -- ui elements (shadow)
     if(state==state_look)then
       print("target:",2,114,5)
-      print(sel.look.name,2,121,(sel.look.entity~=nil and sel.look.entity.parent_class==creature.class and 0) or 5)
-      print(s_z,128-str_width(s_z)-2,114,5)
-      print(s_x,128-str_width(s_x)-2,121,5)
+      print(sel_look.name,2,121,(sel_look.entity and sel_look.entity.parent_class==creature.class and 0) or 5)
+      print(s_btn_z,128-str_width(s_btn_z)-2,114,5)
+      print(s_btn_x,128-str_width(s_btn_x)-2,121,5)
     end
     -- ui elements
     print("target:",2,113,6)
-    if(sel.look.entity~=nil)print(sel.look.name,2,120,sel.look.color)
-    print(s_z,128-str_width(s_z)-2,113,6)
-    if(sel.look.usable)print(s_x,126-str_width(s_x),120,6)
+    if(sel_look.entity)print(sel_look.name,2,120,sel_look.color)
+    print(s_btn_z,128-str_width(s_btn_z)-2,113,6)
+    if(sel_look.usable)print(s_btn_x,126-str_width(s_btn_x),120,6)
   end,
 
   -- chest state
   chest=function()
-    -- draw map, entities and selection
+    -- vars
+    chest_e=sel_chest.entity
+    num_itms=tbl_len(chest_e.content)
+    s_btn_x="take items ❎"
+    -- draw player and chest
     cls()
     player:draw()
-    sel.chest.entity:draw()
+    chest_e:draw()
     if (not chest.anim_playing)draw.monochrome()
-    -- vars
-    s_x="take items ❎"
-    num=tbl_len(sel.chest.entity.content)
-    if (sel.chest.entity.anim_frame<=0) then
-      for i=1,num do
-        target={x=68-num*8+(i-1)*16,y=52}
-        if (i==1 or sel.chest.anim_frame[i-1]<=0) then
-          itm=sel.chest.entity.content[i]
-          if (sel.chest.anim_frame[i]>0) then
-            if(i==num)sel.chest.entity.play_anim=false
-            pal({0,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7})
+    -- wait for chest open animation to finish
+    if (chest_e.anim_frame<=0) then
+      -- iterate through chest items
+      for i=1,num_itms do
+        target_pos={x=68-num_itms*8+(i-1)*16,y=52}
+        -- wait for animation of previous item to finish before playing the next
+        if (i==1 or sel_chest.anim_frame[i-1]<=0) then
+          itm=chest_e.content[i]
+          -- play animation for current item
+          if (sel_chest.anim_frame[i]>0) then
+            -- stop chest blinking on last item
+            if(i==num_itms)chest_e.anim_this=false
+            -- set item color to white
+            pal_all(7)
+            -- draw animated item with trailing echoes
             for j=0,10 do
-              pos=sel.chest.entity:item_anim_pos(smoothstep(min(1,(1-(sel.chest.anim_frame[i]/60))+0.025*j)),target)
-              if(blink)spr(itm.sprite,pos.x,pos.y)
+              pos=chest_e:item_anim_pos(smoothstep(min(1,(1-(sel_chest.anim_frame[i]/60))+0.025*j)),target_pos)
+              if(blink)vec2_spr(itm.sprite,pos)
             end
+            -- reset palette and decrement animation frame
             pal()
-            sel.chest.anim_frame[i]-=1
-            if (sel.chest.anim_frame[num]<=0) then 
+            sel_chest.anim_frame[i]-=1
+            -- flash the screen and set chest animation to finished after last item animation is done
+            if (sel_chest.anim_frame[num_itms]<=0) then 
               chest.anim_playing=false
-              draw.flash_n=2
+              draw.flash_frame=2
             end
+          -- draw the item bobbing up and down after the popping out of chest animation has finished
           else
-            if(not chest.anim_playing or blink)itm:spr(itm.sprite,target.x,target.y+wavy())
+            if(not chest.anim_playing or blink)itm:spr(target_pos.x,target_pos.y+wavy())
           end
         end
       end
     end
+    -- show wavy button press text after the whole chest animation is complete
     if (not chest.anim_playing) then
-      wavy_print(s_x,64-str_width(s_x)*0.5,87,5)
-      wavy_print(s_x,64-str_width(s_x)*0.5,86,6)
+      wavy_print(s_btn_x,64-str_width(s_btn_x)*0.5,87,5)
+      wavy_print(s_btn_x,64-str_width(s_btn_x)*0.5,86,6)
     end
   end,
 
   -- read state
   read=function()
+    -- vars
+    s_btn_x="continue ❎"
+    e=sel_read
+    txt_w=str_width(sel_read.message)
+    txt_h=str_height(sel_read.message)
+    txt_expand=((txt_h>5 and txt_h-5) or 0)*3
+    txt_offset=((txt_h<5 and 5-txt_h) or 0)*3
     -- draw map, entities and selection
     draw.look()
     draw.monochrome()
-    -- vars
-    s_x="continue ❎"
-    s_txt=sel.read.text
-    h=str_height(s_txt)
-    w=str_width(s_txt)
-    exp=((h>5 and h-5) or 0)*3
-    s_off=((h<5 and 5-h) or 0)*3
     -- bg and message text
-    rectfill(23,39-exp,103,71+exp,sel.read.bg)
-    line(24,38-exp,102,38-exp,sel.read.bg)
-    line(24,72+exp,102,72+exp,sel.read.bg)
-    print(s_txt,64-w*0.5,41-exp+s_off,sel.read.fg)
+    rectfill(23,39-txt_expand,103,71+txt_expand,sel_read.bg)
+    line(24,38-txt_expand,102,38-txt_expand,sel_read.bg)
+    line(24,72+txt_expand,102,72+txt_expand,sel_read.bg)
+    print(sel_read.message,64-txt_w*0.5,41-txt_expand+txt_offset,sel_read.fg)
     -- button legend
-    print(s_x,64-str_width(s_x)*0.5,82+exp,5)
-    print(s_x,64-str_width(s_x)*0.5,81+exp,6)
+    print(s_btn_x,64-str_width(s_btn_x)*0.5,82+txt_expand,5)
+    print(s_btn_x,64-str_width(s_btn_x)*0.5,81+txt_expand,6)
   end,
 
   -- dead state
@@ -360,18 +430,18 @@ draw={
     draw.game()
     draw.monochrome()
     -- vars
-    s="g a m e   o v e r"
-    s_x="select ❎"
+    s_title="g a m e   o v e r"
+    s_btn_x="select ❎"
     -- title and menu box
-    print(s,64-str_width(s)*0.5,41,1)
-    print(s,64-str_width(s)*0.5,40,8)
+    print(s_title,64-str_width(s_title)*0.5,41,1)
+    print(s_title,64-str_width(s_title)*0.5,40,8)
     rect(24,52,103,75,7)
-    print("▶",28,58+sel.dead*7,7)
-    print("restart",34+((sel.dead==0 and 1) or 0),58,7)
-    print("quit",34+((sel.dead==1 and 1) or 0),66,7)
+    print("▶",28,58+sel_dead*7,7)
+    print("restart",34+((sel_dead==0 and 1) or 0),58,7)
+    print("quit",34+((sel_dead==1 and 1) or 0),66,7)
     -- button legend
-    print(s_x,64-str_width(s_x)*0.5,85,5)
-    print(s_x,64-str_width(s_x)*0.5,84,6)
+    print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
+    print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
   end,
 }
 
@@ -381,60 +451,74 @@ draw={
 -- input
 -------------------------------------------------------------------------------
 input={
+  -- title state
+  title=function()
+    if(btnp(⬆️) and sel_title>0)sel_title-=1
+    if(btnp(⬇️) and sel_title<1)sel_title+=1
+    if(btnp(❎)) then
+      if(sel_title==0)change_state(state_game)
+    end
+  end,
+
   -- game state
   game=function()
     valid = false
-    if(btnp(⬆️))valid=player:action_dir(player.x,player.y-1)
-    if(btnp(➡️))valid=player:action_dir(player.x+1,player.y)
-    if(btnp(⬇️))valid=player:action_dir(player.x,player.y+1)
-    if(btnp(⬅️))valid=player:action_dir(player.x-1,player.y)
+    x,y=player.x,player.y
+    if(btnp(⬆️))valid=player:action_dir(x,y-1)
+    if(btnp(➡️))valid=player:action_dir(x+1,y)
+    if(btnp(⬇️))valid=player:action_dir(x,y+1)
+    if(btnp(⬅️))valid=player:action_dir(x-1,y)
     if(btnp(🅾️))change_state(state_menu)
     if(btnp(❎))change_state(state_look)
     return valid
   end,
 
+  -- menu state
+  menu=function()
+    if(btnp(⬅️))sel_menu.tab=(sel_menu.tab-1)%2
+    if(btnp(➡️))sel_menu.tab=(sel_menu.tab+1)%2
+    if(btnp(🅾️))change_state(state_game)
+    if (sel_menu.tab==1) then
+      if(btnp(⬆️) and sel_menu.i>1)sel_menu.i-=1
+      if(btnp(⬇️) and sel_menu.i<inventory.num)sel_menu.i+=1
+      --if(btnp(❎) and inventory.num>0 and inventory.items[sel_menu.i].interactable)
+    end
+  end,
+
   -- look state
   look=function()
-    if(btnp(⬆️)and sel.look.y-cam_y>0)sel.look.y-=1
-    if(btnp(➡️)and sel.look.x-cam_x<15)sel.look.x+=1
-    if(btnp(⬇️)and sel.look.y-cam_y<15-ui_h)sel.look.y+=1
-    if(btnp(⬅️)and sel.look.x-cam_x>0)sel.look.x-=1
+    if(btnp(⬆️)and sel_look.y-cam_y>0)sel_look.y-=1
+    if(btnp(➡️)and sel_look.x-cam_x<15)sel_look.x+=1
+    if(btnp(⬇️)and sel_look.y-cam_y<15-ui_h)sel_look.y+=1
+    if(btnp(⬅️)and sel_look.x-cam_x>0)sel_look.x-=1
     if (btnp(🅾️)) then 
       change_state(state_game)
       return false
     end
-    if (btnp(❎) and sel.look.usable) then
-      sel.look.entity:interact()
-      inventory.remove(sel.look.possession)
+    if (btnp(❎) and sel_look.usable) then
+      sel_look.entity:interact()
+      inventory.remove(sel_look.possession)
       return false
     end
     return true
   end,
 
-  -- menu state
-  menu=function()
-    if(btnp(⬅️))sel.menu.tab=(sel.menu.tab-1)%2
-    if(btnp(➡️))sel.menu.tab=(sel.menu.tab+1)%2
-    if(btnp(🅾️))change_state(state_game)
-    if (sel.menu.tab==1) then
-      if(btnp(⬆️) and sel.menu.i>1)sel.menu.i-=1
-      if(btnp(⬇️) and sel.menu.i<inventory.num)sel.menu.i+=1
-      --if(btnp(❎) and inventory.num>0 and inventory.items[sel.menu.i].interactable)
-    end
+  -- chest state
+  chest=function()
+    if (btnp(❎)) change_state(state_game)
   end,
 
-  -- chest state
-  chest=function() if (btnp(❎)) change_state(state_game) end,
-
   -- read state
-  read=function() if (btnp(❎)) change_state(state_game) end,
+  read=function()
+    if (btnp(❎)) change_state(state_game)
+  end,
 
   -- dead state
   dead=function()
-    options={[0]=reset,[1]=quit}
-    if(btnp(⬆️) and sel[state]>0)sel[state]-=1
-    if(btnp(⬇️) and sel[state]<tbl_len(options)-1)sel[state]+=1
-    if(btnp(❎))options[sel[state]]()
+    sel_options={[0]=reset,[1]=quit}
+    if(btnp(⬆️) and sel_dead>0)sel_dead-=1
+    if(btnp(⬇️) and sel_dead<tbl_len(sel_options)-1)sel_dead+=1
+    if(btnp(❎))sel_options[sel_dead]()
   end,
 }
 
@@ -482,20 +566,21 @@ inventory={
   items={},
   num=0,
 
-  -- add item to inventory (from world)
+  -- convert item (from world) to possession and add to inventory
   add_item=function(e)
     add(inventory.items,possession.new_from_entity(e))
     inventory.num+=1
   end,
 
+  -- add possession to inventory
   add_possession=function(itm)
     add(inventory.items,itm)
     inventory.num+=1
   end,
 
-  -- remove item from inventory
+  -- remove possession from inventory
   remove=function(itm)
-    if (itm~=nil) then
+    if (itm) then
       del(inventory.items,itm)
       inventory.num-=1
     end
@@ -505,71 +590,12 @@ inventory={
 
 
 -------------------------------------------------------------------------------
--- utils
--------------------------------------------------------------------------------
-
--- calculate distance between two points (simple)
-function dist(a,b) return max(abs(b.x-a.x),abs(b.y-a.y)) end
-
--- calculate string width
-function str_width(s) return print(s,0,128) end
-
--- calculate string height
-function str_height(s) return tbl_len(split(s,"\n")) end
-
--- copy a table
-function tbl_copy(a)
-  tbl={}
-  for k,v in pairs(a) do tbl[k]=v end
-  return tbl
-end
-
--- merge table a and b into a new table
-function tbl_merge_new(a,b)
-  tbl={}
-  for k,v in pairs(a) do tbl[k]=v end
-  for k,v in pairs(b) do tbl[k]=v end
-  return tbl
-end
-
--- merge table b into table a
-function tbl_merge(a,b) for k,v in pairs(b) do a[k]=v end end
-
--- check length of table
-function tbl_len(t)
-  num=0
-  for k,v in pairs(t) do num+=1 end
-  return num
-end
-
--- transform position to screen position
-function pos_to_screen(pos) return {x=8*(pos.x-cam_x),y=8*(pos.y-cam_y)} end
-
--- quadratic rational smoothstep
---function smoothstep(x) return x*x/(2*x*x-2*x+1) end
-
--- cubic polynomial smoothstep
-function smoothstep(x) return x*x*(3-2*x) end
-
--- linear interpolation
-function interp(val,min,max)
-  return (max-min)*val+min
-end
-
--- wavy text
-function wavy_print(s,x,y,c,h) for i=1,#s do print(sub(s,i,i),x+i*4,y+wavy(i),c) end end
-
--- wavy value
-function wavy(i,o,h) return sin(t()*1.25+(i or 1)*(o or 0.06))*(h or 3) end
-
-
--------------------------------------------------------------------------------
 -- system
 -------------------------------------------------------------------------------
 
 -- reset cart
 function reset() 
-  state=state_reset
+  change_state(state_reset)
   for i=0x0,0x7fff,rnd(0xf) do poke(i,rnd(0xf)) end
 end
 
@@ -580,9 +606,9 @@ function quit()
 end
 
 -- change state
-function change_state(new_state)
+function change_state(new_state,sel)
   state=new_state
-  init[state]()
+  if(init[state])init[state](sel)
 end
 
 
@@ -594,20 +620,22 @@ end
 -- iterate through all map tiles and find entities
 function populate_map()
   for x=0,127 do for y=0,63 do
-      if(mget(x,y)==0)mset(x,y,sprites.empty)
-      if(fget(mget(x,y),flags.entity))entity.spawn(mget(x,y),x,y)
+      if(fget(mget(x,y),flag_entity))entity.entity_spawn(mget(x,y),x,y)
+      if(mget(x,y)==sprite_void)mset(x,y,sprite_empty)
   end end
 end
 
 -- check for collision
 function collision(x,y)
-  if(fget(mget(x,y),flags.collision))return true
+  if(x<0 or x>127 or y<0 or y>127 or fget(mget(x,y),flag_collision))return true
   for e in all(entity.entities) do if (e.collision and e.x==x and e.y==y) return true end
   return false
 end
 
 -- check if neighbour tile is in reach
-function in_reach(a,b) return ((dist(a,b)<=1) and ((a.x==b.x or a.y==b.y) or (not collision(a.x,b.y)) or (not collision(b.x,a.y)))) end
+function in_reach(a,b)
+  return ((dist(a,b)<=1) and ((a.x==b.x or a.y==b.y) or (not collision(a.x,b.y)) or (not collision(b.x,a.y))))
+end
 
 -- perform turn
 function do_turn()
@@ -617,23 +645,22 @@ end
 
 -- update camera position
 function update_camera()
-  t_x=cam_x
-  t_y=cam_y
-  if (player.x-cam_x>15-cam_offset and cam_x<width-16) then 
-    t_x=player.x-15+cam_offset
-  elseif (player.x-cam_x<cam_offset and cam_x>0) then 
-    t_x=player.x-cam_offset
-  elseif (player.y-cam_y>15-cam_offset-ui_h and cam_y<height-16+ui_h) then 
-    t_y=player.y-15+cam_offset+ui_h
-  elseif (player.y-cam_y<cam_offset and cam_y>0) then 
-    t_y=player.y-cam_offset 
+  x,y=cam_x,cam_y
+  p_x,p_y=player.x,player.y
+  if (p_x-cam_x>15-cam_offset and cam_x<width-16) then 
+    x=p_x-15+cam_offset
+  elseif (p_x-cam_x<cam_offset and cam_x>0) then 
+    x=p_x-cam_offset
+  elseif (p_y-cam_y>15-cam_offset-ui_h and cam_y<height-16+ui_h) then 
+    y=p_y-15+cam_offset+ui_h
+  elseif (p_y-cam_y<cam_offset and cam_y>0) then 
+    y=p_y-cam_offset 
   end
-  if (t_x~=cam_x or t_y ~= cam_y) then
+  if (x~=cam_x or y ~= cam_y) then
     if (player.anim_frame>0) then
-      camera((t_x-cam_x)*8+player.anim_x,(t_y-cam_y)*8+player.anim_y)
+      camera((x-cam_x)*8+player.anim_x,(y-cam_y)*8+player.anim_y)
     else
-      cam_x=t_x
-      cam_y=t_y
+      cam_x,cam_y=x,y
     end
   end
 end
@@ -645,42 +672,8 @@ end
 
 -- change look target
 function set_look()
-  e=entity.get(sel.look.x,sel.look.y)
-  tbl=sel.look
-  tbl.entity=(e~=player and e) or nil
-  tbl.name="none"
-  tbl.usable=false
-  tbl.text="interact"
-  tbl.color=5
-  tbl.possession=nil
-  if(e~=nil and e~= player) then 
-    if (e.parent_class==creature.class and e.dead) then
-      tbl.entity=nil
-    else
-      tbl.name=e:get_name()
-      tbl.usable=e.interactable and dist(player,e)<=e.interact_dist
-      tbl.color=6
-      tbl.text=e.interact_text
-      if(e.class==chest.class) then
-        tbl.usable=tbl.usable and not e.open
-      elseif(e.class==door.class) then 
-        if (e.lock==0) then
-          tbl.text=(e.collision and "open") or "close"
-        else
-          if (tbl.usable) then
-            tbl.usable=false
-            for itm in all(inventory.items) do 
-              if(itm.class==key.class and itm.lock==e.lock) then 
-                tbl.usable=true 
-                tbl.possession=itm
-                break 
-              end 
-            end
-          end
-          tbl.text="unlock"
-        end
-      end
-      if(e.parent_class==creature.class)tbl.color=(e.hostile and 2) or 3
-    end
-  end
+  tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,possession=nil})
+  sel_look.entity=nil
+  e=entity.entity_at(sel_look.x,sel_look.y)
+  if(e)e:look_at(sel_look)
 end

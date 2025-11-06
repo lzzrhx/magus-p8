@@ -8,9 +8,7 @@ object={
 
   -- metatable setup
   inherit=function(self,tbl)
-    tbl=tbl or {}
-    setmetatable(tbl,{__index=self})
-    return tbl
+    return setmetatable(tbl or {},{__index=self})
   end,
 
 }
@@ -27,22 +25,28 @@ drawable=object:inherit({
 
   -- vars
   sprite=0,
-  flash_n=0,
-  color_swap={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
-  color_swap_enable=false,
+  flash_frame=0,
+  pal_swap={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
+  pal_swap_enable=false,
 
   -- (static) get drawable data from entity data
   data_from_entity=function(e)
-    return {sprite=e.sprite or drawable.sprite, color_swap=e.color_swap or drawable.color_swap, color_swap_enable=e.color_swap_enable or drawable.color_swap_enable}
+    return {sprite=e.sprite or drawable.sprite, pal_swap=e.pal_swap or drawable.pal_swap, pal_swap_enable=e.pal_swap_enable or drawable.pal_swap_enable}
+  end,
+
+  vec2_spr=function(self,pos,sprite)
+    sprite=sprite or self.sprite
+    self:spr(pos.x,pos.y,sprite)
   end,
 
   -- draw at given screen position
-  spr=function(self,sprite,x,y)
-    if (self.flash_n>0) then
-      self.flash_n-=1
-      pal({0,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7})
-    elseif (self.color_swap_enable) then
-      pal(self.color_swap)
+  spr=function(self,x,y,sprite)
+    sprite=sprite or self.sprite
+    if (self.flash_frame>0) then
+      self.flash_frame-=1
+      pal_all(7)
+    elseif (self.pal_swap_enable) then
+      pal(self.pal_swap)
     end
     spr(sprite,x,y)
     pal()
@@ -62,29 +66,54 @@ entity=drawable:inherit({
   num=0,
 
   -- vars
-  name=nil,
-
   x=0,
   y=0,
+  name=nil,
   collision=true,
   interactable=true,
-  interact_dist=1,
   interact_text="interact",
 
   -- (static) get name or class name of any entity
-  static_get_name=function(e)
-    return(e.name~=nil and e.name) or (e.item_class~=nil and e.item_class) or e.class
+  entity_name=function(e)
+    return(e.name and e.name) or (e.item_class and e.item_class) or e.class
+  end,
+
+  -- (static) get entity at coordinate
+  entity_at=function(x,y)
+    for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
+    return nil
+  end,
+
+  -- (static) spawn entity on map
+  entity_spawn=function(sprite,x,y)
+    mset(x,y,sprite_empty)
+    tbl={x=x,y=y,sprite=sprite}
+    entity_data=data_entities[sprite]
+    if (entity_data) then
+      if (entity_data.class==player.class) then
+        tbl_merge(player,tbl)
+        companion_sprite=(rnd()>0.5 and sprite_companion_cat) or sprite_companion_dog
+        companion_x,companion_y=x,y
+        for i in all({-1,1}) do
+          if not collision(x+i,y) then companion_x=x+i break
+          elseif not collision(x,y+i) then companion_y=y+i break end
+        end
+        companion:new(tbl_merge_new({x=companion_x,y=companion_y,sprite=companion_sprite},data_entities[companion_sprite]))
+      else
+        tbl_merge(tbl,entity_data)
+        _ENV[tbl.class]:new(tbl)
+      end
+    end
   end,
 
   -- constructor
   new=function(self,tbl)
-    local e=self:inherit(tbl)
+    tbl=self:inherit(tbl)
     entity.num=entity.num+1
-    e["id"]=entity.num
-    e["prev_x"]=e.x
-    e["prev_y"]=e.y
-    add(self.entities,e)
-    return e
+    tbl["id"]=entity.num
+    tbl["prev_x"],tbl["prev_y"]=tbl.x,tbl.y
+    add(entity.entities,tbl)
+    return tbl
   end,
 
   -- destructor
@@ -98,7 +127,7 @@ entity=drawable:inherit({
   -- draw entity at world position (if in frame)
   draw=function(self)
     if (self:in_frame()) then
-      self:spr(self.sprite,pos_to_screen(self).x,pos_to_screen(self).y)
+      self:vec2_spr(pos_to_screen(self))
       return true
     end
     return false
@@ -106,7 +135,12 @@ entity=drawable:inherit({
 
   -- get name or class name of this entity
   get_name=function(self)
-    return entity.static_get_name(self)
+    return entity.entity_name(self)
+  end,
+
+  -- look at entity
+  look_at=function(self,tbl)
+      tbl_merge(tbl,{entity=self,name=self:get_name(),color=6,text=self.interact_text,usable=self.interactable and dist(player,self)<=1})
   end,
 
   -- interact with entity
@@ -116,30 +150,10 @@ entity=drawable:inherit({
   do_turn=function(self) end,
 
   -- check if entity is on screen
-  in_frame=function(self) return (self.x>=cam_x-1 and self.x<cam_x+17 and self.y>=cam_y-1 and self.y<cam_y+17-ui_h) end,
-
-  -- get entity at coordinate
-  get=function(x,y)
-    for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
-    return nil
+  in_frame=function(self)
+    return (self.x>=cam_x-1 and self.x<cam_x+17 and self.y>=cam_y-1 and self.y<cam_y+17-ui_h)
   end,
 
-  -- spawn entity on map
-  spawn=function(sprite,x,y)
-    mset(x,y,sprites.empty)
-    tbl={x=x,y=y,sprite=sprite}
-    entity_data=data_entities[sprite]
-    if (entity_data ~= nil) then
-      if (entity_data.class==player.class) then
-        tbl_merge(player,tbl)
-        companion_sprite=(rnd()>0.5 and sprites.companion_cat) or sprites.companion_dog
-        companion:new(tbl_merge_new({x=x,y=y,sprite=companion_sprite},data_entities[companion_sprite]))
-      else
-        tbl_merge(tbl,entity_data)
-        _ENV[tbl.class]:new(tbl)
-      end
-    end
-  end,
 })
 
 
@@ -177,9 +191,9 @@ creature=entity:inherit({
 
   -- constructor
   new=function(self,tbl)
-    local e=entity.new(self,tbl)
-    e["hp"]=e.max_hp
-    return e
+    tbl=entity.new(self,tbl)
+    tbl["hp"]=tbl.max_hp
+    return tbl
   end,
 
   -- update creature
@@ -193,23 +207,37 @@ creature=entity:inherit({
     if (self:in_frame()) then
       sprite=self.sprite+frame*16
       if (self.anim_frame<=0) then
-        if (self.dead) then sprite=((frame==1 and (turn-self.dhp_turn)<=1 and self.blink_delay<=0 and not creature.anim_playing) and sprites.void) or sprites.grave
+        if (self.dead) then sprite=((frame==1 and (turn-self.dhp_turn)<=1 and self.blink_delay<=0 and not creature.anim_playing) and sprite_void) or sprite_grave
         elseif (self.attacked and frame==1 and self.blink_delay<=0 and not creature.anim_playing) then
-          sprite=sprites.void
-          if(state==state_game)print(abs(self.dhp),pos_to_screen(self).x+self.anim_x+4-str_width(abs(self.dhp))*0.5,pos_to_screen(self).y+self.anim_y+1,self.dhp<0 and 8 or 11)
+          sprite=sprite_void
+          if(state==state_game)print(abs(self.dhp),self:screen_pos().x+4-str_width(abs(self.dhp))*0.5,self:screen_pos().y+1,self.dhp<0 and 8 or 11)
         end
       end
-      self:spr(sprite,pos_to_screen(self).x+self.anim_x,pos_to_screen(self).y+self.anim_y)
+      pos=self:screen_pos()
+      self:vec2_spr(self:screen_pos(),sprite)
       return true
     end
     return false
+  end,
+
+  -- position on screen (position and animation position summed)
+  screen_pos=function(self)
+    return vec2_add(pos_to_screen(self),{x=self.anim_x,y=self.anim_y})
+  end,
+
+  -- look at creature
+  look_at=function(self,tbl)
+    if (not self.dead) then
+      entity.look_at(self,tbl)
+      tbl.color=(self.hostile and 2) or 3
+    end
   end,
 
   -- perform turn actions
   do_turn=function(self)
     if(turn>self.dhp_turn)self.attacked=false
     if(self.dead and (turn-self.dhp_turn)>timer_corpse)self:destroy()
-    if(self.target~=nil and self.target.dead or (turn-self.target_turn)>timer_target)self.target=nil
+    if(self.target and self.target.dead or (turn-self.target_turn)>timer_target)self.target=nil
     return (not self.dead and self:in_frame())
   end,
 
@@ -223,24 +251,21 @@ creature=entity:inherit({
   -- perform animation step
   anim_step=function(self)
     anim_pos=smoothstep(self.anim_frame/self.anim.frames)
-    if (self.anim==creature.anims.move) then
-      self.anim_x=self.anim.dist*anim_pos*((self.anim_x<-0.1 and -1) or (self.anim_x>0.1 and 1) or 0)
-      self.anim_y=self.anim.dist*anim_pos*((self.anim_y<-0.1 and -1) or (self.anim_y>0.1 and 1) or 0)
-    elseif (self.anim==creature.anims.attack) then
-      if (self.target~=nil) then
-        if(self.anim_frame==self.anim.frames and self.target==player)draw.flash_n=2
-        if(self.anim_frame==self.anim.frames-3)self.target.flash_n=2
+    x,y=self.anim_x,self.anim_y
+    if (self.anim==creature.anims.attack) then
+      x,y=self.anim_x1,self.anim_y1
+      if (self.target) then
+        if(self.anim_frame==self.anim.frames and self.target==player)draw.flash_frame=2
+        if(self.anim_frame==self.anim.frames-3)self.target.flash_frame=2
       end
-      self.anim_x=self.anim.dist*anim_pos*((self.anim_x1<-0.1 and -1) or (self.anim_x1>0.1 and 1) or 0)
-      self.anim_y=self.anim.dist*anim_pos*((self.anim_y1<-0.1 and -1) or (self.anim_y1>0.1 and 1) or 0)
     end
-    
+    self.anim_x=self.anim.dist*anim_pos*((x<-0.1 and -1) or (x>0.1 and 1) or 0)
+    self.anim_y=self.anim.dist*anim_pos*((y<-0.1 and -1) or (y>0.1 and 1) or 0)
     self.anim_frame-=1
     if (self.anim_frame<=0) then
       del(creature.anim_queue,self.id)
       if(#creature.anim_queue==0)creature.anim_playing=false
-      self.anim_x=0
-      self.anim_y=0
+      self.anim_x,self.anim_y=0
     end
   end,
 
@@ -325,6 +350,9 @@ player = creature:new({
   -- vars
   xp=0,
 
+  -- look at player
+  look_at=function(self,tbl) end,
+
   -- move the player or attack if there is an enemy in the target tile
   action_dir=function(self,x,y)
     valid=self:move(x,y)
@@ -366,14 +394,13 @@ companion=creature:inherit({
   -- perform turn actions
   do_turn=function(self)
     if (creature.do_turn(self)) then
-      if (player.target~=nil and player.target_turn<turn) then
+      if (player.target and player.target_turn<turn) then
         self:move_towards_and_attack(player.target)
       else
         self:follow(player)
       end
     elseif not self:in_frame() then
-      self.x=player.prev_x
-      self.y=player.prev_y
+      self.x,self.y=player.prev_x,player.prev_y
     end
   end,
 })
@@ -434,7 +461,7 @@ door=entity:inherit({
 
   -- constructor
   new=function(self,tbl)
-    if(tbl.lock~=nil) then
+    if(tbl.lock) then
       tbl["name"]="locked door"
       if (tbl.lock>0) then
         for d in all(data_locks.doors) do if(d.x==tbl.x and d.y==tbl.y)then tbl.lock=d.lock or 1 break end end
@@ -444,13 +471,27 @@ door=entity:inherit({
     return entity.new(self,tbl)
   end,
 
+  -- look at door
+  look_at=function(self,tbl)
+    entity.look_at(self,tbl)
+    if (self.lock==0) then 
+      tbl.text=(self.collision and "open") or "close"
+    else
+      tbl.text="unlock"
+      if (tbl.usable) then
+        tbl.usable=false
+        for itm in all(inventory.items) do if(itm.class==key.class and itm.lock==e.lock) then tbl_merge(tbl,{usable=true,possession=itm}) break end end
+      end
+    end
+  end,
+
   -- interact action
   interact=function(self)
     self.collision=not self.collision
-    self.sprite=(self.collision and sprites.door_closed) or sprites.door_open
+    self.sprite=(self.collision and sprite_door_closed) or sprite_door_open
     if (self.lock>0) then
       self.lock=0
-      self.color_swap_enable=false
+      self.pal_swap_enable=false
       msg.add("unlocked door")
     else
       msg.add(((self.collision and "closed") or "opened").." door")
@@ -502,10 +543,7 @@ sign=entity:inherit({
 
   -- interact action
   interact=function(self)
-    change_state(state_read)
-    sel.read.text=self.message
-    sel.read.fg=self.fg
-    sel.read.bg=self.bg
+    change_state(state_read,self)
   end,
 })
 
@@ -523,7 +561,7 @@ chest=entity:inherit({
 
   -- vars
   anim_frame=0,
-  play_anim=false,
+  anim_this=false,
   open=false,
   content={},
 
@@ -543,41 +581,45 @@ chest=entity:inherit({
     return nil
   end,
 
+  -- look at chest
+  look_at=function(self,tbl)
+      entity.look_at(self,tbl)
+      tbl.usable=tbl.usable and not e.open
+  end,
+
   -- interact action
   interact = function(self)
     self.open=true
-    self.sprite=sprites.chest_open
+    self.sprite=sprite_chest_open
     self.anim_frame=45
-    self.play_anim=true
+    self.anim_this=true
     chest.anim_playing=true
-    sel.chest.entity=self
-    sel.chest.anim_frame={}
+    sel={entity=self,anim_frame={}}
     for itm in all(self.content) do 
-      add(sel.chest.anim_frame,60)
+      add(sel.anim_frame,60)
       inventory.add_possession(itm)
       msg.add("got "..itm.name)
     end
-    change_state(state_chest)
+    change_state(state_chest,sel)
   end,
 
   -- perform animation step
   anim_step=function(self) if(self.anim_frame>0)self.anim_frame-=1 end,
 
   -- get content item animation position
-  item_anim_pos=function(self, anim_pos, target) return {x=interp(anim_pos+sin(anim_pos*-0.5)*0.75,pos_to_screen(self).x,target.x),y=interp(anim_pos+cos(anim_pos*0.9+0.1)*0.3-0.3,pos_to_screen(self).y,target.y)} end,
+  item_anim_pos=function(self, anim_pos, target) return {x=lerp(anim_pos+sin(anim_pos*-0.5)*0.75,pos_to_screen(self).x,target.x),y=lerp(anim_pos+cos(anim_pos*0.9+0.1)*0.3-0.3,pos_to_screen(self).y,target.y)} end,
 
   -- draw chest
   draw=function(self)
-    if (entity.draw(self) and (self.play_anim)) then
-      x=pos_to_screen(self).x
-      y=pos_to_screen(self).y
+    if (entity.draw(self) and (self.anim_this)) then
+      x,y=pos_to_screen(self).x,pos_to_screen(self).y
       draw_lid=true
       if(self.anim_frame<30)draw_lid=(self.anim_frame>10 and blink) or false
       if(blink)rectfill(x+1,y+2,x+5,y+3,7)
       if(draw_lid) then
         y-=(45-self.anim_frame)*0.25
         clip(x,y,8,5)
-        self:spr(sprites.chest_closed,x,y)
+        spr(sprite_chest_closed,x,y)
         clip()
       end
     end
@@ -599,7 +641,7 @@ item = entity:inherit({
 
   -- constructor
   new=function(self,tbl)
-    tbl.item_data=tbl.item_data~=nil and tbl_copy(tbl.item_data) or {}
+    tbl.item_data=tbl.item_data and tbl_copy(tbl.item_data) or {}
     if(tbl.item_class==key.class)key.get_data(tbl)
     return entity.new(self,tbl)
   end,
@@ -632,15 +674,15 @@ possession=drawable:inherit({
 
   -- constructor
   new=function(self,tbl)
-    local itm=self:inherit(tbl)
+    tbl=self:inherit(tbl)
     possession.num=possession.num+1
-    itm["id"]=possession.num
-    return itm
+    tbl["id"]=possession.num
+    return tbl
   end,
 
   -- create new possession from data
   new_from_entity=function(e)
-    return _ENV[e.item_class]:new(tbl_merge_new(tbl_merge_new({name=entity.static_get_name(e)},drawable.data_from_entity(e)),e.item_data))
+    return _ENV[e.item_class]:new(tbl_merge_new(tbl_merge_new({name=entity.entity_name(e)},drawable.data_from_entity(e)),e.item_data))
   end,
 
   -- interact with possession
@@ -673,8 +715,8 @@ key=possession:inherit({
   -- set entity color swap to match key color
   set_variant=function(tbl,i)
     if (i>1) then
-      tbl["color_swap_enable"]=true
-      tbl["color_swap"]={[key.colors[1][2]]=key.colors[i][2],[key.colors[1][3]]=key.colors[i][3]}
+      tbl["pal_swap_enable"]=true
+      tbl["pal_swap"]={[key.colors[1][2]]=key.colors[i][2],[key.colors[1][3]]=key.colors[i][3]}
     end
     tbl.name=key.colors[i][1].." key"
   end,
