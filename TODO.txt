@@ -1,9 +1,7 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- map
 -- npc dialogue
--- auto inventory sorting (by class and alphabet)
 -- consumable items
 -- health potion (consumable item)
 -- equippable items
@@ -11,6 +9,7 @@
 -- ranged combat
 -- traps
 -- magic
+-- auto inventory sorting (by class and alphabet)
 
 
 
@@ -39,6 +38,7 @@
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
+-- (?) map
 -- (?) group keys in inventory
 -- (?) golden chest / mimic chest
 -- (?) senses (hearing / smell)

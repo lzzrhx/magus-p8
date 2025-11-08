@@ -49,8 +49,8 @@ data_entities={
   [56]={class="item",item_class="equippable",name="dagger"},
   [57]={class="item",item_class="equippable",name="sword"},
   [58]={class="item",item_class="equippable",name="bow"},
-  [59]={class="item",item_class="cosumable",name="potion"},
-  [60]={class="item",item_class="cosumable",name="potion"},
-  [61]={class="item",item_class="cosumable",name="scroll"},
+  [59]={class="item",item_class="consumable",name="potion",item_data={hp=10}},
+  [60]={class="item",item_class="consumable",name="potion"},
+  [61]={class="item",item_class="consumable",name="scroll"},
   [62]={class="item",item_class="equippable",name="ring"},
 }

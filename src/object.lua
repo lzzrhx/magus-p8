@@ -714,7 +714,6 @@ key=possession:inherit({
   get_data=function(tbl)
     for d in all(data_locks.keys) do if(d.x==tbl.x and d.y==tbl.y)then tbl.item_data["lock"]=d.lock or 1 break end end 
     key.set_variant(tbl,tbl.item_data.lock)
-    
   end,
 
   -- set entity color swap to match key color

@@ -75,7 +75,7 @@ option_disable_flash=false
 
 -- init
 function _init()
-  change_state(state_game)
+  change_state(state_title)
   populate_map()
 end
 
@@ -263,14 +263,19 @@ draw={
         map(cam_x-1-cam_x_diff,cam_y-1-cam_y_diff-(room.z),-8,-8,18,18-ui_h)
         pal()
       end
-      rectfill(max(0,(room.x0-cam_x+1)*8),max(0,(room.y0-cam_y+1)*8),min(128,(room.x1-cam_x)*8-1),min(128,(room.y1-cam_y)*8-1),0)
+      x0=max(0,(room.x0-cam_x+1)*8)
+      y0=max(0,(room.y0-cam_y+1)*8)
+      x1=min(128,(room.x1-cam_x)*8)
+      y1=min(128,(room.y1-cam_y)*8)
+      rectfill(x0,y0,x1,y1,0)
       map(room.x0,room.y0,8*(room.x0-cam_x),8*(room.y0-cam_y),room.x1-room.x0+1,room.y1-room.y0+1)
+      clip(x0,y0,x1-x0,y1-y0)
     else
       map(cam_x-1,cam_y-1,-8,-8,18,18-ui_h)
     end
-    for e in all(entity.entities) do if (not (e.parent_class==creature.class)) e:draw() end
-    for e in all(entity.entities) do if (e.parent_class==creature.class and not e.collision) e:draw() end
-    for e in all(entity.entities) do if (e.parent_class==creature.class and e.collision) e:draw() end
+    for e in all(entity.entities) do if (not e.collision) e:draw() end
+    for e in all(entity.entities) do if (e.collision) e:draw() end
+    clip()
     -- vars
     hp_ratio=max(0,player.hp/player.max_hp)
     s_btn_z="menu 🅾️"
@@ -580,8 +585,7 @@ inventory={
 
   -- convert item (from world) to possession and add to inventory
   add_item=function(e)
-    add(inventory.items,possession.new_from_entity(e))
-    inventory.num+=1
+    inventory.add_possession(possession.new_from_entity(e))
   end,
 
   -- add possession to inventory
