@@ -12,6 +12,7 @@ ui_h=2 -- row height of bottom ui box
 -- game states
 state_reset="reset"
 state_title="title"
+state_intro="intro"
 state_game="game"
 state_menu="menu"
 state_look="look"
@@ -108,6 +109,16 @@ end
 -- init
 -------------------------------------------------------------------------------
 init={
+  -- intro state
+  intro=function(sel)
+    intro_text = split(data_intro_text,"\n")
+    intro_text_pos=1
+    intro_text_anim={}
+    for k,v in pairs(intro_text) do
+      add(intro_text_anim,0)
+    end
+  end,
+
   -- menu state
   menu=function(sel)
     sel_menu={tab=0,i=1}
@@ -142,6 +153,16 @@ update={
   -- title state
   title=function()
     input.title()
+  end,
+
+  -- intro state
+  intro=function()
+    if (intro_text_anim[intro_text_pos]<=128) do 
+      intro_text_anim[intro_text_pos]+=3
+    elseif (intro_text_pos<=#intro_text_anim) then
+      intro_text_pos+=1
+    end
+    input.intro()
   end,
 
   -- game state
@@ -231,7 +252,7 @@ draw={
     pset(127,127,0)
   end,
 
-  -- game state
+  -- title state
   title=function()
     cls(0)
     -- title effect
@@ -245,11 +266,27 @@ draw={
     s_title="\014magus magicus"
     print(s_title,68-str_width(s_title)*0.5,38+4,4)
     print(s_title,68-str_width(s_title)*0.5,37+4,7)
+    print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,51,6)
     -- button legend
     s_btn_x="start game ❎"
     if (frame==0) then
       print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
       print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
+    end
+  end,
+
+  -- title state
+  intro=function()
+    cls(0)
+    --test=str_height(data_intro_text)
+    --print(data_intro_text,2,2,6)
+    for k,v in pairs(intro_text) do
+      clip(0,0,intro_text_anim[k],128)
+      print(v,2,7+k*7,5)
+      print(v,2,6+k*7,6)
+      clip(intro_text_anim[k],0,3,128)
+      print(v,2,5+k*7,7)
+      clip()
     end
   end,
 
@@ -474,6 +511,13 @@ draw={
 input={
   -- title state
   title=function()
+    if(btnp(❎)) then 
+      draw.play_fade(change_state,state_intro)
+    end
+  end,
+
+  -- intro state
+  intro=function()
     if(btnp(❎)) then 
       draw.play_fade(change_state,state_game)
     end

@@ -1,12 +1,14 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- traps
+-- intro text
 -- npc dialogue
--- consumable item
+-- status effects
+-- consumable items
+-- spells
+-- traps
 -- equippable items
 -- ranged combat
--- magic
 
 
 
@@ -16,15 +18,7 @@
 -- plan: equippables (armor / rings / melee weapons / ranged weapons)
 -- plan: consumables (scrolls/potions)
 -- plan: character stats
-    -- xp and levels
-    -- (?) melee proficiency
-    -- (?) ranged proficiency
 -- plan: character statuses
-    -- poisoned
-    -- charmed
-    -- sleeping
-    -- blind
-    -- scared
 -- plan: magic and spells
 -- plan: enemy types / stats
 -- plan: story / dialogue / npcs / areas
@@ -35,7 +29,6 @@
 -- maybe
 -------------------------------------------------------------------------------
 -- (?) trim stairs token use
-
 -- (?) auto inventory sorting (by class and alphabet) & group keys in inventory
 -- (?) golden chest / mimic chest
 -- (?) senses (hearing / smell)
@@ -58,30 +51,53 @@
 -------------------------------------------------------------------------------
 -- plan
 -------------------------------------------------------------------------------
--- potions:
-    -- red: +10hp
-    -- green: ?
-    -- blue: ?
-    -- yellow: sleep
+characters:
+    magus
+    cat/dog (companion)
+    ghyle (dinosaur)
+    (mushroom man)
+    (green guy)
 
--- status effects:
-    -- poisoned: -1hp every turn
-    -- charmed: enemy becomes ally (until hit 3 times)
-    -- sleep: skip turn
-    -- blind: moves in random direction, hits anyone in path
-    -- scared: moves away from source of effect
+enemies:
+    1,slime:1xp,2hp,1dmg
+    1,hobgoblin:3xp,4hp,3dmg
+    2,bat:2xp,4hp,2dmg
+    2,ghoul:5xp,5hp,6dmg,ranged
+    3,skull:4xp,6hp,4dmg
+    3,vampire:7xp,10hp,8dmg
+    4,demon:6xp,12hp,6dmg
 
--- spells:
-    -- beguile: cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
-        -- lvl 1: n=1
-        -- lvl 2: n=3
-        -- lvl 3: n=5
-    -- terrify: cast fear on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
-        -- lvl 1: n=3, m=1
-        -- lvl 2: n=4, m=2
-        -- lvl 3: n=5, m=3
-    -- 
-    -- familiar: passive spell
-        -- lvl 1: companion dmg=1
-        -- lvl 2: companion dmg=2
-        -- lvl 3: companion dmg=3
+status effects:
+    poisoned: -2hp every turn
+    sleep: skip turn
+    charmed: enemy becomes ally (until hit 3 times)
+    scared: moves away from source of effect
+
+consumables:
+    red potion (+10hp)
+    green potion (poisoned status)
+    yellow potion (sleep status)
+
+spells:
+    beguile:cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
+        lvl 1: n=2
+        lvl 2: n=4
+        lvl 3: n=8
+    terrify: cast fear on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
+        lvl 1: n=3, m=1
+        lvl 2: n=4, m=2
+        lvl 3: n=5, m=3
+    sleep: cast sleep on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
+        lvl 1: n=3, m=1
+        lvl 2: n=4, m=2
+        lvl 3: n=5, m=3
+    familiar: passive spell
+        lvl 1: companion dmg=1
+        lvl 2: companion dmg=4
+        lvl 3: companion dmg=8
+    teleport: teleport enemy to random visible location
+    detect trap: finds traps within a distance of 3 from player
+
+equippables:
+    ???
+

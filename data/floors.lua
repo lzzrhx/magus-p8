@@ -4,16 +4,47 @@
 data_floors={
   rooms={
     [1]={z=1,x0=103,y0=0,x1=108,y1=6},
-    [2]={z=1,x0=109,y0=0,x1=118,y1=7},
-    [3]={z=-1,x0=119,y0=0,x1=127,y1=7},
+    [2]={z=1,x0=103,y0=7,x1=111,y1=23},
+    [3]={z=-1,x0=112,y0=7,x1=127,y1=23},
+    [4]={z=-1,x0=109,y0=0,x1=127,y1=6},
+    [5]={z=1,x0=103,y0=24,x1=127,y1=32},
+    [6]={z=-1,x0=108,y0=24,x1=127,y1=32},
+    [7]={z=1,x0=103,y0=33,x1=108,y1=37},
+    [8]={z=-1,x0=109,y0=33,x1=119,y1=37},
   },
   stairs={
-    [1]={x=3,y=16,room=nil,target=2},
+    [1]={x=5,y=51,room=nil,target=2},
     [2]={x=104,y=1,room=1,target=1},
-    [3]={x=16,y=21,room=nil,target=4},
-    [4]={x=110,y=1,room=2,target=3},
 
-    [5]={x=23,y=24,room=nil,target=6},
-    [6]={x=120,y=1,room=3,target=5},
+    [3]={x=93,y=47,room=nil,target=4},
+
+    [4]={x=104,y=8,room=2,target=3},
+
+    [5]={x=93,y=61,room=nil,target=6},
+    [6]={x=104,y=22,room=2,target=5},
+
+    [7]={x=99,y=57,room=nil,target=8},
+    [8]={x=113,y=8,room=3,target=7},
+
+    [9]={x=34,y=39,room=nil,target=10},
+    [10]={x=110,y=3,room=4,target=9},
+
+    [11]={x=32,y=22,room=nil,target=12},
+    [12]={x=104,y=26,room=5,target=11},
+
+    [13]={x=32,y=26,room=nil,target=14},
+    [14]={x=104,y=30,room=5,target=13},
+
+    [15]={x=34,y=26,room=nil,target=16},
+    [16]={x=125,y=25,room=6,target=15},
+
+    [17]={x=20,y=32,room=nil,target=18},
+    [18]={x=109,y=31,room=6,target=17},
+
+    [19]={x=58,y=47,room=nil,target=20},
+    [20]={x=104,y=34,room=7,target=19},
+
+    [21]={x=61,y=47,room=nil,target=22},
+    [22]={x=117,y=36,room=8,target=21},
   },
 }

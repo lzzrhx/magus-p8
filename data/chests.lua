@@ -2,5 +2,5 @@
 -- chests
 -------------------------------------------------------------------------------
 data_chests = {
-  {x=107,y=3,content={{sprite=10},{sprite=10,item_data={lock=2}}}},
+  {x=104,y=4,content={{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
 }

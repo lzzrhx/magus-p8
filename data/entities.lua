@@ -22,13 +22,13 @@ data_entities={
 
 -- enemies
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-  [24]={class="npc",name="blob"},
-  [25]={class="npc",name="hobgoblin"},
-  [26]={class="enemy",name="skully"},
-  [27]={class="npc",name="ghoul"},
-  [28]={class="npc",name="bat"},
-  [29]={class="enemy",name="vampire",ap=3,max_hp=8,xp=5},
-  [30]={class="npc",name="demon"},
+  [24]={class="npc",name="slime",xp=1,max_hp=2,ap=1},
+  [25]={class="npc",name="hobgoblin",xp=3,max_hp=4,ap=3},
+  [28]={class="npc",name="bat",xp=2,max_hp=4,ap=2},
+  [27]={class="npc",name="ghoul",xp=5,max_hp=5,ap=6},
+  [26]={class="npc",name="skully",xp=4,max_hp=6,ap=4},
+  [29]={class="npc",name="vampire",xp=7,max_hp=10,ap=8},
+  [30]={class="npc",name="demon",xp=9,max_hp=8,ap=20},
 
 -- interactables
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
