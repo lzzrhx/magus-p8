@@ -16,17 +16,17 @@ data_floors={
     [1]={x=5,y=51,room=nil,target=2},
     [2]={x=104,y=1,room=1,target=1},
 
-    [3]={x=93,y=47,room=nil,target=4},
+    [3]={x=94,y=47,room=nil,target=4},
 
     [4]={x=104,y=8,room=2,target=3},
 
-    [5]={x=93,y=61,room=nil,target=6},
+    [5]={x=94,y=61,room=nil,target=6},
     [6]={x=104,y=22,room=2,target=5},
 
-    [7]={x=99,y=57,room=nil,target=8},
+    [7]={x=100,y=57,room=nil,target=8},
     [8]={x=113,y=8,room=3,target=7},
 
-    [9]={x=34,y=39,room=nil,target=10},
+    [9]={x=34,y=38,room=nil,target=10},
     [10]={x=110,y=3,room=4,target=9},
 
     [11]={x=32,y=22,room=nil,target=12},

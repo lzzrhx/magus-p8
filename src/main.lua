@@ -12,7 +12,6 @@ ui_h=2 -- row height of bottom ui box
 -- game states
 state_reset="reset"
 state_title="title"
-state_intro="intro"
 state_game="game"
 state_menu="menu"
 state_look="look"
@@ -109,14 +108,11 @@ end
 -- init
 -------------------------------------------------------------------------------
 init={
-  -- intro state
-  intro=function(sel)
-    intro_text = split(data_intro_text,"\n")
-    intro_text_pos=1
-    intro_text_anim={}
-    for k,v in pairs(intro_text) do
-      add(intro_text_anim,0)
-    end
+  -- title state
+  title=function(sel)
+    title_idle=true
+    title_pos=0
+    title_text=split(data_intro_text,"\n")
   end,
 
   -- menu state
@@ -152,17 +148,9 @@ init={
 update={
   -- title state
   title=function()
+    if(not title_idle)title_pos+=0.2
+    if(title_pos>=str_height(data_intro_text)*8+88 and fade_frame==0)draw.play_fade(change_state,state_game)
     input.title()
-  end,
-
-  -- intro state
-  intro=function()
-    if (intro_text_anim[intro_text_pos]<=128) do 
-      intro_text_anim[intro_text_pos]+=3
-    elseif (intro_text_pos<=#intro_text_anim) then
-      intro_text_pos+=1
-    end
-    input.intro()
   end,
 
   -- game state
@@ -214,7 +202,7 @@ draw={
   -- perform fade animation step
   fade_step=function()
     if(fade_frame>0)then
-      if (fade_frame==3) do cls(0)
+      if (fade_frame==3) do rectfill(0,0,128,128,0)
       else for j=1,16 do for k=1,16 do print("\014"..fade_chars[(fade_frame>#fade_chars) and (6-fade_frame) or fade_frame],(j-1)*8,(k-1)*8,0) end end end
       fade_frame-=1
       if(fade_frame==3 and fade_action)fade_action.func(fade_action.param)
@@ -242,9 +230,11 @@ draw={
   end,
 
   -- window frame
-  window_frame=function()
-    rectfill(0,111,127,127,1)
-    line(0,111,127,111,6)
+  window_frame=function(disable_bottom)
+    if (not disable_bottom) then
+      rectfill(0,111,127,127,1)
+      line(0,111,127,111,6)
+    end
     rect(0,0,127,127,6)
     pset(0,0,0)
     pset(127,0,0)
@@ -255,39 +245,45 @@ draw={
   -- title state
   title=function()
     cls(0)
+    camera(0,title_pos)
     -- title effect
     for i=1,title_effect_num_points do
       x=cos(t()/8+i/title_effect_num_points)*56
       y=sin(t()/8+i/title_effect_num_points)*16+sin(t()+i*(1/title_effect_num_points)*5)*4
       c=title_effect_colors[i%(#title_effect_colors)+1]
-      for j=1,3 do pset(64+x+j,46+y+j,c) end
+      for j=1,3 do pset(64+x+j,50+y+j,c) end
     end
     -- main title
     s_title="\014magus magicus"
-    print(s_title,68-str_width(s_title)*0.5,38+4,4)
-    print(s_title,68-str_width(s_title)*0.5,37+4,7)
-    print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,51,6)
+    print(s_title,68-str_width(s_title)*0.5,46,4)
+    print(s_title,68-str_width(s_title)*0.5,45,7)
+    print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
     -- button legend
-    s_btn_x="start game ❎"
-    if (frame==0) then
-      print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
-      print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
+    if (title_idle==true) then
+      s_btn_x="start game ❎"
+      if (frame==0) then
+        print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
+        print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
+      end
+    -- intro text
+    else
+      for k,v in pairs(title_text) do
+        print(v,64-str_width(v)*0.5,85+(k-1)*8,5)
+        print(v,64-str_width(v)*0.5,84+(k-1)*8,6)
+      end
     end
-  end,
-
-  -- title state
-  intro=function()
-    cls(0)
-    --test=str_height(data_intro_text)
-    --print(data_intro_text,2,2,6)
-    for k,v in pairs(intro_text) do
-      clip(0,0,intro_text_anim[k],128)
-      print(v,2,7+k*7,5)
-      print(v,2,6+k*7,6)
-      clip(intro_text_anim[k],0,3,128)
-      print(v,2,5+k*7,7)
-      clip()
+    camera(0,0)
+    -- text fade effect
+    for i=0,15 do
+      x=i*8+flr(rnd()+0.5)
+      print("\014"..fade_chars[2],x,-5,0)
+      print("\014"..fade_chars[1],x,-4,0)
+      print("\014"..fade_chars[1],x,124,0)
+      print("\014"..fade_chars[2],x,125,0)
     end
+    draw.window_frame(true)
+    -- set clipping for fade effect
+    clip(1,84,126,43)
   end,
 
   -- game state
@@ -512,14 +508,8 @@ input={
   -- title state
   title=function()
     if(btnp(❎)) then 
-      draw.play_fade(change_state,state_intro)
-    end
-  end,
-
-  -- intro state
-  intro=function()
-    if(btnp(❎)) then 
-      draw.play_fade(change_state,state_game)
+      if (title_idle) then draw.play_fade(toggle_bool,"title_idle")
+      else draw.play_fade(change_state,state_game) end
     end
   end,
 

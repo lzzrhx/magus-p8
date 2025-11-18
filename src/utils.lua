@@ -9,7 +9,7 @@ end
 
 -- calculate string width
 function str_width(s)
-  return print(s,0,128)
+  return print(s,0,-128)
 end
 
 -- calculate string height
@@ -100,4 +100,9 @@ end
 -- draw sprite with 2d vector screen coordinate
 function vec2_spr(s,pos)
   spr(s,pos.x,pos.y)
+end
+
+-- toggle a boolean value
+function toggle_bool(b)
+  _ENV[b]=not _ENV[b]
 end
