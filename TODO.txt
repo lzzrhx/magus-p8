@@ -1,6 +1,7 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
+-- trim tokens
 -- status effects
 -- consumable items
 -- spells
@@ -42,6 +43,7 @@
 -- (?) field of view (shadowcasting)
 -- (?) pathfinding (a-star)
 -- (?) mouse support
+-- (?) companion name
 -- (?) player name
 
 

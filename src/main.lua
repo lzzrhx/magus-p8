@@ -5,7 +5,7 @@
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
 timer_target=3 -- timeout for target (turns)
-timer_dialog_line=24
+timer_dialog_line=24 -- timeout for next line on multiline dialogue (in frames)
 width=103 -- area width
 height=64 -- area height
 ui_h=2 -- row height of bottom ui box
