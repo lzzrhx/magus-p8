@@ -25,6 +25,7 @@ drawable=object:inherit({
 
   -- vars
   sprite=0,
+  flipped=false,
   flash_frame=0,
   pal_swap={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
   pal_swap_enable=false,
@@ -40,7 +41,7 @@ drawable=object:inherit({
   end,
 
   -- draw at given screen position
-  spr=function(self,x,y,sprite)
+  spr=function(self,x,y,sprite,flipped)
     sprite=sprite or self.sprite
     if (self.flash_frame>0) then
       self.flash_frame-=1
@@ -48,7 +49,7 @@ drawable=object:inherit({
     elseif (self.pal_swap_enable) then
       pal_set(self.pal_swap)
     end
-    spr(sprite,x,y)
+    spr(sprite,x,y,1,1,self.flipped)
     pal_set()
   end,
 })
@@ -267,6 +268,7 @@ creature=entity:inherit({
   -- try to move the creature to a given map coordinate
   move=function(self,x,y)
     if (not collision(x,y) and x>=0 and x<128 and y>=0 and y<64 and (x~=0 or y~=0)) then
+      if(self.x~=x)self.flipped=self.x>x
       self:play_anim(creature.anims.move,self.x-x,self.y-y)
       tbl_merge(self,{prev_x=self.x,prev_y=self.y,x=x,y=y})
       return true
@@ -381,10 +383,17 @@ companion=creature:inherit({
   -- static vars
   class="companion",
   parent_class=creature.class,
+  interact_text="pet",
   collision=false,
 
   -- vars
   ap=1,
+
+    -- interact action
+  interact=function(self)
+    msg.add("you petted the "..self:get_name())
+    change_state(state_game)
+  end,
 
   -- perform turn actions
   do_turn=function(self)
@@ -409,11 +418,13 @@ npc=creature:inherit({
   -- static vars
   class="npc",
   parent_class=creature.class,
+  interact_text="talk",
 
-  -- perform turn actions
-  do_turn=function(self)
-    if (creature.do_turn(self)) then 
-    end 
+    -- interact action
+  interact=function(self)
+    sel={entity=self,text=split(data_dialogue[self.sprite],"\n"),anim_frame={},pos=1}
+    for line in all(sel.text) do add(sel.anim_frame,timer_dialog_line+#line*4) end
+    change_state(state_dialogue,sel)
   end,
 })
 
@@ -426,6 +437,7 @@ enemy = creature:inherit({
   -- static vars
   class="enemy",
   parent_class=creature.class,
+  interactable=false,
 
   -- vars
   hostile=true,

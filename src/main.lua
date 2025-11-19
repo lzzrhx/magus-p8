@@ -5,6 +5,7 @@
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
 timer_target=3 -- timeout for target (turns)
+timer_dialog_line=24
 width=103 -- area width
 height=64 -- area height
 ui_h=2 -- row height of bottom ui box
@@ -15,6 +16,7 @@ state_title="title"
 state_game="game"
 state_menu="menu"
 state_look="look"
+state_dialogue="dialogue"
 state_chest="chest"
 state_read="read"
 state_dead="dead"
@@ -33,13 +35,13 @@ sprite_companion_dog=18
 
 -- sprite flags
 flag_collision=0
---flag_unused_one=1
+flag_entity=1
 --flag_unused_two=2
 --flag_unused_three=3
 --flag_unused_four=4
 --flag_unused_five=5
 --flag_unused_six=6
-flag_entity=7
+--flag_unused_seven=7
 
 -- vars
 state=nil -- game state
@@ -112,7 +114,7 @@ init={
   title=function(sel)
     title_idle=true
     title_pos=0
-    title_text=split(data_intro_text,"\n")
+    title_text=split(data_story_intro,"\n")
   end,
 
   -- menu state
@@ -124,6 +126,11 @@ init={
   look=function(sel)
     sel_look={x=player.x,y=player.y}
     set_look()
+  end,
+
+  -- dialogue state
+  dialogue=function(sel)
+    sel_dialogue=sel
   end,
 
   -- chest state
@@ -149,7 +156,7 @@ update={
   -- title state
   title=function()
     if(not title_idle)title_pos+=0.2
-    if(title_pos>=str_height(data_intro_text)*8+88 and fade_frame==0)draw.play_fade(change_state,state_game)
+    if(title_pos>=str_height(data_story_intro)*8+88 and fade_frame==0)draw.play_fade(change_state,state_game)
     input.title()
   end,
 
@@ -167,6 +174,11 @@ update={
   -- look state
   look=function()
     if(input.look())set_look()
+  end,
+
+  -- dialogue state
+  dialogue=function()
+    input.dialogue()
   end,
 
   -- chest state
@@ -230,10 +242,11 @@ draw={
   end,
 
   -- window frame
-  window_frame=function(disable_bottom)
-    if (not disable_bottom) then
-      rectfill(0,111,127,127,1)
-      line(0,111,127,111,6)
+  window_frame=function(b_ui_h)
+    b_ui_h=b_ui_h or ui_h
+    if (b_ui_h>0) then
+      rectfill(0,127-(b_ui_h*7+2),127,127,1)
+      line(0,127-(b_ui_h*7+2),127,127-(b_ui_h*7+2),6)
     end
     rect(0,0,127,127,6)
     pset(0,0,0)
@@ -268,21 +281,21 @@ draw={
     -- intro text
     else
       for k,v in pairs(title_text) do
-        print(v,64-str_width(v)*0.5,85+(k-1)*8,5)
-        print(v,64-str_width(v)*0.5,84+(k-1)*8,6)
+        print(v,64-(str_width(v))*0.5,85+(k-1)*8,5)
+        print(v,64-(str_width(v))*0.5,84+(k-1)*8,6)
       end
     end
     camera(0,0)
     -- text fade effect
-    for i=0,15 do
-      x=i*8+flr(rnd()+0.5)
-      print("\014"..fade_chars[2],x,-5,0)
-      print("\014"..fade_chars[1],x,-4,0)
-      print("\014"..fade_chars[1],x,124,0)
-      print("\014"..fade_chars[2],x,125,0)
-    end
-    draw.window_frame(true)
-    -- set clipping for fade effect
+    rectfill(0,0,127,2,0)
+    rectfill(0,125,127,127,0)
+    for i=0,1 do for j=0,15 do
+      x=j*8+flr(rnd()+0.5)
+      print("\014"..fade_chars[2],x,126*i-3,0)
+      print("\014"..fade_chars[1],x,124*i-2,0)
+    end end
+    draw.window_frame(0)
+    -- set clipping for fade after pressing start
     clip(1,84,126,43)
   end,
 
@@ -402,6 +415,38 @@ draw={
     if(sel_look.entity)print(sel_look.name,2,120,sel_look.color)
     print(s_btn_z,128-str_width(s_btn_z)-2,113,6)
     if(sel_look.usable)print(s_btn_x,126-str_width(s_btn_x),120,6)
+  end,
+
+  -- dialogue state
+  dialogue=function()
+    draw.game()
+    draw.monochrome()
+    player:draw()
+    sel_dialogue.entity:draw()
+    draw.window_frame(4)
+    -- dialogue message
+    print(sel_dialogue.entity:get_name()..":",2,100,5)
+    print(sel_dialogue.entity:get_name()..":",2,99,6)
+    for k,v in pairs(sel_dialogue.text) do
+      if (k>=sel_dialogue.pos and k<=sel_dialogue.pos+2) then
+        y=106+(k-sel_dialogue.pos)*7
+        clip(0,0,#v*4+timer_dialog_line-sel_dialogue.anim_frame[k],128)
+        print(v,2,y+1,5)
+        print(v,2,y,6)
+        if (sel_dialogue.anim_frame[k]>0 and sel_dialogue.anim_frame[k]~=#v*4+timer_dialog_line) then
+          clip(#v*4+timer_dialog_line-sel_dialogue.anim_frame[k],0,3,128)
+          print(v,2,y-1,7)
+        end
+        if(sel_dialogue.anim_frame[k]>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3
+      end
+    end
+    clip()
+    -- button legend
+    if (sel_dialogue.anim_frame[min(sel_dialogue.pos+2,#sel_dialogue.text)]<=0 and frame==0) then
+      s_btn_x="continue ❎"
+      print(s_btn_x,126-str_width(s_btn_x),100,5)
+      print(s_btn_x,126-str_width(s_btn_x),99,6)
+    end
   end,
 
   -- chest state
@@ -554,6 +599,14 @@ input={
       return false
     end
     return true
+  end,
+
+  -- dialogue state
+  dialogue=function()
+    if (btnp(❎)) then
+      if (sel_dialogue.pos+2<#sel_dialogue.text) then sel_dialogue.pos+=3
+      else change_state(state_game) end
+    end
   end,
 
   -- chest state

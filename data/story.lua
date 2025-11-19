@@ -1,4 +1,4 @@
-data_intro_text = [[you spent four years attending
+data_story_intro=[[you spent four years attending
 classes from the old masters
 at the kulian academy of
 magicks, followed by a three
@@ -40,10 +40,10 @@ grown custom to the place and
 have built sturdy friendships
 with your fellow villagers.
 over these past months you 
-have  requested  numerous
+have requested numerous
 books from distant libraries,
 and you have shared precious
-learnings, that  has resulted
+learnings, that has resulted
 in the introduction of new
 tools, new planting
 techniques, and an improved

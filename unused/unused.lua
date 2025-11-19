@@ -35,3 +35,13 @@ for i in all({-1,1}) do
   if not collision(x+i,y) then companion_x=x+i break
   elseif not collision(x,y+i) then companion_y=y+i break end
 end]]--
+
+--[[
+l_w=0
+if (k==1 or (title_text[k-1]=="" and v~="~ ⁙ ~")) do
+  l=sub(v,1,1)
+  l_w=(l=="i" and 5) or ((l=="y" or l=="t") and 6) or 7
+  v=sub(v,2,-1)
+  print("\014"..l,64-(str_width(v)+l_w)*0.5,83+(k-1)*8,5)
+  print("\014"..l,64-(str_width(v)+l_w)*0.5,82+(k-1)*8,6)
+end]]--
