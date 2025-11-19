@@ -2,7 +2,7 @@
 -- todo
 -------------------------------------------------------------------------------
 -- trim tokens
--- status effects
+-- status effect graphic
 -- consumable items
 -- spells
 -- traps
@@ -54,9 +54,8 @@
 characters:
     magus
     cat/dog (companion)
-    ghyle (dinosaur)
-    (mushroom man)
-    (green guy)
+    balthasar (dinosaur)
+    dardanius (mushroom man)
 
 enemies:
     1,slime:1xp,2hp,1dmg
@@ -100,4 +99,3 @@ spells:
 
 equippables:
     ???
-

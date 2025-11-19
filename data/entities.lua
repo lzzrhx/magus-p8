@@ -14,9 +14,8 @@ data_entities={
 
 -- npcs
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-  [19]={class="npc",name="dinosaur"},
-  [20]={class="npc",name="mushroom man"},
-  --[21]={class="npc",name="green guy"},
+  [19]={class="npc",name="balthasar"},
+  [20]={class="npc",name="dardanius"},
 
 -- enemies
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

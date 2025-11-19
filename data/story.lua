@@ -21,7 +21,7 @@ assigned your first solo
 posting in the province of
 myga, where you were appointed
 as keeper of the sage-house in
-the small village of yutta.
+the small village of thyng.
 the house contains a rich
 library and your duty is to
 curate the selection and share

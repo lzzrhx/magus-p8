@@ -181,6 +181,7 @@ creature=entity:inherit({
   dhp_turn=0,
   target=nil,
   target_turn=0,
+  status=0,
 
   -- stats
   max_hp=10,
@@ -234,6 +235,17 @@ creature=entity:inherit({
     if(turn>self.dhp_turn)self.attacked=false
     if(self.dead and (turn-self.dhp_turn)>timer_corpse)self:destroy()
     if(self.target and self.target.dead or (turn-self.target_turn)>timer_target)self.target=nil
+    
+    if ((self.status & status_poisoned)==status_poisoned) then
+      msg.add(self:get_name().." took poison damage")
+      self:take_dmg(flr(2*(0.5+rnd())+0.5))
+    end
+
+    if ((self.status & status_sleeping)==status_sleeping) then
+      msg.add(self:get_name().." is sleeping")
+      return false
+    end
+
     return (not self.dead and self:in_frame())
   end,
 
@@ -289,9 +301,9 @@ creature=entity:inherit({
   end,
 
   -- try to move an towards another entity
-  move_towards=function(self,other)
-    diff_x=other.x-self.x
-    diff_y=other.y-self.y
+  move_towards=function(self,other,reverse)
+    diff_x=(reverse and self.x-other.x) or other.x-self.x
+    diff_y=(reverse and self.y-other.y) or other.y-self.y
     desire_x=(diff_x>0 and 1) or (diff_x<0 and -1) or 0
     desire_y=(diff_y>0 and 1) or (diff_y<0 and -1) or 0
     valid=((abs(diff_x)<abs(diff_y)) and self:move(self.x,self.y+desire_y) or (self:move(self.x+desire_x,self.y) or self:move(self.x,self.y+desire_y)))
@@ -312,6 +324,7 @@ creature=entity:inherit({
 
   -- take damage
   take_dmg=function(self,dmg)
+    self.status=self.status & ~status_sleeping
     self.blink_delay=(frame==0 and 2) or 1
     self.attacked=true
     self.dhp=(self.dhp_turn==turn and self.dhp-dmg) or dmg*-1
@@ -330,6 +343,15 @@ creature=entity:inherit({
     self.collision=false
     if(self==player)change_state(state_dead)
   end,
+
+  -- assist player
+  assist_player=function(self)
+    if (player.target and player.target_turn<turn) then
+      self:move_towards_and_attack(player.target)
+    else
+      self:follow(player)
+    end
+  end,
 })
 
 
@@ -346,6 +368,7 @@ player=creature:new({
 
   -- vars
   xp=0,
+  max_hp=20,
 
   -- look at player
   look_at=function(self,tbl) end,
@@ -398,11 +421,7 @@ companion=creature:inherit({
   -- perform turn actions
   do_turn=function(self)
     if (creature.do_turn(self)) then
-      if (player.target and player.target_turn<turn) then
-        self:move_towards_and_attack(player.target)
-      else
-        self:follow(player)
-      end
+      self:assist_player()
     elseif not self:in_frame() then
       self.x,self.y=player.prev_x,player.prev_y
     end
@@ -448,7 +467,13 @@ enemy = creature:inherit({
   -- perform turn actions
   do_turn=function(self)
     if (creature.do_turn(self)) then
-      if(self.hostile)self:move_towards_and_attack(player)
+      if ((self.status & status_charmed)==status_charmed) then
+        self:assist_player()
+      elseif ((self.status & status_scared)==status_scared) then
+        self:move_towards(player,true)
+      else
+        self:move_towards_and_attack(player)
+      end
     end
   end,
 })

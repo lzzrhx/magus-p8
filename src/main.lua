@@ -33,6 +33,12 @@ sprite_door_open=81
 sprite_companion_cat=17
 sprite_companion_dog=18
 
+-- status effects
+status_poisoned=0b0001
+status_sleeping=0b0010
+status_charmed=0b0100
+status_scared=0b1000
+
 -- sprite flags
 flag_collision=0
 flag_entity=1
@@ -156,7 +162,7 @@ update={
   -- title state
   title=function()
     if(not title_idle)title_pos+=0.2
-    if(title_pos>=str_height(data_story_intro)*8+88 and fade_frame==0)draw.play_fade(change_state,state_game)
+    if(title_pos>=str_height(data_story_intro)*8+86 and fade_frame==0)draw.play_fade(change_state,state_game)
     input.title()
   end,
 
