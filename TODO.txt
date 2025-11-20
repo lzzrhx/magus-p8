@@ -12,7 +12,8 @@
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
-
+-- add sound
+-- add music
 
 -------------------------------------------------------------------------------
 -- things to plan
