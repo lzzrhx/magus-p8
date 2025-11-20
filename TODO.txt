@@ -1,50 +1,50 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- trim tokens
--- status effect graphic
 -- consumable items
 -- spells
--- traps
+-- xp and level up
+-- graphics for status effects
 -- equippable items
+-- traps
 -- ranged combat
--- add sprites: flower / bed / jug / cobwebs
+-- make more sprites:
+    -- house interior objects: bed, jug
+    -- ruins: cobwebs
+    -- other: flowers
 
 
 -------------------------------------------------------------------------------
 -- things to plan
 -------------------------------------------------------------------------------
--- plan: equippables (armor / rings / melee weapons / ranged weapons)
 -- plan: consumables (scrolls/potions)
--- plan: character stats
--- plan: character statuses
--- plan: magic and spells
--- plan: enemy types / stats
+-- plan: equippables (armor / rings / melee weapons / ranged weapons)
 -- plan: story / dialogue / npcs / areas
+-- plan: character stats
 
 
 
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
--- (?) trim stairs token use
--- (?) auto inventory sorting (by class and alphabet) & group keys in inventory
--- (?) golden chest / mimic chest
--- (?) senses (hearing / smell)
--- (?) debug menu
 -- (?) palette swapping on enemies
+-- (?) increased attack distance for some enemies (2 tiles)
+-- (?) increased movement speed for some enemies (2-3 tiles per turn)
+-- (?) golden chest / mimic chest
 -- (?) portals (teleport)
--- (?) score system
--- (?) variable attack distance for some enemies (1 or 2 tiles)
+-- (?) auto inventory sorting (by class and alphabet) & group keys in inventory
+-- (?) debug menu
+-- (?) mouse support
+-- (?) senses (hearing / smell)
 -- (?) movement speed stat
 -- (?) food and hunger
+-- (?) pathfinding (a-star)
+-- (?) field of view (shadowcasting)
 -- (?) procedural system for drawing roads and grass with shapes instead of sprites
 -- (?) randomly generated dungeons (underworld)
--- (?) field of view (shadowcasting)
--- (?) pathfinding (a-star)
--- (?) mouse support
--- (?) companion name
+-- (?) score system
 -- (?) player name
+-- (?) companion name
 
 
 

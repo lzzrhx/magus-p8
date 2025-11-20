@@ -1,14 +1,12 @@
--------------------------------------------------------------------------------
 -- globals
 -------------------------------------------------------------------------------
 
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
 timer_target=3 -- timeout for target (turns)
-timer_dialog_line=24 -- timeout for next line on multiline dialogue (in frames)
+timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 width=103 -- area width
 height=64 -- area height
-ui_h=2 -- row height of bottom ui box
 
 -- game states
 state_reset="reset"
@@ -51,12 +49,11 @@ flag_entity=1
 
 -- vars
 state=nil -- game state
-z_level=0
 room=nil
 turn=1 -- turn number
-frame=0 -- animation frame (increments twice per second)
-prev_frame=0 -- previous animation frame (increments twice per second)
-blink_frame=0 -- frame for fast blink animations (updates 30 times per soncond)
+frame=0 -- animation frame (updates twice per second)
+prev_frame=0 -- previous animation frame
+blink_frame=0 -- frame for fast blink animations (updates 30 times per second)
 blink=false
 flash_frame=0
 fade_frame=0
@@ -70,15 +67,15 @@ cam_x_min=0
 cam_y_min=0
 cam_x_diff=0
 cam_y_diff=0
-title_effect_num_points=96
+title_effect_num=96
 title_effect_colors={8,9,10,11,12,13,14,15}
+title_text=split(data_story_intro,"\n")
 
 -- options
 option_disable_flash=false
 
 
 
--------------------------------------------------------------------------------
 -- built-in functions
 -------------------------------------------------------------------------------
 
@@ -112,7 +109,6 @@ end
 
 
 
--------------------------------------------------------------------------------
 -- init
 -------------------------------------------------------------------------------
 init={
@@ -120,7 +116,6 @@ init={
   title=function(sel)
     title_idle=true
     title_pos=0
-    title_text=split(data_story_intro,"\n")
   end,
 
   -- menu state
@@ -150,25 +145,27 @@ init={
   end,
 
   -- dead state
-  dead=function(sel) sel_dead=0 end,
+  dead=function(sel)
+    sel_dead=0
+  end,
 }
 
 
 
--------------------------------------------------------------------------------
 -- update
 -------------------------------------------------------------------------------
 update={
   -- title state
   title=function()
     if(not title_idle)title_pos+=0.2
-    if(title_pos>=str_height(data_story_intro)*8+86 and fade_frame==0)draw.play_fade(change_state,state_game)
+    if(title_pos>=str_height(data_story_intro)*8+85 and fade_frame==0)draw.play_fade(change_state,state_game)
     input.title()
   end,
 
   -- game state
   game=function()
     for e in all(entity.entities) do e:update() end
+    update_camera()
     if(not creature.anim_playing and input.game())do_turn()
   end,
 
@@ -207,7 +204,6 @@ update={
 
 
 
--------------------------------------------------------------------------------
 -- draw
 -------------------------------------------------------------------------------
 draw={
@@ -248,11 +244,11 @@ draw={
   end,
 
   -- window frame
-  window_frame=function(b_ui_h)
-    b_ui_h=b_ui_h or ui_h
-    if (b_ui_h>0) then
-      rectfill(0,127-(b_ui_h*7+2),127,127,1)
-      line(0,127-(b_ui_h*7+2),127,127-(b_ui_h*7+2),6)
+  window_frame=function(ui_h)
+    ui_h=ui_h or 2
+    if (ui_h>0) then
+      rectfill(0,125-ui_h*7,127,127,1)
+      line(0,125-ui_h*7,127,125-ui_h*7,6)
     end
     rect(0,0,127,127,6)
     pset(0,0,0)
@@ -266,39 +262,31 @@ draw={
     cls(0)
     camera(0,title_pos)
     -- title effect
-    for i=1,title_effect_num_points do
-      x=cos(t()/8+i/title_effect_num_points)*56
-      y=sin(t()/8+i/title_effect_num_points)*16+sin(t()+i*(1/title_effect_num_points)*5)*4
+    for i=1,title_effect_num do
+      x=cos(t()/8+i/title_effect_num)*56
+      y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
       c=title_effect_colors[i%(#title_effect_colors)+1]
       for j=1,3 do pset(64+x+j,50+y+j,c) end
     end
     -- main title
-    s_title="\014magus magicus"
-    print(s_title,68-str_width(s_title)*0.5,46,4)
-    print(s_title,68-str_width(s_title)*0.5,45,7)
+    s_print("\014magus magicus",15,45,7,4)
+    --print(s_title,15,46,4)
+    --print(s_title,15,45,7)
     print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
-    -- button legend
-    if (title_idle==true) then
-      s_btn_x="start game ❎"
-      if (frame==0) then
-        print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
-        print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
-      end
     -- intro text
-    else
+    if (not title_idle) then
       for k,v in pairs(title_text) do
         print(v,64-(str_width(v))*0.5,85+(k-1)*8,5)
         print(v,64-(str_width(v))*0.5,84+(k-1)*8,6)
       end
-    end
+    -- button legend
+    elseif (frame==0) then s_print("start game ❎",38,84) end
     camera(0,0)
     -- text fade effect
-    rectfill(0,0,127,2,0)
-    rectfill(0,125,127,127,0)
     for i=0,1 do for j=0,15 do
-      x=j*8+flr(rnd()+0.5)
-      print("\014"..fade_chars[2],x,126*i-3,0)
-      print("\014"..fade_chars[1],x,124*i-2,0)
+      x=j*8+rnd_1()
+      print("\014"..fade_chars[2],x,130*i-5,0)
+      print("\014"..fade_chars[1],x,128*i-4,0)
     end end
     draw.window_frame(0)
     -- set clipping for fade after pressing start
@@ -309,11 +297,10 @@ draw={
   game=function()
     -- draw map and entities
     cls()
-    update_camera()
     if(room) then
       if (room.z>0) then
         pal_all(1,true)
-        map(cam_x-1-cam_x_diff,cam_y-1-cam_y_diff-(room.z),-8,-8,18,18-ui_h)
+        map(cam_x-1-cam_x_diff,cam_y-1-cam_y_diff-room.z,-8,-8,18,16)
         for e in all(entity.entities) do e:draw({x=cam_x_diff,y=cam_y_diff+room.z}) end
         pal_unlock()
       end
@@ -325,7 +312,7 @@ draw={
       map(room.x0,room.y0,8*(room.x0-cam_x),8*(room.y0-cam_y),room.x1-room.x0+1,room.y1-room.y0+1)
       clip(x0,y0,x1-x0,y1-y0)
     else
-      map(cam_x-1,cam_y-1,-8,-8,18,18-ui_h)
+      map(cam_x-1,cam_y-1,-8,-8,18,16)
     end
     for e in all(entity.entities) do if (not e.collision) e:draw() end
     for e in all(entity.entities) do if (e.collision) e:draw() end
@@ -348,14 +335,14 @@ draw={
     if(state==state_game)then
       print("hp:",2,121,5)
       rectfill(14,120,82,124,5)
-      print(s_btn_z,126-str_width(s_btn_z),114,5)
-      print(s_btn_x,126-str_width(s_btn_x),121,5)
+      print(s_btn_z,98,114,5)
+      print(s_btn_x,98,121,5)
     end
     -- ui elements
     print("hp:",2,120,6)
     if(hp_ratio>0)rectfill(14,120,14+68*hp_ratio,124,(hp_ratio<0.25 and 8) or (hp_ratio<0.5 and 9) or (hp_ratio<0.75 and 10) or 11)
-    print(s_btn_z,126-str_width(s_btn_z),113,6)
-    print(s_btn_x,126-str_width(s_btn_x),120,6)
+    print(s_btn_z,98,113,6)
+    print(s_btn_x,98,120,6)
   end,
 
   -- menu state
@@ -365,35 +352,28 @@ draw={
     draw.monochrome()
     -- vars
     s_btns="cancel 🅾️  select ❎"
-    s_chr="⬅️ character ➡️"
-    s_inv="⬅️ inventory ➡️"
-    s_itms="empty"
     -- bg box
     rectfill(23,23,103,103,1)
     line(23,22,103,22,6)
     line(23,104,103,104,6)
     -- button legend
-    print(s_btns,64-str_width(s_btns)*0.5,114,5)
-    clip(64-str_width(s_btns)*0.5,113,(sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,6)
-    print(s_btns,64-str_width(s_btns)*0.5,113,6)
+    print(s_btns,24,114,5)
+    clip(24,113,(sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,6)
+    print(s_btns,24,113,6)
     clip()
     -- character tab
     if (sel_menu.tab==0) then
-      print(s_chr,64-str_width(s_chr)*0.5,26,5)
-      print(s_chr,64-str_width(s_chr)*0.5,25,6)
+      s_print("⬅️ character ➡️",34,25)
       print("hp: "..player.hp.."/"..player.max_hp.."\nxp: "..player.xp,28,34,6)
     -- inventory tab
     elseif (sel_menu.tab==1) then
-      print(s_inv,64-str_width(s_inv)*0.5,26,5)
-      print(s_inv,64-str_width(s_inv)*0.5,25,6)
-      if (inventory.num>0) do
-        print("▶",28,34+(sel_menu.i-1)*6,6)
-        for i=1,inventory.num do s_itms=((i==1 and "") or s_itms)..inventory.items[i].name.."\n" end
+      s_print("⬅️ inventory ➡️",34,25)
+      if (inventory.num==0) do
+        print("empty",28,34,5)
+      else
+        print("▶",28,27+sel_menu.i*7,6)
+        for i=1,inventory.num do print(inventory.items[i].name,34,27+i*7,sel_menu.i==i and 6 or 5) end
       end
-      print(s_itms,28+(inventory.num>0 and 6 or 0),34,5)
-      clip(23,28+6*sel_menu.i,80,6)
-      print(s_itms,28+(inventory.num>0 and 6 or 0),34,6)
-      clip()
     end
   end,
 
@@ -413,13 +393,13 @@ draw={
     if(state==state_look)then
       print("target:",2,114,5)
       print(sel_look.name,2,121,(sel_look.entity and sel_look.entity.parent_class==creature.class and 0) or 5)
-      print(s_btn_z,128-str_width(s_btn_z)-2,114,5)
-      print(s_btn_x,128-str_width(s_btn_x)-2,121,5)
+      print(s_btn_z,90,114,5)
+      print(s_btn_x,126-str_width(s_btn_x),121,5)
     end
     -- ui elements
     print("target:",2,113,6)
     if(sel_look.entity)print(sel_look.name,2,120,sel_look.color)
-    print(s_btn_z,128-str_width(s_btn_z)-2,113,6)
+    print(s_btn_z,90,113,6)
     if(sel_look.usable)print(s_btn_x,126-str_width(s_btn_x),120,6)
   end,
 
@@ -431,28 +411,23 @@ draw={
     sel_dialogue.entity:draw()
     draw.window_frame(4)
     -- dialogue message
-    print(sel_dialogue.entity:get_name()..":",2,100,5)
-    print(sel_dialogue.entity:get_name()..":",2,99,6)
+    s_print(sel_dialogue.entity:get_name()..":",2,99)
     for k,v in pairs(sel_dialogue.text) do
+      f=sel_dialogue.anim_frame[k]
       if (k>=sel_dialogue.pos and k<=sel_dialogue.pos+2) then
         y=106+(k-sel_dialogue.pos)*7
-        clip(0,0,#v*4+timer_dialog_line-sel_dialogue.anim_frame[k],128)
-        print(v,2,y+1,5)
-        print(v,2,y,6)
-        if (sel_dialogue.anim_frame[k]>0 and sel_dialogue.anim_frame[k]~=#v*4+timer_dialog_line) then
-          clip(#v*4+timer_dialog_line-sel_dialogue.anim_frame[k],0,3,128)
+        clip(0,0,#v*4+timer_dialog_line-f,128)
+        s_print(v,2,y)
+        if (f>0 and f~=#v*4+timer_dialog_line) then
+          clip(#v*4+timer_dialog_line-f,0,3,128)
           print(v,2,y-1,7)
         end
-        if(sel_dialogue.anim_frame[k]>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3
+        if(f>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3
       end
     end
     clip()
     -- button legend
-    if (sel_dialogue.anim_frame[min(sel_dialogue.pos+2,#sel_dialogue.text)]<=0 and frame==0) then
-      s_btn_x="continue ❎"
-      print(s_btn_x,126-str_width(s_btn_x),100,5)
-      print(s_btn_x,126-str_width(s_btn_x),99,6)
-    end
+    if (sel_dialogue.anim_frame[min(sel_dialogue.pos+2,#sel_dialogue.text)]<=0 and frame==0)s_print("continue ❎",82,99)
   end,
 
   -- chest state
@@ -460,7 +435,6 @@ draw={
     -- vars
     chest_e=sel_chest.entity
     num_itms=tbl_len(chest_e.content)
-    s_btn_x="take items ❎"
     -- draw player and chest
     cls()
     player:draw()
@@ -470,19 +444,20 @@ draw={
     if (chest_e.anim_frame<=0) then
       -- iterate through chest items
       for i=1,num_itms do
-        target_pos={x=68-num_itms*8+(i-1)*16,y=52}
+        f=sel_chest.anim_frame[i]
+        target_pos={x=52-num_itms*8+i*16,y=52}
         -- wait for animation of previous item to finish before playing the next
         if (i==1 or sel_chest.anim_frame[i-1]<=0) then
           itm=chest_e.content[i]
           -- play animation for current item
-          if (sel_chest.anim_frame[i]>0) then
+          if (f>0) then
             -- stop chest blinking on last item
             if(i==num_itms)chest_e.anim_this=false
             -- set item color to white
             pal_all(7)
             -- draw animated item with trailing echoes
             for j=0,10 do
-              pos=chest_e:item_anim_pos(smoothstep(min(1,(1-(sel_chest.anim_frame[i]/60))+0.025*j)),target_pos)
+              pos=chest_e:item_anim_pos(smoothstep(min(1,(1-(f/60))+0.025*j)),target_pos)
               if(blink)vec2_spr(itm.sprite,pos)
             end
             -- reset palette and decrement animation frame
@@ -494,71 +469,51 @@ draw={
               flash_frame=2
             end
           -- draw the item bobbing up and down after the popping out of chest animation has finished
-          else
-            if(not chest.anim_playing or blink)itm:spr(target_pos.x,target_pos.y+wavy())
-          end
+          elseif (not chest.anim_playing or blink) then itm:spr(target_pos.x,target_pos.y+wavy()) end
         end
       end
     end
-    -- show wavy button press text after the whole chest animation is complete
-    if (not chest.anim_playing) then
-      wavy_print(s_btn_x,64-str_width(s_btn_x)*0.5,87,5)
-      wavy_print(s_btn_x,64-str_width(s_btn_x)*0.5,86,6)
-    end
+    -- wavy button press text
+    if(not chest.anim_playing)wavy_print("take items ❎",38,86)
   end,
 
   -- read state
   read=function()
-    -- draw map, entities and selection
     draw.look()
     draw.monochrome()
-    -- vars
-    s_btn_x="continue ❎"
-    e=sel_read
-    txt_w=str_width(sel_read.message)
     txt_h=str_height(sel_read.message)
     txt_expand=((txt_h>5 and txt_h-5) or 0)*3
     txt_offset=((txt_h<5 and 5-txt_h) or 0)*3
-    -- bg and message text
-    rectfill(23,39-txt_expand,103,71+txt_expand,sel_read.bg)
-    line(24,38-txt_expand,102,38-txt_expand,sel_read.bg)
-    line(24,72+txt_expand,102,72+txt_expand,sel_read.bg)
-    print(sel_read.message,64-txt_w*0.5,41-txt_expand+txt_offset,sel_read.fg)
-    -- button legend
-    print(s_btn_x,64-str_width(s_btn_x)*0.5,82+txt_expand,5)
-    print(s_btn_x,64-str_width(s_btn_x)*0.5,81+txt_expand,6)
+    y0=39-txt_expand
+    y1=71+txt_expand
+    rectfill(23,y0,103,y1,sel_read.bg)
+    line(24,y0-1,102,y0-1,sel_read.bg)
+    line(24,y1+1,102,y1+1,sel_read.bg)
+    print(sel_read.message,64-str_width(sel_read.message)*0.5,41-txt_expand+txt_offset,sel_read.fg)
+    s_print("continue ❎",42,81+txt_expand)
   end,
 
   -- dead state
   dead=function()
-    -- draw map, entities and selection
     draw.game()
     draw.monochrome()
-    -- vars
-    s_title="g a m e   o v e r"
-    s_btn_x="select ❎"
-    -- title and menu box
-    print(s_title,64-str_width(s_title)*0.5,41,1)
-    print(s_title,64-str_width(s_title)*0.5,40,8)
+    s_print("g a m e   o v e r",30,40,8,1)
     rect(24,52,103,75,7)
     print("▶",28,58+sel_dead*7,7)
     print("restart",34+((sel_dead==0 and 1) or 0),58,7)
     print("quit",34+((sel_dead==1 and 1) or 0),66,7)
-    -- button legend
-    print(s_btn_x,64-str_width(s_btn_x)*0.5,85,5)
-    print(s_btn_x,64-str_width(s_btn_x)*0.5,84,6)
+    s_print("select ❎",64-str_width(s_btn_x)*0.5,84)
   end,
 }
 
 
 
--------------------------------------------------------------------------------
 -- input
 -------------------------------------------------------------------------------
 input={
   -- title state
   title=function()
-    if(btnp(❎)) then 
+    if(btnp(5)) then 
       if (title_idle) then draw.play_fade(toggle_bool,"title_idle")
       else draw.play_fade(change_state,state_game) end
     end
@@ -568,38 +523,39 @@ input={
   game=function()
     valid = false
     x,y=player.x,player.y
-    if (btn(⬆️)) then valid=player:action_dir(x,y-1)
-    elseif (btn(➡️)) then valid=player:action_dir(x+1,y)
-    elseif (btn(⬇️)) then valid=player:action_dir(x,y+1)
-    elseif (btn(⬅️)) then valid=player:action_dir(x-1,y)
-    elseif (btnp(🅾️)) then change_state(state_menu)
-    elseif (btnp(❎)) then change_state(state_look) end
+    
+    if (btn(0)) then valid=player:action_dir(x-1,y)
+    elseif (btn(1)) then valid=player:action_dir(x+1,y)
+    elseif (btn(2)) then valid=player:action_dir(x,y-1)
+    elseif (btn(3)) then valid=player:action_dir(x,y+1)
+    elseif (btnp(4)) then change_state(state_menu)
+    elseif (btnp(5)) then change_state(state_look) end
     return valid
   end,
 
   -- menu state
   menu=function()
-    if(btnp(⬅️))sel_menu.tab=(sel_menu.tab-1)%2
-    if(btnp(➡️))sel_menu.tab=(sel_menu.tab+1)%2
-    if(btnp(🅾️))change_state(state_game)
+    if(btnp(0))sel_menu.tab=(sel_menu.tab-1)%2
+    if(btnp(1))sel_menu.tab=(sel_menu.tab+1)%2
+    if(btnp(4))change_state(state_game)
     if (sel_menu.tab==1) then
-      if(btnp(⬆️) and sel_menu.i>1)sel_menu.i-=1
-      if(btnp(⬇️) and sel_menu.i<inventory.num)sel_menu.i+=1
-      --if(btnp(❎) and inventory.num>0 and inventory.items[sel_menu.i].interactable)
+      if(btnp(2) and sel_menu.i>1)sel_menu.i-=1
+      if(btnp(3) and sel_menu.i<inventory.num)sel_menu.i+=1
+      --if(btnp(5) and inventory.num>0 and inventory.items[sel_menu.i].interactable)
     end
   end,
 
   -- look state
   look=function()
-    if(btnp(⬆️)and sel_look.y-cam_y>0)sel_look.y-=1
-    if(btnp(➡️)and sel_look.x-cam_x<15)sel_look.x+=1
-    if(btnp(⬇️)and sel_look.y-cam_y<15-ui_h)sel_look.y+=1
-    if(btnp(⬅️)and sel_look.x-cam_x>0)sel_look.x-=1
-    if (btnp(🅾️)) then 
+    if(btnp(0)and sel_look.x-cam_x>0)sel_look.x-=1
+    if(btnp(1)and sel_look.x-cam_x<15)sel_look.x+=1
+    if(btnp(2)and sel_look.y-cam_y>0)sel_look.y-=1
+    if(btnp(3)and sel_look.y-cam_y<13)sel_look.y+=1
+    if (btnp(4)) then 
       change_state(state_game)
       return false
     end
-    if (btnp(❎) and sel_look.usable) then
+    if (btnp(5) and sel_look.usable) then
       sel_look.entity:interact()
       inventory.remove(sel_look.possession)
       return false
@@ -609,7 +565,7 @@ input={
 
   -- dialogue state
   dialogue=function()
-    if (btnp(❎)) then
+    if (btnp(5)) then
       if (sel_dialogue.pos+2<#sel_dialogue.text) then sel_dialogue.pos+=3
       else change_state(state_game) end
     end
@@ -617,26 +573,25 @@ input={
 
   -- chest state
   chest=function()
-    if (btnp(❎)) change_state(state_game)
+    if (btnp(5)) change_state(state_game)
   end,
 
   -- read state
   read=function()
-    if (btnp(❎)) change_state(state_game)
+    if (btnp(5)) change_state(state_game)
   end,
 
   -- dead state
   dead=function()
     sel_options={[0]=reset,[1]=quit}
-    if(btnp(⬆️) and sel_dead>0)sel_dead-=1
-    if(btnp(⬇️) and sel_dead<tbl_len(sel_options)-1)sel_dead+=1
-    if(btnp(❎))sel_options[sel_dead]()
+    if(btnp(2) and sel_dead>0)sel_dead-=1
+    if(btnp(3) and sel_dead<tbl_len(sel_options)-1)sel_dead+=1
+    if(btnp(5))sel_options[sel_dead]()
   end,
 }
 
 
 
--------------------------------------------------------------------------------
 -- message
 -------------------------------------------------------------------------------
 msg={
@@ -671,7 +626,6 @@ msg={
 
 
 
--------------------------------------------------------------------------------
 -- inventory
 -------------------------------------------------------------------------------
 inventory={
@@ -700,7 +654,6 @@ inventory={
 
 
 
--------------------------------------------------------------------------------
 -- system
 -------------------------------------------------------------------------------
 
@@ -724,15 +677,14 @@ end
 
 
 
--------------------------------------------------------------------------------
 -- game state
 -------------------------------------------------------------------------------
 
 -- iterate through all map tiles and find entities
 function populate_map()
   for x=0,127 do for y=0,67 do
-      if(fget(mget(x,y),flag_entity))entity.entity_spawn(mget(x,y),x,y)
-      if(mget(x,y)==sprite_void)mset(x,y,sprite_empty)
+    if(fget(mget(x,y),flag_entity))entity.entity_spawn(mget(x,y),x,y)
+    if(mget(x,y)==sprite_void)mset(x,y,sprite_empty)
   end end
 end
 
@@ -760,25 +712,23 @@ function update_camera()
   p_x,p_y=player.x,player.y
   if (p_x-cam_x>15-cam_offset and (room or cam_x<width-16)) x=p_x-15+cam_offset
   if (p_x-cam_x<cam_offset and cam_x>cam_x_min) x=p_x-cam_offset
-  if (p_y-cam_y>15-cam_offset-ui_h and cam_y<height-16+ui_h) y=p_y-15+cam_offset+ui_h
+  if (p_y-cam_y>13-cam_offset and cam_y<height-14) y=p_y-13+cam_offset
   if (p_y-cam_y<cam_offset and cam_y>cam_y_min) y=p_y-cam_offset
   if (room==nil and cam_x<cam_x_min)x=cam_x_min
   if (room==nil and cam_y<cam_y_min)y=cam_y_min
   if (x~=cam_x or y ~= cam_y) then
-    if (player.anim_frame>0) then
-      camera((x-cam_x)*8+player.anim_x,(y-cam_y)*8+player.anim_y)
-    else
-      cam_x,cam_y=x,y
-    end
+    if (player.anim_frame>0) then camera((x-cam_x)*8+player.anim_x,(y-cam_y)*8+player.anim_y)
+    else cam_x,cam_y=x,y end
   end
 end
 
+-- change room
 function change_room(new_room)
   room=new_room
 end
 
 
--------------------------------------------------------------------------------
+
 -- look state
 -------------------------------------------------------------------------------
 

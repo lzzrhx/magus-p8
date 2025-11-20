@@ -1,4 +1,3 @@
--------------------------------------------------------------------------------
 -- object
 -------------------------------------------------------------------------------
 object={
@@ -15,7 +14,6 @@ object={
 
 
 
--------------------------------------------------------------------------------
 -- drawable
 -------------------------------------------------------------------------------
 drawable=object:inherit({
@@ -56,7 +54,6 @@ drawable=object:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- entity
 -------------------------------------------------------------------------------
 entity=drawable:inherit({
@@ -148,21 +145,20 @@ entity=drawable:inherit({
   -- check if entity is on screen
   in_frame=function(self,offset)
     pos=vec2_add(self,offset or {x=0,y=0})
-    return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+17-ui_h)
+    return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+15)
   end,
 
 })
 
 
 
--------------------------------------------------------------------------------
 -- creature
 -------------------------------------------------------------------------------
 creature=entity:inherit({
   -- static vars
   class="creature",
   parent_class=entity.class,
-  anims={move={frames=3,dist=8},attack={frames=5,dist=6}},
+  anims={move={frames=4,dist=8},attack={frames=5,dist=6}},
   anim_queue={},
   anim_playing=false,
 
@@ -196,7 +192,11 @@ creature=entity:inherit({
 
   -- update creature
   update=function(self)
-    if(self.anim_frame>0 and creature.anim_queue[1]==self.id) then self:anim_step()
+    if(self.anim_frame>0) then
+      for e in all(creature.anim_queue) do
+        if(e==self)self:anim_step()
+        if(e.anim==creature.anims.attack)break
+      end
     elseif(prev_frame~=frame and self.blink_delay>0) then self.blink_delay-=1 end
   end,
 
@@ -252,7 +252,7 @@ creature=entity:inherit({
   -- start playing animation
   play_anim=function(self,a,x,y,x1,y1)
     tbl_merge(self,{anim=a,anim_frame=a.frames,anim_x=x*a.dist,anim_y=y*a.dist,anim_x1=(x1 or 0)*a.dist,anim_y1=(y1 or 0)*a.dist})
-    add(creature.anim_queue,self.id)
+    add(creature.anim_queue,self)
     creature.anim_playing=true
   end,
 
@@ -271,7 +271,7 @@ creature=entity:inherit({
     self.anim_y=self.anim.dist*anim_pos*((y<-0.1 and -1) or (y>0.1 and 1) or 0)
     self.anim_frame-=1
     if (self.anim_frame<=0) then
-      del(creature.anim_queue,self.id)
+      del(creature.anim_queue,self)
       if(#creature.anim_queue==0)creature.anim_playing=false
       self.anim_x,self.anim_y=0
     end
@@ -356,7 +356,6 @@ creature=entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- player
 -------------------------------------------------------------------------------
 player=creature:new({
@@ -399,7 +398,6 @@ player=creature:new({
 
 
 
--------------------------------------------------------------------------------
 -- companion
 -------------------------------------------------------------------------------
 companion=creature:inherit({
@@ -430,7 +428,6 @@ companion=creature:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- npc
 -------------------------------------------------------------------------------
 npc=creature:inherit({
@@ -449,7 +446,6 @@ npc=creature:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- enemy
 -------------------------------------------------------------------------------
 enemy = creature:inherit({
@@ -480,7 +476,6 @@ enemy = creature:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- door
 -------------------------------------------------------------------------------
 door=entity:inherit({
@@ -534,7 +529,6 @@ door=entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- stairs
 -------------------------------------------------------------------------------
 stairs=entity:inherit({
@@ -563,7 +557,6 @@ stairs=entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- sign
 -------------------------------------------------------------------------------
 sign=entity:inherit({
@@ -591,7 +584,6 @@ sign=entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- chest
 -------------------------------------------------------------------------------
 chest=entity:inherit({
@@ -671,7 +663,6 @@ chest=entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- item (in world)
 -------------------------------------------------------------------------------
 item = entity:inherit({
@@ -700,7 +691,6 @@ item = entity:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- possession (item in inventory)
 -------------------------------------------------------------------------------
 possession=drawable:inherit({
@@ -733,7 +723,6 @@ possession=drawable:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- key
 -------------------------------------------------------------------------------
 key=possession:inherit({
@@ -765,7 +754,6 @@ key=possession:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- consumable
 -------------------------------------------------------------------------------
 consumable=possession:inherit({
@@ -775,7 +763,6 @@ consumable=possession:inherit({
 
 
 
--------------------------------------------------------------------------------
 -- equippable
 -------------------------------------------------------------------------------
 equippable=possession:inherit({

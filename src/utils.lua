@@ -1,4 +1,3 @@
--------------------------------------------------------------------------------
 -- utils
 -------------------------------------------------------------------------------
 
@@ -61,7 +60,7 @@ end
 
 -- wavy text
 function wavy_print(s,x,y,c,h)
-  for i=1,#s do print(sub(s,i,i),x+i*4,y+wavy(i),c) end
+  for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),c) end
 end
 
 -- wavy value
@@ -93,6 +92,7 @@ function vec2_add(a,b)
   return {x=a.x+b.x,y=a.y+b.y}
 end
 
+-- scale a 2d vector
 function vec2_scale(a,b)
   return {x=a.x*b,y=a.y*b}
 end
@@ -105,4 +105,17 @@ end
 -- toggle a boolean value
 function toggle_bool(b)
   _ENV[b]=not _ENV[b]
+end
+
+-- print with shadow
+function s_print(s,x,y,c0,c1)
+  c0=c0 or 6
+  c1=c1 or 5
+  print(s,x,y+1,c1)
+  print(s,x,y,c0)
+end
+
+-- return a random value of 0 or 1
+function rnd_1()
+  return flr(rnd()+0.5)
 end
