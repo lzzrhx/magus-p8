@@ -329,7 +329,7 @@ creature=entity:inherit({
     self.attacked=true
     self.dhp=(self.dhp_turn==turn and self.dhp-dmg) or dmg*-1
     self.dhp_turn=turn
-    self.hp-=dmg
+    self.hp=min(max(self.hp-dmg,0),self.max_hp)
     if (self.hp <= 0) then
       self:kill()
       return true
@@ -716,9 +716,6 @@ possession=drawable:inherit({
   new_from_entity=function(e)
     return _ENV[e.item_class]:new(tbl_merge_new(tbl_merge_new({name=entity.entity_name(e)},drawable.data_from_entity(e)),e.item_data))
   end,
-
-  -- interact with possession
-  interact=function(self) end,
 })
 
 
@@ -759,6 +756,13 @@ key=possession:inherit({
 consumable=possession:inherit({
   class="consumable",
   parent_class=possession.class,
+
+  -- interact with consumable
+  interact=function(self)
+    msg.add("consumed "..self.name)
+    if(self.status)player.status=player.status | self.status
+    if(self.dhp) then  player:take_dmg(-self.dhp) end
+  end,
 })
 
 

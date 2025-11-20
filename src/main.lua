@@ -266,12 +266,10 @@ draw={
       x=cos(t()/8+i/title_effect_num)*56
       y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
       c=title_effect_colors[i%(#title_effect_colors)+1]
-      for j=1,3 do pset(64+x+j,50+y+j,c) end
+      for j=1,3 do pset(62+x+j,50+y+j,c) end
     end
     -- main title
-    s_print("\014magus magicus",15,45,7,4)
-    --print(s_title,15,46,4)
-    --print(s_title,15,45,7)
+    s_print("\014magus magicus",13,45,7,4)
     print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
     -- intro text
     if (not title_idle) then
@@ -541,7 +539,14 @@ input={
     if (sel_menu.tab==1) then
       if(btnp(2) and sel_menu.i>1)sel_menu.i-=1
       if(btnp(3) and sel_menu.i<inventory.num)sel_menu.i+=1
-      --if(btnp(5) and inventory.num>0 and inventory.items[sel_menu.i].interactable)
+      if(btnp(5) and inventory.num>0) then
+        itm=inventory.items[sel_menu.i]
+        if (itm.interactable) then
+          if(sel_menu.i>1)sel_menu.i-=1
+          inventory.remove(itm)
+          itm:interact()
+        end
+      end
     end
   end,
 

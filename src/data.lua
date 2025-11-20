@@ -24,11 +24,12 @@ data_entities={
   [81]={class="door",collision=false},
   [9]={class="door",lock=1},
   [10]={class="item",item_class="key",item_data={lock=1}},
+  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=10}},
+  [49]={class="item",item_class="consumable",name="green potion",item_data={status=0b0001}},
+  [50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
   --[56]={class="item",item_class="equippable",name="dagger"},
   --[57]={class="item",item_class="equippable",name="sword"},
   --[58]={class="item",item_class="equippable",name="bow"},
-  --[59]={class="item",item_class="consumable",name="potion",item_data={hp=10}},
-  --[60]={class="item",item_class="consumable",name="potion"},
   --[61]={class="item",item_class="consumable",name="scroll"},
   --[62]={class="item",item_class="equippable",name="ring"},
 }
@@ -94,7 +95,7 @@ data_locks = {
 -- chests
 -------------------------------------------------------------------------------
 data_chests = {
-  {x=104,y=4,content={{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
+  {x=104,y=4,content={{sprite=48},{sprite=49},{sprite=50},{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
 }
 
 

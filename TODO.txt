@@ -28,6 +28,7 @@
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
+-- (?) set transparent color per drawable entity
 -- (?) palette swapping on enemies
 -- (?) increased attack distance for some enemies (2 tiles)
 -- (?) increased movement speed for some enemies (2-3 tiles per turn)
@@ -76,7 +77,6 @@ status effects:
 consumables:
     red potion (+10hp)
     green potion (poisoned status)
-    yellow potion (sleep status)
 
 spells:
     beguile:cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
