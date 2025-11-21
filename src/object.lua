@@ -47,6 +47,8 @@ drawable=object:inherit({
     elseif (self.pal_swap_enable) then
       pal_set(self.pal_swap)
     end
+    palt(0,false)
+    palt(15,true)
     spr(sprite,x,y,1,1,self.flipped)
     pal_set()
   end,
@@ -78,6 +80,7 @@ entity=drawable:inherit({
 
   -- (static) get entity at coordinate
   entity_at=function(x,y)
+    for e in all(entity.entities) do if (e.class==enemy.class and e.x==x and e.y==y) return e end
     for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
     return nil
   end,
@@ -227,7 +230,9 @@ creature=entity:inherit({
     if (not self.dead) then
       entity.look_at(self,tbl)
       tbl.color=(self.hostile and 2) or 3
+      return true
     end
+    return false
   end,
 
   -- perform turn actions
@@ -325,6 +330,7 @@ creature=entity:inherit({
   -- take damage
   take_dmg=function(self,dmg)
     self.status=self.status & ~status_sleeping
+    if(dmg<0)self.status=self.status & ~status_poisoned
     self.blink_delay=(frame==0 and 2) or 1
     self.attacked=true
     self.dhp=(self.dhp_turn==turn and self.dhp-dmg) or dmg*-1
@@ -370,7 +376,14 @@ player=creature:new({
   max_hp=20,
 
   -- look at player
-  look_at=function(self,tbl) end,
+  look_at=function(self,tbl)
+    tbl_merge(tbl,{entity=self,text="magick",usable=true})
+  end,
+
+  -- go to spell selection
+  interact=function(self)
+    change_state(state_magic)
+  end,
 
   -- move the player or attack if there is an enemy in the target tile
   action_dir=function(self,x,y)
@@ -387,12 +400,6 @@ player=creature:new({
       end
     end
     return valid
-  end,
-
-  -- wait one turn
-  action_wait=function(self)
-    msg.add("you waited")
-    return true
   end,
 })
 
@@ -452,13 +459,25 @@ enemy = creature:inherit({
   -- static vars
   class="enemy",
   parent_class=creature.class,
-  interactable=false,
+  interactable=true,
 
   -- vars
   hostile=true,
   ap=1,
   max_hp=5,
   xp=1,
+
+  -- look at enemy
+  look_at=function(self,tbl)
+    if(creature.look_at(self,tbl))tbl.text="attack"
+  end,
+
+  -- attack enemy
+  interact=function(self)
+    change_state(state_game)
+    player:attack(self)
+    do_turn()
+  end,
 
   -- perform turn actions
   do_turn=function(self)

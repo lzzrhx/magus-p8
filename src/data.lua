@@ -24,7 +24,7 @@ data_entities={
   [81]={class="door",collision=false},
   [9]={class="door",lock=1},
   [10]={class="item",item_class="key",item_data={lock=1}},
-  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=10}},
+  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
   [49]={class="item",item_class="consumable",name="green potion",item_data={status=0b0001}},
   [50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
   --[56]={class="item",item_class="equippable",name="dagger"},

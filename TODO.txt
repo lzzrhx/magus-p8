@@ -1,7 +1,6 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- consumable items
 -- spells
 -- xp and level up
 -- graphics for status effects
@@ -28,7 +27,6 @@
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
--- (?) set transparent color per drawable entity
 -- (?) palette swapping on enemies
 -- (?) increased attack distance for some enemies (2 tiles)
 -- (?) increased movement speed for some enemies (2-3 tiles per turn)
@@ -54,49 +52,52 @@
 -- plan
 -------------------------------------------------------------------------------
 characters:
-    magus
-    cat/dog (companion)
-    balthasar (dinosaur)
-    dardanius (mushroom man)
+    x  magus
+    x  cat/dog (companion)
+    x  balthasar (dinosaur)
+    x  dardanius (mushroom man)
 
 enemies:
-    1,slime:1xp,2hp,1dmg
-    1,hobgoblin:3xp,4hp,3dmg
-    2,bat:2xp,4hp,2dmg
-    2,ghoul:5xp,5hp,6dmg,ranged
-    3,skull:4xp,6hp,4dmg
-    3,vampire:7xp,10hp,8dmg
-    4,demon:6xp,12hp,6dmg
+    x  1,slime:1xp,2hp,1dmg
+    x  1,hobgoblin:3xp,4hp,3dmg
+    x  2,bat:2xp,4hp,2dmg
+    x  2,ghoul:5xp,5hp,6dmg,ranged
+    x  3,skull:4xp,6hp,4dmg
+    x  3,vampire:7xp,10hp,8dmg
+    x  4,demon:6xp,12hp,6dmg
 
 status effects:
-    poisoned: -2hp every turn
-    sleep: skip turn
-    charmed: enemy becomes ally (until hit 3 times)
-    scared: moves away from source of effect
+    x  (enemy/player) poisoned: -2hp every turn
+    x  (enemy) sleep: skip turn
+    x  (enemy) charmed: enemy becomes ally (until hit 3 times)
+    x  (enemy) scared: moves away from source of effect
 
 consumables:
-    red potion (+10hp)
-    green potion (poisoned status)
+    x  red potion (+15hp)
+    x  green potion (poisoned status)
+    x  yellow potion (no effect)
+    -  dumpling (+5hp)
+    -  ramen bowl (+10hp)
 
 spells:
-    beguile:cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
-        lvl 1: n=2
-        lvl 2: n=4
-        lvl 3: n=8
-    terrify: cast fear on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
-        lvl 1: n=3, m=1
-        lvl 2: n=4, m=2
-        lvl 3: n=5, m=3
-    sleep: cast sleep on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
-        lvl 1: n=3, m=1
-        lvl 2: n=4, m=2
-        lvl 3: n=5, m=3
-    familiar: passive spell
-        lvl 1: companion dmg=1
-        lvl 2: companion dmg=4
-        lvl 3: companion dmg=8
-    teleport: teleport enemy to random visible location
-    detect trap: finds traps within a distance of 3 from player
+    -  beguile:cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
+          lvl 1: n=2
+          lvl 2: n=4
+          lvl 3: n=8
+    -  terrify: cast fear on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
+          lvl 1: n=3, m=1
+          lvl 2: n=4, m=2
+          lvl 3: n=5, m=3
+    -  sleep: cast sleep on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
+          lvl 1: n=3, m=1
+          lvl 2: n=4, m=2
+          lvl 3: n=5, m=3
+    -  familiar: passive spell
+          lvl 1: companion dmg=1
+          lvl 2: companion dmg=4
+          lvl 3: companion dmg=8
+    -  teleport: teleport enemy to random visible location
+    -  detect trap: finds traps within a distance of 3 from player
 
 equippables:
     ???

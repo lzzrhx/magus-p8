@@ -14,6 +14,7 @@ state_title="title"
 state_game="game"
 state_menu="menu"
 state_look="look"
+state_magic="magic"
 state_dialogue="dialogue"
 state_chest="chest"
 state_read="read"
@@ -70,6 +71,8 @@ cam_y_diff=0
 title_effect_num=96
 title_effect_colors={8,9,10,11,12,13,14,15}
 title_text=split(data_story_intro,"\n")
+
+spells={"beguile","terrify","sleep","teleport"}
 
 -- options
 option_disable_flash=false
@@ -129,6 +132,11 @@ init={
     set_look()
   end,
 
+  -- magic state
+  magic=function(sel)
+    sel_magic={sel=false,i=1}
+  end,
+
   -- dialogue state
   dialogue=function(sel)
     sel_dialogue=sel
@@ -179,6 +187,11 @@ update={
     if(input.look())set_look()
   end,
 
+  -- magic state
+  magic=function()
+    input.magic()
+  end,
+
   -- dialogue state
   dialogue=function()
     input.dialogue()
@@ -187,7 +200,7 @@ update={
   -- chest state
   chest=function()
     if(sel_chest.entity.anim_this)sel_chest.entity:anim_step()
-    if(not chest.anim_playing)input.chest()
+    input.chest()
   end,
 
   -- read state
@@ -318,7 +331,7 @@ draw={
     -- vars
     hp_ratio=max(0,player.hp/player.max_hp)
     s_btn_z="menu 🅾️"
-    s_btn_x="look ❎"
+    s_btn_x="action ❎"
     camera()
     draw.window_frame()
     -- animated message
@@ -334,13 +347,13 @@ draw={
       print("hp:",2,121,5)
       rectfill(14,120,82,124,5)
       print(s_btn_z,98,114,5)
-      print(s_btn_x,98,121,5)
+      print(s_btn_x,90,121,5)
     end
     -- ui elements
     print("hp:",2,120,6)
     if(hp_ratio>0)rectfill(14,120,14+68*hp_ratio,124,(hp_ratio<0.25 and 8) or (hp_ratio<0.5 and 9) or (hp_ratio<0.75 and 10) or 11)
     print(s_btn_z,98,113,6)
-    print(s_btn_x,98,120,6)
+    print(s_btn_x,90,120,6)
   end,
 
   -- menu state
@@ -349,15 +362,15 @@ draw={
     draw.game()
     draw.monochrome()
     -- vars
-    s_btns="cancel 🅾️  select ❎"
+    s_btns="cancel 🅾️  use ❎"
     -- bg box
     rectfill(23,23,103,103,1)
     line(23,22,103,22,6)
     line(23,104,103,104,6)
     -- button legend
-    print(s_btns,24,114,5)
+    print(s_btns,29,114,5)
     clip(24,113,(sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,6)
-    print(s_btns,24,113,6)
+    print(s_btns,29,113,6)
     clip()
     -- character tab
     if (sel_menu.tab==0) then
@@ -390,15 +403,34 @@ draw={
     -- ui elements (shadow)
     if(state==state_look)then
       print("target:",2,114,5)
-      print(sel_look.name,2,121,(sel_look.entity and sel_look.entity.parent_class==creature.class and 0) or 5)
+      print(sel_look.name,2,121,(sel_look.entity and sel_look.entity~=player and sel_look.entity.parent_class==creature.class and 0) or 5)
       print(s_btn_z,90,114,5)
       print(s_btn_x,126-str_width(s_btn_x),121,5)
     end
     -- ui elements
     print("target:",2,113,6)
-    if(sel_look.entity)print(sel_look.name,2,120,sel_look.color)
+    if(sel_look.entity and sel_look.entity~=player)print(sel_look.name,2,120,sel_look.color)
     print(s_btn_z,90,113,6)
     if(sel_look.usable)print(s_btn_x,126-str_width(s_btn_x),120,6)
+  end,
+
+  -- magic state
+  magic=function()
+    draw.look()
+    draw.monochrome()
+    if(sel_magic.sel) then
+      player:draw()
+    else
+      rect(42,49,86,80,6)
+      rectfill(42,43,86,49,6)
+      print("magick",44,64-15-5,0)
+      print("▶",46,45+sel_magic.i*7,6)
+      for i=1,tbl_len(spells) do
+        print(spells[i],52,45+i*7,sel_magic.i==i and 6 or 5)
+      end
+      s_print("select ❎",47,88)
+    end
+    draw.window_frame(0)
   end,
 
   -- dialogue state
@@ -500,7 +532,7 @@ draw={
     print("▶",28,58+sel_dead*7,7)
     print("restart",34+((sel_dead==0 and 1) or 0),58,7)
     print("quit",34+((sel_dead==1 and 1) or 0),66,7)
-    s_print("select ❎",64-str_width(s_btn_x)*0.5,84)
+    s_print("select ❎",46,84)
   end,
 }
 
@@ -519,9 +551,8 @@ input={
 
   -- game state
   game=function()
-    valid = false
+    valid=false
     x,y=player.x,player.y
-    
     if (btn(0)) then valid=player:action_dir(x-1,y)
     elseif (btn(1)) then valid=player:action_dir(x+1,y)
     elseif (btn(2)) then valid=player:action_dir(x,y-1)
@@ -568,6 +599,17 @@ input={
     return true
   end,
 
+  -- magic state
+  magic=function()
+    if(sel_magic.sel) then
+    else
+      if(btnp(2) and sel_magic.i>1)sel_magic.i-=1
+      if(btnp(3) and sel_magic.i<tbl_len(spells))sel_magic.i+=1
+      if(btnp(5))sel_magic.sel=true
+    end
+    if(btnp(4))change_state(state_look)
+  end,
+
   -- dialogue state
   dialogue=function()
     if (btnp(5)) then
@@ -578,7 +620,14 @@ input={
 
   -- chest state
   chest=function()
-    if (btnp(5)) change_state(state_game)
+    if (btnp(5)) then
+      if(chest.anim_playing) then 
+        sel_chest.entity.anim_frame=0
+        for i=1,tbl_len(sel_chest.anim_frame) do sel_chest.anim_frame[i]=1 end
+      else
+        change_state(state_game)
+      end
+    end
   end,
 
   -- read state
