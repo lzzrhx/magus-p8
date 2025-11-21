@@ -14,7 +14,6 @@ state_title="title"
 state_game="game"
 state_menu="menu"
 state_look="look"
-state_magic="magic"
 state_dialogue="dialogue"
 state_chest="chest"
 state_read="read"
@@ -72,7 +71,7 @@ title_effect_num=96
 title_effect_colors={8,9,10,11,12,13,14,15}
 title_text=split(data_story_intro,"\n")
 
-spells={"beguile","terrify","sleep","teleport"}
+spells={"beguile","terrify","sleep","teleport",}
 
 -- options
 option_disable_flash=false
@@ -132,11 +131,6 @@ init={
     set_look()
   end,
 
-  -- magic state
-  magic=function(sel)
-    sel_magic={sel=false,i=1}
-  end,
-
   -- dialogue state
   dialogue=function(sel)
     sel_dialogue=sel
@@ -150,11 +144,6 @@ init={
   -- read state
   read=function(sel)
     sel_read=sel
-  end,
-
-  -- dead state
-  dead=function(sel)
-    sel_dead=0
   end,
 }
 
@@ -185,11 +174,6 @@ update={
   -- look state
   look=function()
     if(input.look())set_look()
-  end,
-
-  -- magic state
-  magic=function()
-    input.magic()
   end,
 
   -- dialogue state
@@ -287,11 +271,11 @@ draw={
     -- intro text
     if (not title_idle) then
       for k,v in pairs(title_text) do
-        print(v,64-(str_width(v))*0.5,85+(k-1)*8,5)
-        print(v,64-(str_width(v))*0.5,84+(k-1)*8,6)
+        print(v,64-(str_width(v))*0.5,86+(k-1)*8,5)
+        print(v,64-(str_width(v))*0.5,85+(k-1)*8,6)
       end
     -- button legend
-    elseif (frame==0) then s_print("start game ❎",38,84) end
+    elseif (frame==0) then s_print("start game ❎",38,85) end
     camera(0,0)
     -- text fade effect
     for i=0,1 do for j=0,15 do
@@ -331,7 +315,7 @@ draw={
     -- vars
     hp_ratio=max(0,player.hp/player.max_hp)
     s_btn_z="menu 🅾️"
-    s_btn_x="action ❎"
+    s_btn_x="look ❎"
     camera()
     draw.window_frame()
     -- animated message
@@ -347,13 +331,13 @@ draw={
       print("hp:",2,121,5)
       rectfill(14,120,82,124,5)
       print(s_btn_z,98,114,5)
-      print(s_btn_x,90,121,5)
+      print(s_btn_x,98,121,5)
     end
     -- ui elements
     print("hp:",2,120,6)
     if(hp_ratio>0)rectfill(14,120,14+68*hp_ratio,124,(hp_ratio<0.25 and 8) or (hp_ratio<0.5 and 9) or (hp_ratio<0.75 and 10) or 11)
     print(s_btn_z,98,113,6)
-    print(s_btn_x,90,120,6)
+    print(s_btn_x,98,120,6)
   end,
 
   -- menu state
@@ -364,27 +348,35 @@ draw={
     -- vars
     s_btns="cancel 🅾️  use ❎"
     -- bg box
-    rectfill(23,23,103,103,1)
-    line(23,22,103,22,6)
-    line(23,104,103,104,6)
+    y=5
+    line(30,22,96,22,6)
+    line(30,88,96,88,6)
+    line(29,23,29,87,6)
+    line(97,23,97,87,6)
+    rectfill(30,22,96,28,6)
     -- button legend
-    print(s_btns,29,114,5)
-    clip(24,113,(sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,6)
-    print(s_btns,29,113,6)
+    print(s_btns,29,97,5)
+    clip(24,0,(sel_menu.tab==0 and 80) or (sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,128)
+    print(s_btns,29,96,6)
     clip()
-    -- character tab
+    -- magic tab
     if (sel_menu.tab==0) then
-      s_print("⬅️ character ➡️",34,25)
-      print("hp: "..player.hp.."/"..player.max_hp.."\nxp: "..player.xp,28,34,6)
+      print("⬅️ magick ➡️",40,23,0)
+      print("▶",33,25+sel_menu.i*7,6)
+      for i=1,tbl_len(spells) do print(spells[i],38,25+i*7,sel_menu.i==i and 6 or 5) end
     -- inventory tab
     elseif (sel_menu.tab==1) then
-      s_print("⬅️ inventory ➡️",34,25)
+      print("⬅️ inventory ➡️",34,23,0)
       if (inventory.num==0) do
-        print("empty",28,34,5)
+        print("empty",35,32,5)
       else
-        print("▶",28,27+sel_menu.i*7,6)
-        for i=1,inventory.num do print(inventory.items[i].name,34,27+i*7,sel_menu.i==i and 6 or 5) end
+        print("▶",33,25+sel_menu.i*7,6)
+        for i=1,inventory.num do print(inventory.items[i].name,38,25+i*7,sel_menu.i==i and 6 or 5) end
       end
+    -- character tab
+    elseif (sel_menu.tab==2) then
+      print("⬅️ character ➡️",34,23,0)
+      print("hp: "..player.hp.."/"..player.max_hp.."\nxp: "..player.xp,35,32,6)
     end
   end,
 
@@ -412,25 +404,6 @@ draw={
     if(sel_look.entity and sel_look.entity~=player)print(sel_look.name,2,120,sel_look.color)
     print(s_btn_z,90,113,6)
     if(sel_look.usable)print(s_btn_x,126-str_width(s_btn_x),120,6)
-  end,
-
-  -- magic state
-  magic=function()
-    draw.look()
-    draw.monochrome()
-    if(sel_magic.sel) then
-      player:draw()
-    else
-      rect(42,49,86,80,6)
-      rectfill(42,43,86,49,6)
-      print("magick",44,64-15-5,0)
-      print("▶",46,45+sel_magic.i*7,6)
-      for i=1,tbl_len(spells) do
-        print(spells[i],52,45+i*7,sel_magic.i==i and 6 or 5)
-      end
-      s_print("select ❎",47,88)
-    end
-    draw.window_frame(0)
   end,
 
   -- dialogue state
@@ -504,35 +477,32 @@ draw={
       end
     end
     -- wavy button press text
-    if(not chest.anim_playing)wavy_print("take items ❎",38,86)
+    if(not chest.anim_playing)wavy_print("take items ❎",38,85)
   end,
 
   -- read state
   read=function()
     draw.look()
     draw.monochrome()
-    txt_h=str_height(sel_read.message)
-    txt_expand=((txt_h>5 and txt_h-5) or 0)*3
-    txt_offset=((txt_h<5 and 5-txt_h) or 0)*3
-    y0=39-txt_expand
-    y1=71+txt_expand
+    txt=split(sel_read.message,"\n")
+    txt_exp=max(#txt-5,0)*4
+    y0=34-txt_exp
+    y1=76+txt_exp
     rectfill(23,y0,103,y1,sel_read.bg)
     line(24,y0-1,102,y0-1,sel_read.bg)
     line(24,y1+1,102,y1+1,sel_read.bg)
-    print(sel_read.message,64-str_width(sel_read.message)*0.5,41-txt_expand+txt_offset,sel_read.fg)
-    s_print("continue ❎",42,81+txt_expand)
+    for i=1,tbl_len(txt) do
+      print(txt[i],64-str_width(txt[i])*0.5,29-txt_exp+max(5-#txt,0)*4+i*8,sel_read.fg)
+    end
+    s_print("continue ❎",42,85+txt_exp)
   end,
 
   -- dead state
   dead=function()
     draw.game()
     draw.monochrome()
-    s_print("g a m e   o v e r",30,40,8,1)
-    rect(24,52,103,75,7)
-    print("▶",28,58+sel_dead*7,7)
-    print("restart",34+((sel_dead==0 and 1) or 0),58,7)
-    print("quit",34+((sel_dead==1 and 1) or 0),66,7)
-    s_print("select ❎",46,84)
+    wavy_print("g a m e   o v e r",26,61,8,1)
+    if (frame==0) then s_print("restart ❎",44,85) end
   end,
 }
 
@@ -564,19 +534,29 @@ input={
 
   -- menu state
   menu=function()
-    if(btnp(0))sel_menu.tab=(sel_menu.tab-1)%2
-    if(btnp(1))sel_menu.tab=(sel_menu.tab+1)%2
+    if(btnp(0)) then 
+      sel_menu.i=1
+      sel_menu.tab=(sel_menu.tab-1)%3
+    end
+    if(btnp(1)) then
+      sel_menu.i=1
+      sel_menu.tab=(sel_menu.tab+1)%3
+    end
     if(btnp(4))change_state(state_game)
+    if(btnp(2) and sel_menu.i>1)sel_menu.i-=1
+    if (sel_menu.tab==0) then
+      if(btnp(3) and sel_menu.i<tbl_len(spells))sel_menu.i+=1
+      if(btnp(5)) then
+        change_state(state_look)
+      end
+    end
     if (sel_menu.tab==1) then
-      if(btnp(2) and sel_menu.i>1)sel_menu.i-=1
       if(btnp(3) and sel_menu.i<inventory.num)sel_menu.i+=1
-      if(btnp(5) and inventory.num>0) then
+      if(btnp(5) and inventory.num>0 and inventory.items[sel_menu.i].interactable) then
         itm=inventory.items[sel_menu.i]
-        if (itm.interactable) then
-          if(sel_menu.i>1)sel_menu.i-=1
-          inventory.remove(itm)
-          itm:interact()
-        end
+        inventory.remove(itm)
+        itm:interact()
+        change_state(state_game)
       end
     end
   end,
@@ -597,17 +577,6 @@ input={
       return false
     end
     return true
-  end,
-
-  -- magic state
-  magic=function()
-    if(sel_magic.sel) then
-    else
-      if(btnp(2) and sel_magic.i>1)sel_magic.i-=1
-      if(btnp(3) and sel_magic.i<tbl_len(spells))sel_magic.i+=1
-      if(btnp(5))sel_magic.sel=true
-    end
-    if(btnp(4))change_state(state_look)
   end,
 
   -- dialogue state
@@ -637,10 +606,7 @@ input={
 
   -- dead state
   dead=function()
-    sel_options={[0]=reset,[1]=quit}
-    if(btnp(2) and sel_dead>0)sel_dead-=1
-    if(btnp(3) and sel_dead<tbl_len(sel_options)-1)sel_dead+=1
-    if(btnp(5))sel_options[sel_dead]()
+    if(btnp(5))reset()
   end,
 }
 

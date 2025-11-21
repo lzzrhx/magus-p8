@@ -103,8 +103,7 @@ data_chests = {
 -- signs
 -------------------------------------------------------------------------------
 data_signs = {
-  {x=6,y=22,message="this is a sign."},
-  {x=29,y=23,message="this is a grave."},
+  {x=5,y=58,message="welcome to\nthyng village"},
 }
 
 

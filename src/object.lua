@@ -377,12 +377,6 @@ player=creature:new({
 
   -- look at player
   look_at=function(self,tbl)
-    tbl_merge(tbl,{entity=self,text="magick",usable=true})
-  end,
-
-  -- go to spell selection
-  interact=function(self)
-    change_state(state_magic)
   end,
 
   -- move the player or attack if there is an enemy in the target tile
@@ -672,7 +666,7 @@ chest=entity:inherit({
       if(draw_lid) then
         y-=(45-self.anim_frame)*0.25
         clip(x,y,8,5)
-        spr(sprite_chest_closed,x,y)
+        self:spr(x,y,sprite_chest_closed)
         clip()
       end
     end
