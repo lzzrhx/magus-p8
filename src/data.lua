@@ -1,37 +1,37 @@
 -- entities
 -------------------------------------------------------------------------------
 data_entities={
-  [16]={class="player"},
-  [17]={class="companion",name="cat"},
-  [18]={class="companion",name="dog"},
-  [19]={class="npc",name="balthasar"},
-  [20]={class="npc",name="dardanius"},
-  [24]={class="enemy",name="slime",xp=1,max_hp=2,ap=1},
-  [25]={class="enemy",name="hobgoblin",xp=3,max_hp=4,ap=3},
-  [28]={class="enemy",name="bat",xp=2,max_hp=4,ap=2},
-  [27]={class="enemy",name="ghoul",xp=5,max_hp=5,ap=6},
-  [26]={class="enemy",name="skully",xp=4,max_hp=6,ap=4},
-  [29]={class="enemy",name="vampire",xp=7,max_hp=10,ap=8},
-  [30]={class="enemy",name="demon",xp=9,max_hp=8,ap=20},
-  [5]={class="stairs"},
-  [6]={class="stairs"},
-  [7]={class="stairs"},
-  [8]={class="stairs"},
-  [3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
-  [4]={class="sign"},
-  [11]={class="chest"},
-  [82]={class="door"},
-  [81]={class="door",collision=false},
-  [9]={class="door",lock=1},
-  [10]={class="item",item_class="key",item_data={lock=1}},
-  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
-  [49]={class="item",item_class="consumable",name="green potion",item_data={status=0b0001}},
-  [50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
-  --[56]={class="item",item_class="equippable",name="dagger"},
-  --[57]={class="item",item_class="equippable",name="sword"},
-  --[58]={class="item",item_class="equippable",name="bow"},
-  --[61]={class="item",item_class="consumable",name="scroll"},
-  --[62]={class="item",item_class="equippable",name="ring"},
+ [16]={class="player"},
+ [17]={class="companion",name="cat"},
+ [18]={class="companion",name="dog"},
+ [19]={class="npc",name="balthasar"},
+ [20]={class="npc",name="dardanius"},
+ [24]={class="enemy",name="slime",xp=1,max_hp=2,ap=1},
+ [25]={class="enemy",name="hobgoblin",xp=3,max_hp=4,ap=3},
+ [28]={class="enemy",name="bat",xp=2,max_hp=4,ap=2},
+ [27]={class="enemy",name="ghoul",xp=5,max_hp=5,ap=6},
+ [26]={class="enemy",name="skully",xp=4,max_hp=6,ap=4},
+ [29]={class="enemy",name="vampire",xp=7,max_hp=10,ap=8},
+ [30]={class="enemy",name="demon",xp=9,max_hp=8,ap=20},
+ [5]={class="stairs"},
+ [6]={class="stairs"},
+ [7]={class="stairs"},
+ [8]={class="stairs"},
+ [3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
+ [4]={class="sign"},
+ [11]={class="chest"},
+ [82]={class="door"},
+ [81]={class="door",collision=false},
+ [9]={class="door",lock=1},
+ [10]={class="item",item_class="key",item_data={lock=1}},
+ [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
+ [49]={class="item",item_class="consumable",name="green potion",item_data={status=0b0001}},
+ [50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
+ --[56]={class="item",item_class="equippable",name="dagger"},
+ --[57]={class="item",item_class="equippable",name="sword"},
+ --[58]={class="item",item_class="equippable",name="bow"},
+ --[61]={class="item",item_class="consumable",name="scroll"},
+ --[62]={class="item",item_class="equippable",name="ring"},
 }
 
 
@@ -39,40 +39,40 @@ data_entities={
 -- floors
 -------------------------------------------------------------------------------
 data_floors={
-  rooms={
-    [1]={z=1,x0=103,y0=0,x1=108,y1=6},
-    [2]={z=1,x0=103,y0=7,x1=111,y1=23},
-    [3]={z=-1,x0=112,y0=7,x1=127,y1=23},
-    [4]={z=-1,x0=109,y0=0,x1=127,y1=6},
-    [5]={z=1,x0=103,y0=24,x1=127,y1=32},
-    [6]={z=-1,x0=108,y0=24,x1=127,y1=32},
-    [7]={z=1,x0=103,y0=33,x1=108,y1=37},
-    [8]={z=-1,x0=109,y0=33,x1=119,y1=37},
-  },
-  stairs={
-    [1]={x=5,y=51,room=nil,target=2},
-    [2]={x=104,y=1,room=1,target=1},
-    [3]={x=94,y=47,room=nil,target=4},
-    [4]={x=104,y=8,room=2,target=3},
-    [5]={x=94,y=61,room=nil,target=6},
-    [6]={x=104,y=22,room=2,target=5},
-    [7]={x=100,y=57,room=nil,target=8},
-    [8]={x=113,y=8,room=3,target=7},
-    [9]={x=34,y=38,room=nil,target=10},
-    [10]={x=110,y=3,room=4,target=9},
-    [11]={x=32,y=22,room=nil,target=12},
-    [12]={x=104,y=26,room=5,target=11},
-    [13]={x=32,y=26,room=nil,target=14},
-    [14]={x=104,y=30,room=5,target=13},
-    [15]={x=34,y=26,room=nil,target=16},
-    [16]={x=125,y=25,room=6,target=15},
-    [17]={x=20,y=32,room=nil,target=18},
-    [18]={x=109,y=31,room=6,target=17},
-    [19]={x=58,y=47,room=nil,target=20},
-    [20]={x=104,y=34,room=7,target=19},
-    [21]={x=61,y=47,room=nil,target=22},
-    [22]={x=117,y=36,room=8,target=21},
-  },
+ rooms={
+  [1]={z=1,x0=103,y0=0,x1=108,y1=6},
+  [2]={z=1,x0=103,y0=7,x1=111,y1=23},
+  [3]={z=-1,x0=112,y0=7,x1=127,y1=23},
+  [4]={z=-1,x0=109,y0=0,x1=127,y1=6},
+  [5]={z=1,x0=103,y0=24,x1=127,y1=32},
+  [6]={z=-1,x0=108,y0=24,x1=127,y1=32},
+  [7]={z=1,x0=103,y0=33,x1=108,y1=37},
+  [8]={z=-1,x0=109,y0=33,x1=119,y1=37},
+ },
+ stairs={
+  [1]={x=5,y=51,room=nil,target=2},
+  [2]={x=104,y=1,room=1,target=1},
+  [3]={x=94,y=47,room=nil,target=4},
+  [4]={x=104,y=8,room=2,target=3},
+  [5]={x=94,y=61,room=nil,target=6},
+  [6]={x=104,y=22,room=2,target=5},
+  [7]={x=100,y=57,room=nil,target=8},
+  [8]={x=113,y=8,room=3,target=7},
+  [9]={x=34,y=38,room=nil,target=10},
+  [10]={x=110,y=3,room=4,target=9},
+  [11]={x=32,y=22,room=nil,target=12},
+  [12]={x=104,y=26,room=5,target=11},
+  [13]={x=32,y=26,room=nil,target=14},
+  [14]={x=104,y=30,room=5,target=13},
+  [15]={x=34,y=26,room=nil,target=16},
+  [16]={x=125,y=25,room=6,target=15},
+  [17]={x=20,y=32,room=nil,target=18},
+  [18]={x=109,y=31,room=6,target=17},
+  [19]={x=58,y=47,room=nil,target=20},
+  [20]={x=104,y=34,room=7,target=19},
+  [21]={x=61,y=47,room=nil,target=22},
+  [22]={x=117,y=36,room=8,target=21},
+ },
 }
 
 
@@ -80,14 +80,14 @@ data_floors={
 -- locks
 -------------------------------------------------------------------------------
 data_locks = {
-  doors={
-    {x=98,y=52,lock=1},
-    {x=52,y=35,lock=2},
-    {x=33,y=20,lock=2},
-  },
-  keys={
-    {x=83,y=46,lock=1},
-  },
+ doors={
+  {x=98,y=52,lock=1},
+  {x=52,y=35,lock=2},
+  {x=33,y=20,lock=2},
+ },
+ keys={
+  {x=83,y=46,lock=1},
+ },
 }
 
 
@@ -95,7 +95,7 @@ data_locks = {
 -- chests
 -------------------------------------------------------------------------------
 data_chests = {
-  {x=104,y=4,content={{sprite=48},{sprite=49},{sprite=50},{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
+ {x=104,y=4,content={{sprite=48},{sprite=49},{sprite=50},{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
 }
 
 
@@ -103,7 +103,7 @@ data_chests = {
 -- signs
 -------------------------------------------------------------------------------
 data_signs = {
-  {x=5,y=58,message="welcome to\nthyng village"},
+ {x=5,y=58,message="welcome to\nthyng village"},
 }
 
 

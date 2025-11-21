@@ -45,3 +45,9 @@ if (k==1 or (title_text[k-1]=="" and v~="~ ⁙ ~")) do
   print("\014"..l,64-(str_width(v)+l_w)*0.5,83+(k-1)*8,5)
   print("\014"..l,64-(str_width(v)+l_w)*0.5,82+(k-1)*8,6)
 end]]--
+
+-- quit cart
+function quit()
+  cls()
+  stop()
+end
