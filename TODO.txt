@@ -3,29 +3,26 @@
 -------------------------------------------------------------------------------
 -- add sound
 -- add music
--- make more sprites:
+-- add more sprites:
+    -- tome (quest item)
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
--- xp and level up
--- traps
--- equippable items
--- ranged combat
-
--------------------------------------------------------------------------------
--- things to plan
--------------------------------------------------------------------------------
--- plan: consumables (scrolls/potions)
--- plan: equippables (armor / rings / melee weapons / ranged weapons)
--- plan: story / dialogue / npcs / areas
--- plan: character stats
+-- add dialogue
+-- add 4 tomes
+-- add ending
 
 
 
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
+-- (?) xp and level up
+-- (?) traps
+-- (?) equippable items
+-- (?) ranged combat
 -- (?) palette swapping on enemies
+-- (?) character stats
 -- (?) increased attack distance for some enemies (2 tiles)
 -- (?) increased movement speed for some enemies (2-3 tiles per turn)
 -- (?) golden chest / mimic chest
@@ -78,24 +75,9 @@ consumables:
     -  ramen bowl (+10hp)
 
 spells:
-    -  beguile:cast charm on enemy, max n at the same time, only works on creatures max 1 level above caster
-          lvl 1: n=2
-          lvl 2: n=4
-          lvl 3: n=8
-    -  terrify: cast fear on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
-          lvl 1: n=3, m=1
-          lvl 2: n=4, m=2
-          lvl 3: n=5, m=3
-    -  sleep: cast sleep on enemy, lasts n turns, m aoe size, only works on creatures max 1 level above caster
-          lvl 1: n=3, m=1
-          lvl 2: n=4, m=2
-          lvl 3: n=5, m=3
-    -  familiar: passive spell
-          lvl 1: companion dmg=1
-          lvl 2: companion dmg=4
-          lvl 3: companion dmg=8
+    x  beguile:cast charm on enemy, max 5 at the same time, 48 turns cooldown
+    x  terrify: cast fear on enemy, lasts 16 turns, 24 turns cooldown
+    x  sleep: cast sleep on enemy, lasts 16 turns, 24 turns cooldown
+    x  poison: cast poison on enemy, lasts 6 turns, 24 turns cooldown
     -  teleport: teleport enemy to random visible location
     -  detect trap: finds traps within a distance of 3 from player
-
-equippables:
-    ???

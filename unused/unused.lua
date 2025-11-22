@@ -36,20 +36,13 @@ for i in all({-1,1}) do
   elseif not collision(x,y+i) then companion_y=y+i break end
 end]]--
 
---[[
-l_w=0
-if (k==1 or (title_text[k-1]=="" and v~="~ ⁙ ~")) do
-  l=sub(v,1,1)
-  l_w=(l=="i" and 5) or ((l=="y" or l=="t") and 6) or 7
-  v=sub(v,2,-1)
-  print("\014"..l,64-(str_width(v)+l_w)*0.5,83+(k-1)*8,5)
-  print("\014"..l,64-(str_width(v)+l_w)*0.5,82+(k-1)*8,6)
-end]]--
-
---if(sel_look.spell>0)for i=1,spell_dist*2 do for j=1,spell_dist*2 do rectfill(pos_to_screen(player).x+(i-1-spell_dist)*8,pos_to_screen(player).y+(j-1-spell_dist)*8,pos_to_screen(player).x+(i+1-spell_dist)*8,pos_to_screen(player).y+(j+1-spell_dist)*8,3) end end
-
 -- quit cart
 function quit()
   cls()
   stop()
+end
+
+function get_k(tbl,v0)
+ for k,v1 in pairs(tbl) do if(v0==v1)return k end
+ return 0
 end

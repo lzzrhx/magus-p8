@@ -8,9 +8,8 @@ timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 timer_effect=16 -- effect timer for most status effects (turns)
 timer_effect_poison=6 -- effect timer for poison (turns)
 timer_spell=24 -- cooldown for casting spells (turns)
-timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
-width=103 -- area width
-height=64 -- area height
+timer_spell_charm=0 -- cooldown for casting befriend spell (turns)
+max_followers=5
 
 -- game states
 state_reset="reset"
@@ -23,18 +22,6 @@ state_chest="chest"
 state_read="read"
 state_dead="dead"
 
--- sprites
-sprite_void=0
-sprite_empty=1
-sprite_selection=2
-sprite_grave=3
-sprite_chest_closed=11
-sprite_chest_open=12
-sprite_door_closed=82
-sprite_door_open=81
-sprite_companion_cat=17
-sprite_companion_dog=18
-
 -- status effects
 status_charmed=0b0001
 status_scared=0b0010
@@ -45,12 +32,6 @@ statuses=split"0b0001,0b0010,0b0100,0b1000"
 -- sprite flags
 flag_collision=0
 flag_entity=1
---flag_unused_two=2
---flag_unused_three=3
---flag_unused_four=4
---flag_unused_five=5
---flag_unused_six=6
---flag_unused_seven=7
 
 -- vars
 state=nil -- game state
@@ -77,7 +58,6 @@ title_effect_colors=split"8,9,10,11,12,13,14,15"
 title_text=split(data_story_intro,"\n")
 spells=split"befriend,scare,sleep,poison"
 spells_cd=split"0,0,0,0"
-max_followers=5
 
 
 
@@ -295,24 +275,25 @@ draw={
   -- draw map and entities
   cls()
   if room then
-   local x0=max(0,(room.x0-cam_x+1)*8)
-   local y0=max(0,(room.y0-cam_y+1)*8)
-   local x1=min(128,(room.x1-cam_x)*8)
-   local y1=min(128,(room.y1-cam_y)*8)
-   if room.z>0 then
+   local x0=max(0,(room[2]-cam_x+1)*8)
+   local y0=max(0,(room[3]-cam_y+1)*8)
+   local x1=min(128,(room[4]-cam_x)*8)
+   local y1=min(128,(room[5]-cam_y)*8)
+   if room[1]>0 then
     pal_all(1,true)
-    map(cam_x-cam_x_diff-1,cam_y-cam_y_diff-room.z-1,-8,-8,18,16)
-    for e in all(entity.entities) do e:draw({x=cam_x_diff,y=cam_y_diff+room.z}) end
+    map(cam_x-cam_x_diff-1,cam_y-cam_y_diff-room[1]-1,-8,-8,18,16)
+    for e in all(entity.entities) do e:draw({x=cam_x_diff,y=cam_y_diff+room[1]}) end
     pal_unlock()
    end
    rectfill(x0,y0,x1,y1,0)
-   map(room.x0,room.y0,(room.x0-cam_x)*8,(room.y0-cam_y)*8,room.x1-room.x0+1,room.y1-room.y0+1)
+   map(room[2],room[3],(room[2]-cam_x)*8,(room[3]-cam_y)*8,room[4]-room[2]+1,room[5]-room[3]+1)
    clip(x0,y0,x1-x0,y1-y0)
   else
    map(cam_x-1,cam_y-1,-8,-8,18,16)
   end
-  for e in all(entity.entities) do if(not e.collision)e:draw() end
-  for e in all(entity.entities) do if(e.collision)e:draw() end
+  for e in all(entity.entities) do if(e~=player and (e.parent_class~=creature.class or e.dead))e:draw() end
+  for e in all(entity.entities) do if(e~=player and (e.parent_class==creature.class and not e.dead))e:draw() end
+  player:draw()
   clip()
   camera()
   -- ui elements
@@ -378,7 +359,7 @@ draw={
   if(state==state_look)draw.monochrome()
   player:draw()
   if(sel_look.entity)sel_look.entity:draw()
-  if(state==state_look)vec2_spr(sprite_selection,pos_to_screen(sel_look))
+  if(state==state_look)vec2_spr(2,pos_to_screen(sel_look))
   -- ui elements
   draw.window_frame()
   local btn_x=sel_look.text.." ❎"
@@ -705,13 +686,13 @@ end
 function populate_map()
  for x=0,127 do for y=0,67 do
   if(fget(mget(x,y),flag_entity))entity.entity_spawn(mget(x,y),x,y)
-  if(mget(x,y)==sprite_void)mset(x,y,sprite_empty)
+  if(mget(x,y)==0)mset(x,y,1)
  end end
 end
 
 -- check for collision
 function collision(x,y)
- if(x<0 or x==width or x==128 or y<0 or y==height or fget(mget(x,y),flag_collision))return true
+ if(x<0 or x==103 or x==128 or y<0 or y==64 or fget(mget(x,y),flag_collision))return true
  for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y)return true end
  return false
 end
@@ -732,9 +713,9 @@ end
 function update_camera()
  local x,y=cam_x,cam_y
  local p_x,p_y=player.x,player.y
- if (p_x-cam_x>15-cam_offset and (room or cam_x<width-16)) x=p_x-15+cam_offset
+ if (p_x-cam_x>15-cam_offset and (room or cam_x<87)) x=p_x-15+cam_offset
  if (p_x-cam_x<cam_offset and cam_x>cam_x_min) x=p_x-cam_offset
- if (p_y-cam_y>13-cam_offset and cam_y<height-14) y=p_y-13+cam_offset
+ if (p_y-cam_y>13-cam_offset and cam_y<50) y=p_y-13+cam_offset
  if (p_y-cam_y<cam_offset and cam_y>cam_y_min) y=p_y-cam_offset
  if (room==nil and cam_x<cam_x_min)x=cam_x_min
  if (room==nil and cam_y<cam_y_min)y=cam_y_min
@@ -754,7 +735,7 @@ function cast_spell(i,e)
  msg.add("casted "..spells[i])
  status=statuses[i]
  e:add_status(status)
- if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do del(player.followers,e) break end
+ if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do e:clear_status(status_charmed) break end
 end
 
 
@@ -767,7 +748,7 @@ function set_look()
  tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,possession=nil})
  sel_look.entity=nil
  local e=entity.entity_at(sel_look.x,sel_look.y)
- if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and e or nil
+ if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil
  if(e) then
   e:look_at(sel_look)
   if(sel_look.spell>0)sel_look.usable=true

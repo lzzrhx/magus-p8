@@ -80,6 +80,7 @@ entity=drawable:inherit({
 
  -- (static) get entity at coordinate
  entity_at=function(x,y)
+  for e in all(entity.entities) do if (e.class==item.class and e.x==x and e.y==y) return e end
   for e in all(entity.entities) do if (e.class==enemy.class and e.x==x and e.y==y and not e:check_status(status_charmed) and not e.dead) return e end
   for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
   return nil
@@ -87,13 +88,13 @@ entity=drawable:inherit({
 
  -- (static) spawn entity on map
  entity_spawn=function(sprite,x,y)
-  mset(x,y,sprite_empty)
+  mset(x,y,1)
   local tbl={x=x,y=y,sprite=sprite}
   local e_data=data_entities[sprite]
   if e_data then
    if e_data.class==player.class then
     tbl_merge(player,tbl)
-    local companion_sprite=(rnd()>0.5 and sprite_companion_cat) or sprite_companion_dog
+    local companion_sprite=(rnd()>0.5 and 17) or 18
     tbl_merge(companion,tbl_merge_new({x=x,y=y,sprite=companion_sprite},data_entities[companion_sprite]))
    else
     tbl_merge(tbl,e_data)
@@ -136,7 +137,7 @@ entity=drawable:inherit({
 
  -- look at entity
  look_at=function(self,tbl)
-   tbl_merge(tbl,{entity=self,name=self:get_name(),color=6,text=self.interact_text,usable=self.interactable and dist(player,self)<=1})
+   tbl_merge(tbl,{entity=self,name=self:get_name(),color=6,text=self.interact_text,usable=self.interactable and in_reach(player,self)})
  end,
 
  -- interact with entity
@@ -161,7 +162,7 @@ creature=entity:inherit({
  -- static vars
  class="creature",
  parent_class=entity.class,
- anims={move={frames=4,dist=8},attack={frames=5,dist=6}},
+ anims={move=split"4,8",attack=split"5,6"},
  anim_queue={},
  anim_playing=false,
 
@@ -209,14 +210,14 @@ creature=entity:inherit({
    local sprite=self.sprite+frame*16
    local x,y=self:screen_pos().x,self:screen_pos().y
    if self.anim_frame<=0 then
-    if self.dead then sprite=frame==1 and turn-self.dhp_turn<=1 and self.blink_delay<=0 and not creature.anim_playing and sprite_void or sprite_grave
+    if self.dead then sprite=frame==1 and turn-self.dhp_turn<=1 and self.blink_delay<=0 and not creature.anim_playing and 0 or 3
     elseif self.attacked and frame==1 and self.blink_delay<=0 and not creature.anim_playing then
-     sprite=sprite_void
+     sprite=0
      if(state==state_game)print(abs(self.dhp),x+4-str_width(abs(self.dhp))*0.5,y+1,self.dhp<0 and 8 or 11)
     end
    end
    entity.draw(self,offset,self:screen_pos(),sprite)
-   if(sprite~=sprite_void and sprite~=sprite_grave) then
+   if(sprite~=0 and sprite~=3) then
      local pos={x=x,y=y}
      if(self:check_status(status_charmed))vec2_spr(55,pos) pos.x+=6
      if(self:check_status(status_sleeping))vec2_spr(54,pos) pos.x+=4
@@ -237,7 +238,7 @@ creature=entity:inherit({
  look_at=function(self,tbl)
   if not self.dead then
    entity.look_at(self,tbl)
-   tbl.color=self.class==enemy.class and 2 or 3
+   tbl.color=self.class==enemy.class and not self:check_status(status_charmed) and 2 or 3
    return true
   end
   return false
@@ -265,24 +266,24 @@ creature=entity:inherit({
 
  -- start playing animation
  play_anim=function(self,a,x,y,x1,y1)
-  tbl_merge(self,{anim=a,anim_frame=a.frames,anim_x=x*a.dist,anim_y=y*a.dist,anim_x1=(x1 or 0)*a.dist,anim_y1=(y1 or 0)*a.dist})
+  tbl_merge(self,{anim=a,anim_frame=a[1],anim_x=x*a[2],anim_y=y*a[2],anim_x1=(x1 or 0)*a[2],anim_y1=(y1 or 0)*a[2]})
   add(creature.anim_queue,self)
   creature.anim_playing=true
  end,
 
  -- perform animation step
  anim_step=function(self)
-  local anim_pos=smoothstep(self.anim_frame/self.anim.frames)
+  local anim_pos=smoothstep(self.anim_frame/self.anim[1])
   local x,y=self.anim_x,self.anim_y
   if self.anim==creature.anims.attack then
    x,y=self.anim_x1,self.anim_y1
    if self.target then
-    if(self.anim_frame==self.anim.frames and self.target==player)flash_frame=2
-    if(self.anim_frame==self.anim.frames-3)self.target.flash_frame=2
+    if(self.anim_frame==self.anim[1] and self.target==player)flash_frame=2
+    if(self.anim_frame==self.anim[1]-3)self.target.flash_frame=2
    end
   end
-  self.anim_x=self.anim.dist*anim_pos*((x<-0.1 and -1) or (x>0.1 and 1) or 0)
-  self.anim_y=self.anim.dist*anim_pos*((y<-0.1 and -1) or (y>0.1 and 1) or 0)
+  self.anim_x=self.anim[2]*anim_pos*((x<-0.1 and -1) or (x>0.1 and 1) or 0)
+  self.anim_y=self.anim[2]*anim_pos*((y<-0.1 and -1) or (y>0.1 and 1) or 0)
   self.anim_frame-=1
   if self.anim_frame<=0 then
    del(creature.anim_queue,self)
@@ -339,13 +340,13 @@ creature=entity:inherit({
   self.status_timer[status]=status==status_poisoned and timer_effect_poison or timer_effect
   if(status==status_scared)self:clear_status(status_charmed | status_sleeping)
   if(status==status_charmed or status==status_sleeping)self:clear_status(status_scared)
-  if(status==status_charmed)self.collision=false add(player.followers,self)
+  if(status==status_charmed)self.collision=false self.interactable=false add(player.followers,self)
   self.status=self.status | status
  end,
 
  clear_status=function(self,status)
   self.status=self.status & ~status
-  if(status==status_charmed)self.collision=true del(player.followers,self)
+  if(status==status_charmed)self.collision=true self.interactable=true del(player.followers,self)
  end,
 
  check_status=function(self,status)
@@ -386,6 +387,7 @@ player=creature:new({
  class="player",
  parent_class=creature.class,
  interactable=false,
+ collision=false,
  name="you",
 
  -- vars
@@ -490,7 +492,7 @@ enemy = creature:inherit({
 
  -- look at enemy
  look_at=function(self,tbl)
-  if(creature.look_at(self,tbl))tbl.text="attack"
+  if(creature.look_at(self,tbl) and not self:check_status(status_charmed))tbl.text="attack"
  end,
 
  -- attack enemy
@@ -548,7 +550,7 @@ door=entity:inherit({
  -- interact action
  interact=function(self)
   self.collision=not self.collision
-  self.sprite=self.collision and sprite_door_closed or sprite_door_open
+  self.sprite=self.collision and 82 or 81
   if self.lock>0 then
    self.lock=0
    self.pal_swap_enable=false
@@ -574,15 +576,15 @@ stairs=entity:inherit({
  -- trigger action
  trigger=function(self)
   local stair=nil
-  for e in all(data_floors.stairs) do if(e.x==player.x and e.y==player.y) stair=e break end
-  local target_stair=data_floors.stairs[stair.target]
-  local delta_z=(room and room.z) or 0
-  room=data_floors.rooms[target_stair.room]
-  delta_z=((room and room.z) or 0) - delta_z
-  cam_x_min,cam_y_min=(room and target_stair.x-player.x) or 0,(room and target_stair.y-player.y) or 0
-  cam_x_diff,cam_y_diff=target_stair.x-stair.x,target_stair.y-stair.y
-  player.x,player.y=target_stair.x,target_stair.y
-  cam_x,cam_y=cam_x+target_stair.x-stair.x,cam_y+target_stair.y-stair.y
+  for e in all(data_floors.stairs) do if(e[1]==player.x and e[2]==player.y) stair=e break end
+  local target_stair=data_floors.stairs[stair[4]]
+  local prev_z=(room and room[1]) or 0
+  room=data_floors.rooms[target_stair[3]]
+  local delta_z=((room and room[1]) or 0) - prev_z
+  cam_x_min,cam_y_min=(room and target_stair[1]-player.x) or 0,(room and target_stair[2]-player.y) or 0
+  cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
+  player.x,player.y=target_stair[1],target_stair[2]
+  cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
   msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
   draw.play_fade(change_room,room)
  end,
@@ -657,7 +659,7 @@ chest=entity:inherit({
  -- interact action
  interact = function(self)
   self.open=true
-  self.sprite=sprite_chest_open
+  self.sprite=12
   self.anim_frame=45
   self.anim_this=true
   chest.anim_playing=true
@@ -688,7 +690,7 @@ chest=entity:inherit({
    if(self.anim_frame>=30 or (self.anim_frame>10 and blink)) then
     y-=(45-self.anim_frame)*0.25
     clip(x,y,8,5)
-    self:spr(x,y,sprite_chest_closed)
+    self:spr(x,y,11)
     clip()
    end
   end
@@ -761,7 +763,7 @@ key=possession:inherit({
  class="key",
  parent_class=possession.class,
  interactable=false,
- colors={{"steel",6,13},{"gold",10,9},{"green",11,3},},
+ colors={split"steel,6,13",split"gold,10,9",split"green,11,3",},
 
  -- lookup key data for a given map coordinate
  get_data=function(tbl)
@@ -790,7 +792,7 @@ consumable=possession:inherit({
  -- interact with consumable
  interact=function(self)
   msg.add("consumed "..self.name)
-  if(self.status)player:add_status(self.status)
+  --if(self.status)player:add_status(self.status)
   if(self.dhp) then player:take_dmg(-self.dhp) end
  end,
 })

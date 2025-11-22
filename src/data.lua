@@ -7,12 +7,12 @@ data_entities={
  [19]={class="npc",name="balthasar"},
  [20]={class="npc",name="dardanius"},
  [24]={class="enemy",name="slime",xp=1,max_hp=2,ap=1},
- [25]={class="enemy",name="hobgoblin",xp=3,max_hp=4,ap=3},
+ [25]={class="enemy",name="hobgoblin",xp=3,max_hp=8,ap=3},
  [28]={class="enemy",name="bat",xp=2,max_hp=4,ap=2},
- [27]={class="enemy",name="ghoul",xp=5,max_hp=5,ap=6},
+ [27]={class="enemy",name="ghoul",xp=5,max_hp=8,ap=6},
  [26]={class="enemy",name="skully",xp=4,max_hp=6,ap=4},
- [29]={class="enemy",name="vampire",xp=7,max_hp=10,ap=8},
- [30]={class="enemy",name="demon",xp=9,max_hp=8,ap=20},
+ [29]={class="enemy",name="vampire",xp=7,max_hp=14,ap=8},
+ [30]={class="enemy",name="demon",xp=9,max_hp=16,ap=14},
  [5]={class="stairs"},
  [6]={class="stairs"},
  [7]={class="stairs"},
@@ -20,13 +20,14 @@ data_entities={
  [3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
  [4]={class="sign"},
  [11]={class="chest"},
+ [13]={class="item",item_class="consumable",name="tome",item_data={}},
  [82]={class="door"},
  [81]={class="door",collision=false},
  [9]={class="door",lock=1},
  [10]={class="item",item_class="key",item_data={lock=1}},
  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
- [49]={class="item",item_class="consumable",name="green potion",item_data={status=4}},
- [50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
+ --[49]={class="item",item_class="consumable",name="green potion",item_data={status=4}},
+ --[50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
 }
 
 
@@ -35,38 +36,40 @@ data_entities={
 -------------------------------------------------------------------------------
 data_floors={
  rooms={
-  [1]={z=1,x0=103,y0=0,x1=108,y1=6},
-  [2]={z=1,x0=103,y0=7,x1=111,y1=23},
-  [3]={z=-1,x0=112,y0=7,x1=127,y1=23},
-  [4]={z=-1,x0=109,y0=0,x1=127,y1=6},
-  [5]={z=1,x0=103,y0=24,x1=127,y1=32},
-  [6]={z=-1,x0=108,y0=24,x1=127,y1=32},
-  [7]={z=1,x0=103,y0=33,x1=108,y1=37},
-  [8]={z=-1,x0=109,y0=33,x1=119,y1=37},
+  -- z,x0,y0,x1,y1
+  [1]=split"1,103,0,108,6",
+  [2]=split"1,103,7,111,23",
+  [3]=split"-1,112,7,127,23",
+  [4]=split"-1,109,0,127,6",
+  [5]=split"1,103,24,127,32",
+  [6]=split"-1,108,24,127,32",
+  [7]=split"1,103,33,108,37",
+  [8]=split"-1,109,33,119,37",
  },
  stairs={
-  [1]={x=5,y=51,room=nil,target=2},
-  [2]={x=104,y=1,room=1,target=1},
-  [3]={x=94,y=47,room=nil,target=4},
-  [4]={x=104,y=8,room=2,target=3},
-  [5]={x=94,y=61,room=nil,target=6},
-  [6]={x=104,y=22,room=2,target=5},
-  [7]={x=100,y=57,room=nil,target=8},
-  [8]={x=113,y=8,room=3,target=7},
-  [9]={x=34,y=38,room=nil,target=10},
-  [10]={x=110,y=3,room=4,target=9},
-  [11]={x=32,y=22,room=nil,target=12},
-  [12]={x=104,y=26,room=5,target=11},
-  [13]={x=32,y=26,room=nil,target=14},
-  [14]={x=104,y=30,room=5,target=13},
-  [15]={x=34,y=26,room=nil,target=16},
-  [16]={x=125,y=25,room=6,target=15},
-  [17]={x=20,y=32,room=nil,target=18},
-  [18]={x=109,y=31,room=6,target=17},
-  [19]={x=58,y=47,room=nil,target=20},
-  [20]={x=104,y=34,room=7,target=19},
-  [21]={x=61,y=47,room=nil,target=22},
-  [22]={x=117,y=36,room=8,target=21},
+  -- x,y,room,target
+  [1]=split"5,51,nil,2",
+  [2]=split"104,1,1,1",
+  [3]=split"94,47,nil,4",
+  [4]=split"104,8,2,3",
+  [5]=split"94,61,nil,6",
+  [6]=split"104,22,2,5",
+  [7]=split"100,57,nil,8",
+  [8]=split"113,8,3,7",
+  [9]=split"34,38,nil,10",
+  [10]=split"110,3,4,9",
+  [11]=split"32,22,nil,12",
+  [12]=split"104,26,5,11",
+  [13]=split"32,26,nil,14",
+  [14]=split"104,30,5,13",
+  [15]=split"34,26,nil,16",
+  [16]=split"125,25,6,15",
+  [17]=split"20,32,nil,18",
+  [18]=split"109,31,6,17",
+  [19]=split"58,47,nil,20",
+  [20]=split"104,34,7,19",
+  [21]=split"61,47,nil,22",
+  [22]=split"117,36,8,21",
  },
 }
 
@@ -76,12 +79,17 @@ data_floors={
 -------------------------------------------------------------------------------
 data_locks = {
  doors={
-  {x=98,y=52,lock=1},
-  {x=52,y=35,lock=2},
-  {x=33,y=20,lock=2},
+  {x=111,y=35,lock=1},
+  {x=99,y=52,lock=2},
+  {x=52,y=35,lock=3},
+  {x=33,y=20,lock=3},
+  --{x=?,y=?,lock=1},
  },
  keys={
+  {x=112,y=34,lock=2},
   {x=83,y=46,lock=1},
+  --{x=?,y=?,lock=3},
+  --{x=?,y=?,lock=3},
  },
 }
 
@@ -90,7 +98,8 @@ data_locks = {
 -- chests
 -------------------------------------------------------------------------------
 data_chests = {
- {x=104,y=4,content={{sprite=48},{sprite=49},{sprite=50},{sprite=10,item_data={lock=1}},{sprite=10,item_data={lock=2}},{sprite=10,item_data={lock=3}}}},
+ {x=125,y=2,content={{sprite=48},{sprite=10,item_data={lock=1}},{sprite=13}}},
+ {x=118,y=22,content={{sprite=48},{sprite=10,item_data={lock=3}},{sprite=13}}},
 }
 
 
