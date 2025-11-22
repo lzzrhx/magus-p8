@@ -3,16 +3,16 @@
 -------------------------------------------------------------------------------
 -- spells
 -- xp and level up
--- graphics for status effects
--- equippable items
 -- traps
--- ranged combat
+-- graphics for status effects
+-- add sound
+-- add music
 -- make more sprites:
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
--- add sound
--- add music
+-- equippable items
+-- ranged combat
 
 -------------------------------------------------------------------------------
 -- things to plan

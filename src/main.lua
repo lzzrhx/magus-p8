@@ -57,7 +57,7 @@ blink_frame=0 -- frame for fast blink animations (updates 30 times per second)
 blink=false
 flash_frame=0
 fade_frame=0
-fade_chars={"░","▒"}
+fade_chars=split"░,▒"
 fade_action=nil
 pal_lock=false -- lock palette setting
 cam_x=0 -- camera x position
@@ -68,7 +68,7 @@ cam_y_min=0
 cam_x_diff=0
 cam_y_diff=0
 title_effect_num=96
-title_effect_colors={8,9,10,11,12,13,14,15}
+title_effect_colors=split"8,9,10,11,12,13,14,15"
 title_text=split(data_story_intro,"\n")
 spells=split"beguile,terrify,sleep,teleport"
 
@@ -658,6 +658,25 @@ end
 -- transform position to screen position
 function pos_to_screen(pos)
  return {x=8*(pos.x-cam_x),y=8*(pos.y-cam_y)}
+end
+
+-- change palette (if not locked)
+function pal_set(param,lock)
+ if(not pal_lock) then
+  pal_lock=lock or false
+  pal(param)
+ end
+end
+
+-- change all colors (except black)
+function pal_all(c,lock)
+ pal_set({0,c,c,c,c,c,c,c,c,c,c,c,c,c,c},lock or false)
+end
+
+-- unlock and reset palette
+function pal_unlock()
+ pal_lock=false
+ pal()
 end
 
 

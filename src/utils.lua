@@ -6,26 +6,26 @@ function dist(a,b)
  return max(abs(b.x-a.x),abs(b.y-a.y))
 end
 
--- calculate string width
+-- get string width (in pixels)
 function str_width(s)
  return print(s,0,-128)
 end
 
--- calculate string height
+-- get string height (in lines)
 function str_height(s)
  return tbl_len(split(s,"\n"))
 end
 
 -- copy a table
 function tbl_copy(a)
- tbl={}
+ local tbl={}
  for k,v in pairs(a) do tbl[k]=v end
  return tbl
 end
 
 -- merge table a and b into a new table
 function tbl_merge_new(a,b)
- tbl={}
+ local tbl={}
  for k,v in pairs(a) do tbl[k]=v end
  for k,v in pairs(b) do tbl[k]=v end
  return tbl
@@ -36,11 +36,11 @@ function tbl_merge(a,b)
  for k,v in pairs(b) do a[k]=v end return a
 end
 
--- check length of table
+-- get length of table
 function tbl_len(t)
- num=0
- for k,v in pairs(t) do num+=1 end
- return num
+ local n=0
+ for k,v in pairs(t) do n+=1 end
+ return n
 end
 
 -- cubic polynomial smoothstep
@@ -51,42 +51,6 @@ end
 -- linear interpolation
 function lerp(val,min,max)
  return (max-min)*val+min
-end
-
--- wavy value
-function wavy(i,h,s,o)
- return sin(t()*(s or 1.25)+(i or 1)*(o or 0.06))*(h or 3)
-end
-
--- wavy text
-function wavy_print(s,x,y,c0,c1,h)
- for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),true,true,c0,c1) end
-end
-
--- print with shadow
-function s_print(s,x,y,c1e,c0e,c0,c1)
- c0,c1=c0 or 6,c1 or 5
- if(c1e~=false)print(s,x,y+1,c1)
- if(c0e~=false)print(s,x,y,c0)
-end
-
--- change palette (if not locked)
-function pal_set(param,lock)
- if(not pal_lock) then
-  pal_lock=lock or false
-  pal(param)
- end
-end
-
--- change all colors (except black)
-function pal_all(c,lock)
- pal_set({0,c,c,c,c,c,c,c,c,c,c,c,c,c,c},lock or false)
-end
-
--- unlock and reset palette
-function pal_unlock()
- pal_lock=false
- pal()
 end
 
 -- add two 2d vectors
@@ -110,4 +74,21 @@ end
 -- toggle a boolean value
 function toggle_bool(b)
  _ENV[b]=not _ENV[b]
+end
+
+-- wavy value
+function wavy(i,h,s,o)
+ return sin(t()*(s or 1.25)+(i or 1)*(o or 0.06))*(h or 3)
+end
+
+-- wavy text
+function wavy_print(s,x,y,c0,c1,h)
+ for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),true,true,c0,c1) end
+end
+
+-- print with shadow
+function s_print(s,x,y,c1e,c0e,c0,c1)
+ local c0,c1=c0 or 6,c1 or 5
+ if(c1e~=false)print(s,x,y+1,c1)
+ if(c0e~=false)print(s,x,y,c0)
 end

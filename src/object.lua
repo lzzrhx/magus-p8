@@ -25,7 +25,7 @@ drawable=object:inherit({
  sprite=0,
  flipped=false,
  flash_frame=0,
- pal_swap={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
+ pal_swap=split"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
  pal_swap_enable=false,
 
  -- (static) get drawable data from entity data
