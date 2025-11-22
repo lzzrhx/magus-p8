@@ -1,16 +1,21 @@
+-- global
+global=_ENV
+
 -- object
 -------------------------------------------------------------------------------
-object={
+object=setmetatable({
  -- static vars
  class="object",
  parent_class=nil,
 
  -- metatable setup
- inherit=function(self,tbl)
-  return setmetatable(tbl or {},{__index=self})
+ inherit=function(_ENV,tbl)
+  local tbl=setmetatable(tbl or {},{__index=_ENV})
+  tbl["self"]=tbl
+  return tbl
  end,
 
-}
+},{__index=_ENV})
 
 
 
@@ -33,23 +38,23 @@ drawable=object:inherit({
   return {sprite=e.sprite or drawable.sprite, pal_swap=e.pal_swap or drawable.pal_swap, pal_swap_enable=e.pal_swap_enable or drawable.pal_swap_enable}
  end,
 
- vec2_spr=function(self,pos,sprite)
+ vec2_spr=function(_ENV,pos,sprite)
   local sprite=sprite or self.sprite
   self:spr(pos.x,pos.y,sprite)
  end,
 
  -- draw at given screen position
- spr=function(self,x,y,sprite,flipped)
+ spr=function(_ENV,x,y,sprite,flipped)
   local sprite=sprite or self.sprite
-  if self.flash_frame>0 then
-   self.flash_frame-=1
+  if flash_frame>0 then
+   flash_frame-=1
    pal_all(7)
-  elseif self.pal_swap_enable then
-   pal_set(self.pal_swap)
+  elseif pal_swap_enable then
+   pal_set(pal_swap)
   end
   palt(0,false)
   palt(15,true)
-  spr(sprite,x,y,1,1,self.flipped)
+  spr(sprite,x,y,1,1,flipped)
   pal_set()
  end,
 })
@@ -103,7 +108,7 @@ entity=drawable:inherit({
  end,
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   local tbl=self:inherit(tbl)
   entity.num=entity.num+1
   tbl["id"]=entity.num
@@ -113,15 +118,15 @@ entity=drawable:inherit({
  end,
 
  -- destructor
- destroy=function(self)
+ destroy=function(_ENV)
   del(entity.entities,self)
  end,
 
  -- update entity
- update=function(self) end,
+ update=function(_ENV) end,
 
  -- draw entity at world position (if in frame)
- draw=function(self,offset,pos,sprite)
+ draw=function(_ENV,offset,pos,sprite)
   if self:in_frame(offset) then
    self:vec2_spr(vec2_add((pos or pos_to_screen(self)),vec2_scale(offset or {x=0,y=0},8)),sprite)
    return true
@@ -130,23 +135,23 @@ entity=drawable:inherit({
  end,
 
  -- get name or class name of this entity
- get_name=function(self)
+ get_name=function(_ENV)
   return entity.entity_name(self)
  end,
 
  -- look at entity
- look_at=function(self,tbl)
-   tbl_merge(tbl,{entity=self,name=self:get_name(),color=6,text=self.interact_text,usable=self.interactable and dist(player,self)<=1})
+ look_at=function(_ENV,tbl)
+   tbl_merge(tbl,{entity=self,name=self:get_name(),color=6,text=interact_text,usable=interactable and dist(player,self)<=1})
  end,
 
  -- interact with entity
- interact=function(self) end,
+ interact=function(_ENV) end,
 
  -- perform turn actions
- do_turn=function(self) end,
+ do_turn=function(_ENV) end,
 
  -- check if entity is on screen
- in_frame=function(self,offset)
+ in_frame=function(_ENV,offset)
   local pos=vec2_add(self,offset or {x=0,y=0})
   return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+15)
  end,
@@ -187,31 +192,31 @@ creature=entity:inherit({
  ap=2,
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   local tbl=entity.new(self,tbl)
   tbl["hp"]=tbl.max_hp
   return tbl
  end,
 
  -- update creature
- update=function(self)
-  if self.anim_frame>0 then
+ update=function(_ENV)
+  if anim_frame>0 then
    for e in all(creature.anim_queue) do
     if(e==self)self:anim_step()
     if(e.anim==creature.anims.attack)break
    end
-  elseif(prev_frame~=frame and self.blink_delay>0) then self.blink_delay-=1 end
+  elseif(prev_frame~=frame and blink_delay>0) then blink_delay-=1 end
  end,
 
  -- draw creature
- draw=function(self,offset)
+ draw=function(_ENV,offset)
   if self:in_frame(offset) then
-   sprite=self.sprite+frame*16
-   if self.anim_frame<=0 then
-    if self.dead then sprite=frame==1 and turn-self.dhp_turn<=1 and self.blink_delay<=0 and not creature.anim_playing and sprite_void or sprite_grave
-    elseif self.attacked and frame==1 and self.blink_delay<=0 and not creature.anim_playing then
+   local sprite=self.sprite+frame*16
+   if anim_frame<=0 then
+    if dead then sprite=frame==1 and turn-dhp_turn<=1 and blink_delay<=0 and not creature.anim_playing and sprite_void or sprite_grave
+    elseif attacked and frame==1 and blink_delay<=0 and not creature.anim_playing then
      sprite=sprite_void
-     if(state==state_game)print(abs(self.dhp),self:screen_pos().x+4-str_width(abs(self.dhp))*0.5,self:screen_pos().y+1,self.dhp<0 and 8 or 11)
+     if(state==state_game)print(abs(dhp),self:screen_pos().x+4-str_width(abs(dhp))*0.5,self:screen_pos().y+1,dhp<0 and 8 or 11)
     end
    end
    entity.draw(self,offset,self:screen_pos(),sprite)
@@ -221,25 +226,25 @@ creature=entity:inherit({
  end,
 
  -- position on screen (position and animation position summed)
- screen_pos=function(self)
-  return vec2_add(pos_to_screen(self),{x=self.anim_x,y=self.anim_y})
+ screen_pos=function(_ENV)
+  return vec2_add(pos_to_screen(self),{x=anim_x,y=anim_y})
  end,
 
  -- look at creature
- look_at=function(self,tbl)
-  if not self.dead then
+ look_at=function(_ENV,tbl)
+  if not dead then
    entity.look_at(self,tbl)
-   tbl.color=self.hostile and 2 or 3
+   tbl.color=hostile and 2 or 3
    return true
   end
   return false
  end,
 
  -- perform turn actions
- do_turn=function(self)
-  if(turn>self.dhp_turn)self.attacked=false
-  if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
-  if(self.target and (self.target.dead or turn-self.target_turn>timer_target))self.target=nil
+ do_turn=function(_ENV)
+  if(turn>dhp_turn)attacked=false
+  if(dead and turn-dhp_turn>timer_corpse)self:destroy()
+  if(target and (target.dead or turn-target_turn>timer_target))self.target=nil
   -- poisoned status
   if self.status & status_poisoned==status_poisoned then
    msg.add(self:get_name().." took poison damage")
@@ -377,7 +382,7 @@ player=creature:new({
  end,
 
  -- move the player or attack if there is an enemy in the target tile
- action_dir=function(self,x,y)
+ action_dir=function(_ENV,x,y)
   local valid=self:move(x,y)
   for e in all(entity.entities) do
    if e.x==x and e.y==y do
@@ -409,17 +414,17 @@ companion=creature:new({
  ap=1,
 
   -- interact action
- interact=function(self)
+ interact=function(_ENV)
   msg.add("you petted the "..self:get_name())
   change_state(state_game)
  end,
 
  -- perform turn actions
- do_turn=function(self)
+ do_turn=function(_ENV)
   if creature.do_turn(self) then
    self:assist_player()
   elseif not self:in_frame() then
-   self.x,self.y=player.prev_x,player.prev_y
+   x,y=player.prev_x,player.prev_y
   end
  end,
 })
@@ -435,8 +440,8 @@ npc=creature:inherit({
  interact_text="talk",
 
   -- interact action
- interact=function(self)
-  local sel={entity=self,text=split(data_dialogue[self.sprite],"\n"),anim_frame={},pos=1}
+ interact=function(_ENV)
+  local sel={entity=self,text=split(data_dialogue[sprite],"\n"),anim_frame={},pos=1}
   for line in all(sel.text) do add(sel.anim_frame,timer_dialog_line+#line*4) end
   change_state(state_dialogue,sel)
  end,
@@ -459,22 +464,22 @@ enemy = creature:inherit({
  xp=1,
 
  -- look at enemy
- look_at=function(self,tbl)
+ look_at=function(_ENV,tbl)
   if(creature.look_at(self,tbl))tbl.text="attack"
  end,
 
  -- attack enemy
- interact=function(self)
+ interact=function(_ENV)
   change_state(state_game)
   player:attack(self)
   do_turn()
  end,
 
  -- perform turn actions
- do_turn=function(self)
+ do_turn=function(_ENV)
   if creature.do_turn(self) then
-   if self.status & status_charmed==status_charmed then self:assist_player()
-   elseif self.status & status_scared==status_scared then self:move_towards(player,true)
+   if status & status_charmed==status_charmed then self:assist_player()
+   elseif status & status_scared==status_scared then self:move_towards(player,true)
    else self:move_towards_and_attack(player) end
   end
  end,
@@ -493,7 +498,7 @@ door=entity:inherit({
  lock=0,
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   if tbl.lock and tbl.lock>0 then
    for d in all(data_locks.doors) do if d.x==tbl.x and d.y==tbl.y then tbl.lock=d.lock or 1 break end end
    key.set_variant(tbl,tbl.lock)
@@ -502,10 +507,10 @@ door=entity:inherit({
  end,
 
  -- look at door
- look_at=function(self,tbl)
+ look_at=function(_ENV,tbl)
   entity.look_at(self,tbl)
-  if self.lock==0 then 
-   tbl.text=self.collision and "open" or "close"
+  if lock==0 then 
+   tbl.text=collision and "open" or "close"
   else
    tbl.text,tbl.name="unlock","locked "..tbl.name
    if tbl.usable then
@@ -516,15 +521,15 @@ door=entity:inherit({
  end,
 
  -- interact action
- interact=function(self)
-  self.collision=not self.collision
-  self.sprite=self.collision and sprite_door_closed or sprite_door_open
-  if self.lock>0 then
-   self.lock=0
-   self.pal_swap_enable=false
+ interact=function(_ENV)
+  collision=not collision
+  sprite=collision and sprite_door_closed or sprite_door_open
+  if lock>0 then
+   lock=0
+   pal_swap_enable=false
    msg.add("unlocked door")
   else
-   msg.add((self.collision and "closed" or "opened").." door")
+   msg.add((collision and "closed" or "opened").." door")
   end
   change_state(state_game)
  end,
@@ -542,7 +547,7 @@ stairs=entity:inherit({
  collision=false,
 
  -- trigger action
- trigger=function(self)
+ trigger=function(_ENV)
   local stair=nil
   for e in all(data_floors.stairs) do if(e.x==player.x and e.y==player.y) stair=e break end
   local target_stair=data_floors.stairs[stair.target]
@@ -574,13 +579,13 @@ sign=entity:inherit({
  fg=0,
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   for d in all(data_signs) do if d.x==tbl.x and d.y==tbl.y then tbl.message=d.message break end end
   return entity.new(self,tbl)
  end,
 
  -- interact action
- interact=function(self)
+ interact=function(_ENV)
   change_state(state_read,self)
  end,
 })
@@ -603,7 +608,7 @@ chest=entity:inherit({
  content={},
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   for d in all(data_chests) do
    if d.x==tbl.x and d.y==tbl.y then
     tbl.content={}
@@ -619,20 +624,20 @@ chest=entity:inherit({
  end,
 
  -- look at chest
- look_at=function(self,tbl)
+ look_at=function(_ENV,tbl)
    entity.look_at(self,tbl)
-   tbl.usable=tbl.usable and not self.open
+   tbl.usable=tbl.usable and not open
  end,
 
  -- interact action
- interact = function(self)
-  self.open=true
-  self.sprite=sprite_chest_open
-  self.anim_frame=45
-  self.anim_this=true
+ interact = function(_ENV)
+  open=true
+  sprite=sprite_chest_open
+  anim_frame=45
+  anim_this=true
   chest.anim_playing=true
   local sel={entity=self,anim_frame={}}
-  for itm in all(self.content) do 
+  for itm in all(content) do 
    add(sel.anim_frame,60)
    inventory.add_possession(itm)
    msg.add("got "..itm.name)
@@ -641,22 +646,22 @@ chest=entity:inherit({
  end,
 
  -- perform animation step
- anim_step=function(self)
-  if(self.anim_frame>0)self.anim_frame-=1
+ anim_step=function(_ENV)
+  if(anim_frame>0)anim_frame-=1
  end,
 
  -- get content item animation position
- item_anim_pos=function(self, anim_pos, target)
+ item_anim_pos=function(_ENV, anim_pos, target)
   return {x=lerp(anim_pos+sin(anim_pos*-0.5)*0.75,pos_to_screen(self).x,target.x),y=lerp(anim_pos+cos(anim_pos*0.9+0.1)*0.3-0.3,pos_to_screen(self).y,target.y)} 
  end,
 
  -- draw chest
- draw=function(self,offset)
-  if entity.draw(self,offset) and (self.anim_this) then
+ draw=function(_ENV,offset)
+  if entity.draw(self,offset) and (anim_this) then
    x,y=pos_to_screen(self).x,pos_to_screen(self).y
    if(blink)rectfill(x+1,y+2,x+5,y+3,7)
-   if(self.anim_frame>=30 or (self.anim_frame>10 and blink)) then
-    y-=(45-self.anim_frame)*0.25
+   if(anim_frame>=30 or (anim_frame>10 and blink)) then
+    y-=(45-anim_frame)*0.25
     clip(x,y,8,5)
     self:spr(x,y,sprite_chest_closed)
     clip()
@@ -678,14 +683,14 @@ item = entity:inherit({
  interact_text="pick up",
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   tbl.item_data=tbl.item_data and tbl_copy(tbl.item_data) or {}
   if(tbl.item_class==key.class)key.get_data(tbl)
   return entity.new(self,tbl)
  end,
 
  -- interact action
- interact=function(self)
+ interact=function(_ENV)
   msg.add("picked up "..self:get_name())
   inventory.add_item(self)
   self:destroy()
@@ -709,7 +714,7 @@ possession=drawable:inherit({
  interactable=true,
 
  -- constructor
- new=function(self,tbl)
+ new=function(_ENV,tbl)
   tbl=self:inherit(tbl)
   possession.num=possession.num+1
   tbl["id"]=possession.num
@@ -758,9 +763,9 @@ consumable=possession:inherit({
  parent_class=possession.class,
 
  -- interact with consumable
- interact=function(self)
+ interact=function(_ENV)
   msg.add("consumed "..self.name)
-  if(self.status)player.status=player.status | self.status
-  if(self.dhp) then  player:take_dmg(-self.dhp) end
+  if(status)player.status=player.status | status
+  if(dhp) then player:take_dmg(-dhp) end
  end,
 })
