@@ -59,8 +59,8 @@ function wavy(i,h,s,o)
 end
 
 -- wavy text
-function wavy_print(s,x,y,c,h)
- for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),c) end
+function wavy_print(s,x,y,c0,c1,h)
+ for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),true,true,c0,c1) end
 end
 
 -- print with shadow

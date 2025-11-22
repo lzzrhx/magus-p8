@@ -475,7 +475,7 @@ draw={
  dead=function()
   draw.game()
   draw.monochrome()
-  wavy_print("g a m e   o v e r",26,61,true,true,8,1)
+  wavy_print("g a m e   o v e r",26,61,8,1)
   if(frame==0)s_print("restart ❎",44,85)
  end,
 }
