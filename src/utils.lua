@@ -37,9 +37,9 @@ function tbl_merge(a,b)
 end
 
 -- get length of table
-function tbl_len(t)
+function tbl_len(tbl)
  local n=0
- for k,v in pairs(t) do n+=1 end
+ for k,v in pairs(tbl) do n+=1 end
  return n
 end
 
@@ -83,7 +83,7 @@ end
 
 -- wavy text
 function wavy_print(s,x,y,c0,c1,h)
- for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i),true,true,c0,c1) end
+ for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i,h),true,true,c0,c1) end
 end
 
 -- print with shadow

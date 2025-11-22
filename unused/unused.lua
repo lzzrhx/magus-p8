@@ -46,6 +46,8 @@ if (k==1 or (title_text[k-1]=="" and v~="~ ⁙ ~")) do
   print("\014"..l,64-(str_width(v)+l_w)*0.5,82+(k-1)*8,6)
 end]]--
 
+--if(sel_look.spell>0)for i=1,spell_dist*2 do for j=1,spell_dist*2 do rectfill(pos_to_screen(player).x+(i-1-spell_dist)*8,pos_to_screen(player).y+(j-1-spell_dist)*8,pos_to_screen(player).x+(i+1-spell_dist)*8,pos_to_screen(player).y+(j+1-spell_dist)*8,3) end end
+
 -- quit cart
 function quit()
   cls()

@@ -1,16 +1,14 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- spells
--- xp and level up
--- traps
--- graphics for status effects
 -- add sound
 -- add music
 -- make more sprites:
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
+-- xp and level up
+-- traps
 -- equippable items
 -- ranged combat
 

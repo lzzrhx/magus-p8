@@ -39,7 +39,7 @@ drawable=object:inherit({
  end,
 
  -- draw at given screen position
- spr=function(self,x,y,sprite,flipped)
+ spr=function(self,x,y,sprite,no_flip)
   local sprite=sprite or self.sprite
   if self.flash_frame>0 then
    self.flash_frame-=1
@@ -49,7 +49,7 @@ drawable=object:inherit({
   end
   palt(0,false)
   palt(15,true)
-  spr(sprite,x,y,1,1,self.flipped)
+  spr(sprite,x,y,1,1,no_flip and false or self.flipped)
   pal_set()
  end,
 })
@@ -80,7 +80,7 @@ entity=drawable:inherit({
 
  -- (static) get entity at coordinate
  entity_at=function(x,y)
-  for e in all(entity.entities) do if (e.class==enemy.class and e.x==x and e.y==y) return e end
+  for e in all(entity.entities) do if (e.class==enemy.class and e.x==x and e.y==y and not e:check_status(status_charmed) and not e.dead) return e end
   for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
   return nil
  end,
@@ -93,7 +93,7 @@ entity=drawable:inherit({
   if e_data then
    if e_data.class==player.class then
     tbl_merge(player,tbl)
-    companion_sprite=(rnd()>0.5 and sprite_companion_cat) or sprite_companion_dog
+    local companion_sprite=(rnd()>0.5 and sprite_companion_cat) or sprite_companion_dog
     tbl_merge(companion,tbl_merge_new({x=x,y=y,sprite=companion_sprite},data_entities[companion_sprite]))
    else
     tbl_merge(tbl,e_data)
@@ -167,7 +167,6 @@ creature=entity:inherit({
 
  -- vars
  dead=false,
- hostile=false,
  attacked=false,
  blink_delay=0,
  anim=nil,
@@ -181,6 +180,7 @@ creature=entity:inherit({
  target=nil,
  target_turn=0,
  status=0,
+ status_timer={},
 
  -- stats
  max_hp=10,
@@ -206,15 +206,23 @@ creature=entity:inherit({
  -- draw creature
  draw=function(self,offset)
   if self:in_frame(offset) then
-   sprite=self.sprite+frame*16
+   local sprite=self.sprite+frame*16
+   local x,y=self:screen_pos().x,self:screen_pos().y
    if self.anim_frame<=0 then
     if self.dead then sprite=frame==1 and turn-self.dhp_turn<=1 and self.blink_delay<=0 and not creature.anim_playing and sprite_void or sprite_grave
     elseif self.attacked and frame==1 and self.blink_delay<=0 and not creature.anim_playing then
      sprite=sprite_void
-     if(state==state_game)print(abs(self.dhp),self:screen_pos().x+4-str_width(abs(self.dhp))*0.5,self:screen_pos().y+1,self.dhp<0 and 8 or 11)
+     if(state==state_game)print(abs(self.dhp),x+4-str_width(abs(self.dhp))*0.5,y+1,self.dhp<0 and 8 or 11)
     end
    end
    entity.draw(self,offset,self:screen_pos(),sprite)
+   if(sprite~=sprite_void and sprite~=sprite_grave) then
+     local pos={x=x,y=y}
+     if(self:check_status(status_charmed))vec2_spr(55,pos) pos.x+=6
+     if(self:check_status(status_sleeping))vec2_spr(54,pos) pos.x+=4
+     if(self:check_status(status_scared))vec2_spr(56,pos) pos.x+=3
+     if(self:check_status(status_poisoned))vec2_spr(53,pos) pos.x+=4
+   end
    return true
   end
   return false
@@ -229,7 +237,7 @@ creature=entity:inherit({
  look_at=function(self,tbl)
   if not self.dead then
    entity.look_at(self,tbl)
-   tbl.color=self.hostile and 2 or 3
+   tbl.color=self.class==enemy.class and 2 or 3
    return true
   end
   return false
@@ -239,18 +247,20 @@ creature=entity:inherit({
  do_turn=function(self)
   if(turn>self.dhp_turn)self.attacked=false
   if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
-  if(self.target and (self.target.dead or turn-self.target_turn>timer_target))self.target=nil
+  if(self.target and (self.target.dead or turn>self.target_turn+timer_target or self.target:check_status(status_charmed)))self.target=nil
   -- poisoned status
-  if self.status & status_poisoned==status_poisoned then
-   msg.add(self:get_name().." took poison damage")
+  if self:check_status(status_poisoned) then
+   if(self==player)msg.add(self:get_name().." took poison damage")
    self:take_dmg(flr(2*(0.5+rnd())+0.5))
   end
-  -- sleeping status
-  if self.status & status_sleeping==status_sleeping then
-   msg.add(self:get_name().." is sleeping")
-   return false
+  for i=2,4 do
+   local status=statuses[i]
+   if(self:check_status(status)) then
+    if(self.status_timer[status]<=0)self:clear_status(status)
+    self.status_timer[status]-=1
+   end
   end
-  return not self.dead and self:in_frame()
+  return not self.dead and self:in_frame() and not self:check_status(status_sleeping)
  end,
 
  -- start playing animation
@@ -262,8 +272,8 @@ creature=entity:inherit({
 
  -- perform animation step
  anim_step=function(self)
-  anim_pos=smoothstep(self.anim_frame/self.anim.frames)
-  x,y=self.anim_x,self.anim_y
+  local anim_pos=smoothstep(self.anim_frame/self.anim.frames)
+  local x,y=self.anim_x,self.anim_y
   if self.anim==creature.anims.attack then
    x,y=self.anim_x1,self.anim_y1
    if self.target then
@@ -308,7 +318,7 @@ creature=entity:inherit({
  move_towards=function(self,other,reverse)
   local diff_x,diff_y=reverse and self.x-other.x or other.x-self.x,reverse and self.y-other.y or other.y-self.y
   local desire_x, desire_y=(diff_x>0 and 1) or (diff_x<0 and -1) or 0,(diff_y>0 and 1) or (diff_y<0 and -1) or 0
-  valid=abs(diff_x)<abs(diff_y) and self:move(self.x,self.y+desire_y) or (self:move(self.x+desire_x,self.y) or self:move(self.x,self.y+desire_y))
+  return abs(diff_x)<abs(diff_y) and self:move(self.x,self.y+desire_y) or (self:move(self.x+desire_x,self.y) or self:move(self.x,self.y+desire_y))
  end,
 
  -- perform attack
@@ -316,18 +326,36 @@ creature=entity:inherit({
   msg.add(self:get_name().." attacked "..other:get_name())
   if other:take_dmg(flr(self.ap*(0.5+rnd())+0.5)) then
    msg.add(self:get_name().." killed "..other:get_name())
-   if(self==player or self==companion)player.xp+=other.xp
+   if(other~=player)player.xp+=other.xp
   else 
+   other.target=self
    self.target=other
-   self.target_turn=turn
+   self.target_turn,other.target_turn=turn,turn
   end
   self:play_anim(creature.anims.attack,0,0,other.x-self.x,other.y-self.y)
  end,
 
+ add_status=function(self,status)
+  self.status_timer[status]=status==status_poisoned and timer_effect_poison or timer_effect
+  if(status==status_scared)self:clear_status(status_charmed | status_sleeping)
+  if(status==status_charmed or status==status_sleeping)self:clear_status(status_scared)
+  if(status==status_charmed)self.collision=false add(player.followers,self)
+  self.status=self.status | status
+ end,
+
+ clear_status=function(self,status)
+  self.status=self.status & ~status
+  if(status==status_charmed)self.collision=true del(player.followers,self)
+ end,
+
+ check_status=function(self,status)
+   return self.status & status==status
+ end,
+
  -- take damage
  take_dmg=function(self,dmg)
-  self.status=self.status & ~status_sleeping
-  if(dmg<0)self.status=self.status & ~status_poisoned
+  self:clear_status(status_sleeping)
+  if(dmg<0)self:clear_status(status_poisoned)
   self.blink_delay=(frame==0 and 2) or 1
   self.attacked=true
   self.dhp=(self.dhp_turn==turn and self.dhp-dmg) or dmg*-1
@@ -344,16 +372,8 @@ creature=entity:inherit({
  kill=function(self)
   self.dead=true
   self.collision=false
+  del(player.followers,self)
   if(self==player)change_state(state_dead)
- end,
-
- -- assist player
- assist_player=function(self)
-  if player.target and player.target_turn<turn then
-   self:move_towards_and_attack(player.target)
-  else
-   self:follow(player)
-  end
  end,
 })
 
@@ -371,6 +391,7 @@ player=creature:new({
  -- vars
  xp=0,
  max_hp=20,
+ followers={},
 
  -- look at player
  look_at=function(self,tbl)
@@ -381,7 +402,7 @@ player=creature:new({
   local valid=self:move(x,y)
   for e in all(entity.entities) do
    if e.x==x and e.y==y do
-    if e.class==enemy.class and e.hostile and not e.dead then
+    if e.class==enemy.class and not(e:check_status(status_charmed)) and not e.dead then
      self:attack(e)
      valid=true
     elseif e.class==stairs.class then
@@ -417,7 +438,17 @@ companion=creature:new({
  -- perform turn actions
  do_turn=function(self)
   if creature.do_turn(self) then
-   self:assist_player()
+    if player.target then
+     self:move_towards_and_attack(player.target)
+    else
+     local target=player
+     local prev=companion
+     for e in all(player.followers) do
+       if(e==self)target=prev
+       prev=e
+     end
+     self:follow(target)
+    end
   elseif not self:in_frame() then
    self.x,self.y=player.prev_x,player.prev_y
   end
@@ -453,7 +484,6 @@ enemy = creature:inherit({
  interactable=true,
 
  -- vars
- hostile=true,
  ap=1,
  max_hp=5,
  xp=1,
@@ -472,9 +502,9 @@ enemy = creature:inherit({
 
  -- perform turn actions
  do_turn=function(self)
-  if creature.do_turn(self) then
-   if self.status & status_charmed==status_charmed then self:assist_player()
-   elseif self.status & status_scared==status_scared then self:move_towards(player,true)
+  if self.status & status_charmed==status_charmed then companion.do_turn(self)
+  elseif creature.do_turn(self) then
+   if self.status & status_scared==status_scared then self:move_towards(player,true)
    else self:move_towards_and_attack(player) end
   end
  end,
@@ -510,7 +540,7 @@ door=entity:inherit({
    tbl.text,tbl.name="unlock","locked "..tbl.name
    if tbl.usable then
     tbl.usable=false
-    for itm in all(inventory.items) do if itm.class==key.class and itm.lock==e.lock then tbl_merge(tbl,{usable=true,possession=itm}) break end end
+    for itm in all(inventory.items) do if itm.class==key.class and itm.lock==self.lock then tbl_merge(tbl,{usable=true,possession=itm}) break end end
    end
   end
  end,
@@ -653,7 +683,7 @@ chest=entity:inherit({
  -- draw chest
  draw=function(self,offset)
   if entity.draw(self,offset) and (self.anim_this) then
-   x,y=pos_to_screen(self).x,pos_to_screen(self).y
+   local x,y=pos_to_screen(self).x,pos_to_screen(self).y
    if(blink)rectfill(x+1,y+2,x+5,y+3,7)
    if(self.anim_frame>=30 or (self.anim_frame>10 and blink)) then
     y-=(45-self.anim_frame)*0.25
@@ -760,7 +790,7 @@ consumable=possession:inherit({
  -- interact with consumable
  interact=function(self)
   msg.add("consumed "..self.name)
-  if(self.status)player.status=player.status | self.status
+  if(self.status)player:add_status(self.status)
   if(self.dhp) then player:take_dmg(-self.dhp) end
  end,
 })

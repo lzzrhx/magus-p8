@@ -3,8 +3,12 @@
 
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
-timer_target=3 -- timeout for target (turns)
+timer_target=24 -- timeout for target (turns)
 timer_dialog_line=24 -- timeout for next line in dialogue (frames)
+timer_effect=16 -- effect timer for most status effects (turns)
+timer_effect_poison=6 -- effect timer for poison (turns)
+timer_spell=24 -- cooldown for casting spells (turns)
+timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 width=103 -- area width
 height=64 -- area height
 
@@ -32,10 +36,11 @@ sprite_companion_cat=17
 sprite_companion_dog=18
 
 -- status effects
-status_poisoned=0b0001
-status_sleeping=0b0010
-status_charmed=0b0100
-status_scared=0b1000
+status_charmed=0b0001
+status_scared=0b0010
+status_sleeping=0b0100
+status_poisoned=0b1000
+statuses=split"0b0001,0b0010,0b0100,0b1000"
 
 -- sprite flags
 flag_collision=0
@@ -70,7 +75,9 @@ cam_y_diff=0
 title_effect_num=96
 title_effect_colors=split"8,9,10,11,12,13,14,15"
 title_text=split(data_story_intro,"\n")
-spells=split"beguile,terrify,sleep,teleport"
+spells=split"befriend,scare,sleep,poison"
+spells_cd=split"0,0,0,0"
+max_followers=5
 
 
 
@@ -123,7 +130,7 @@ init={
 
  -- look state
  look=function(sel)
-  sel_look={spell=nil,x=player.x,y=player.y}
+  sel_look={spell=0,x=player.x,y=player.y}
   set_look()
  end,
 
@@ -255,9 +262,9 @@ draw={
   camera(0,title_pos)
   -- title effect
   for i=1,title_effect_num do
-   x=cos(t()/8+i/title_effect_num)*56
-   y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
-   c=title_effect_colors[i%#title_effect_colors+1]
+   local x=cos(t()/8+i/title_effect_num)*56
+   local y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
+   local c=title_effect_colors[i%#title_effect_colors+1]
    for j=1,3 do pset(62+x+j,50+y+j,c) end
   end
   -- main title
@@ -274,7 +281,7 @@ draw={
   camera(0,0)
   -- text fade effect
   for i=0,1 do for j=0,15 do
-   x=j*8+flr(rnd()+0.5)
+   local x=j*8+flr(rnd()+0.5)
    print("\014"..fade_chars[2],x,130*i-5,0)
    print("\014"..fade_chars[1],x,128*i-4,0)
   end end
@@ -340,14 +347,14 @@ draw={
   -- button legend
   local btns="cancel 🅾️  use ❎"
   print(btns,29,97,5)
-  clip(24,0,(sel_menu.tab==0 and 80) or (sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,128)
+  clip(24,0,(sel_menu.tab==0 and spells_cd[sel_menu.i]==0 and 80) or (sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,128)
   print(btns,29,96,6)
   clip()
   -- magic tab
   if sel_menu.tab==0 then
    print("⬅️ magick ➡️",40,23,0)
    print("▶",33,25+sel_menu.i*7,6)
-   for i=1,tbl_len(spells) do print(spells[i],38,25+i*7,sel_menu.i==i and 6 or 5) end
+   for i=1,tbl_len(spells) do print((spells_cd[i]>0 and "("..spells_cd[i]..") " or (i==1 and #player.followers>=max_followers and "(max) " or ""))..spells[i],38,25+i*7,sel_menu.i==i and 6 or 5) end
   -- inventory tab
   elseif sel_menu.tab==1 then
    print("⬅️ inventory ➡️",34,23,0)
@@ -375,7 +382,7 @@ draw={
   -- ui elements
   draw.window_frame()
   local btn_x=sel_look.text.." ❎"
-  s_print("target:",2,113,state==state_look)
+  s_print(sel_look.spell==0 and "target:" or "cast "..spells[sel_look.spell].." on:",2,113,state==state_look)
   s_print(sel_look.name,2,120,state==state_look,sel_look.entity~=nil,sel_look.color,sel_look.entity and sel_look.entity.parent_class==creature.class and 0 or 5)
   s_print("cancel 🅾️",90,113,state==state_look)
   s_print(btn_x,126-str_width(btn_x),120,state==state_look,sel_look.usable)
@@ -518,7 +525,11 @@ input={
   elseif btnp(4) then change_state(state_game)
   elseif sel_menu.tab==0 then
    if btnp(3) and sel_menu.i<tbl_len(spells) then sel_menu.i+=1
-   elseif btnp(5) then change_state(state_look) end
+   elseif btnp(5) and spells_cd[sel_menu.i]==0 then 
+    change_state(state_look)
+    sel_look.spell=sel_menu.i
+    set_look()
+   end
   elseif sel_menu.tab==1 then
    if btnp(3) and sel_menu.i<inventory.num then sel_menu.i+=1
    elseif btnp(5) and inventory.num>0 and inventory.items[sel_menu.i].interactable then
@@ -538,9 +549,15 @@ input={
   elseif btnp(4) then 
    change_state(state_game)
    return false
-  elseif btnp(5) and sel_look.usable then
+  elseif btnp(5) and sel_look.spell==0 and sel_look.usable then
    sel_look.entity:interact()
    inventory.remove(sel_look.possession)
+   return false
+  elseif btnp(5) and sel_look.spell>0 and sel_look.usable then
+   change_state(state_game)
+   cast_spell(sel_look.spell,sel_look.entity)
+   do_turn()
+   spells_cd[sel_look.spell]=sel_look.spell==1 and timer_spell_charm or timer_spell
    return false
   end
   return true
@@ -706,6 +723,7 @@ end
 
 -- perform turn
 function do_turn()
+ for i=1,tbl_len(spells) do spells_cd[i]=max(0,spells_cd[i]-1) end
  for e in all(entity.entities) do e:do_turn() end
  turn+=1
 end
@@ -731,6 +749,14 @@ function change_room(new_room)
  room=new_room
 end
 
+-- cast spell
+function cast_spell(i,e)
+ msg.add("casted "..spells[i])
+ status=statuses[i]
+ e:add_status(status)
+ if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do del(player.followers,e) break end
+end
+
 
 
 -- look state
@@ -741,5 +767,10 @@ function set_look()
  tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,possession=nil})
  sel_look.entity=nil
  local e=entity.entity_at(sel_look.x,sel_look.y)
- if(e)e:look_at(sel_look)
+ if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and e or nil
+ if(e) then
+  e:look_at(sel_look)
+  if(sel_look.spell>0)sel_look.usable=true
+ end
+ if(sel_look.spell>0)sel_look.text="cast"
 end
