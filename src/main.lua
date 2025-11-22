@@ -8,7 +8,7 @@ timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 timer_effect=16 -- effect timer for most status effects (turns)
 timer_effect_poison=6 -- effect timer for poison (turns)
 timer_spell=24 -- cooldown for casting spells (turns)
-timer_spell_charm=0 -- cooldown for casting befriend spell (turns)
+timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 max_followers=5
 
 -- game states
@@ -345,10 +345,6 @@ draw={
     print("▶",33,25+sel_menu.i*7,6)
     for i=1,inventory.num do print(inventory.items[i].name,38,25+i*7,sel_menu.i==i and 6 or 5) end
    end
-  -- character tab
-  elseif sel_menu.tab==2 then
-   print("⬅️ character ➡️",34,23,0)
-   print("hp: "..player.hp.."/"..player.max_hp.."\nxp: "..player.xp,35,32,6)
   end
  end,
 
@@ -498,10 +494,10 @@ input={
  menu=function()
   if btnp(0) then 
    sel_menu.i=1
-   sel_menu.tab=(sel_menu.tab-1)%3
+   sel_menu.tab=(sel_menu.tab-1)%2
   elseif btnp(1) then
    sel_menu.i=1
-   sel_menu.tab=(sel_menu.tab+1)%3
+   sel_menu.tab=(sel_menu.tab+1)%2
   elseif btnp(2) and sel_menu.i>1 then sel_menu.i-=1
   elseif btnp(4) then change_state(state_game)
   elseif sel_menu.tab==0 then

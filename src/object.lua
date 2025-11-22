@@ -72,6 +72,7 @@ entity=drawable:inherit({
  collision=true,
  interactable=true,
  interact_text="interact",
+ turn=0,
 
  -- (static) get name or class name of any entity
  entity_name=function(e)
@@ -182,6 +183,7 @@ creature=entity:inherit({
  target_turn=0,
  status=0,
  status_timer={},
+ followed=false,
 
  -- stats
  max_hp=10,
@@ -261,6 +263,8 @@ creature=entity:inherit({
     self.status_timer[status]-=1
    end
   end
+  self.turn=turn
+  self.followed=false
   return not self.dead and self:in_frame() and not self:check_status(status_sleeping)
  end,
 
@@ -307,6 +311,7 @@ creature=entity:inherit({
  follow=function(self,other)
   if in_reach(self,{x=other.prev_x,y=other.prev_y}) then self:move(other.prev_x,other.prev_y)
   else self:move_towards(other) end
+  other.followed=true
  end,
 
  -- move towards another creature and attack when close
@@ -443,12 +448,8 @@ companion=creature:new({
     if player.target then
      self:move_towards_and_attack(player.target)
     else
-     local target=player
-     local prev=companion
-     for e in all(player.followers) do
-       if(e==self)target=prev
-       prev=e
-     end
+     local target=self==companion and player or companion
+     for e in all(player.followers) do if(e~=self and e.turn==turn and not e.followed)target=e break end
      self:follow(target)
     end
   elseif not self:in_frame() then
@@ -527,7 +528,7 @@ door=entity:inherit({
  -- constructor
  new=function(self,tbl)
   if tbl.lock and tbl.lock>0 then
-   for d in all(data_locks.doors) do if d.x==tbl.x and d.y==tbl.y then tbl.lock=d.lock or 1 break end end
+   for d in all(data_locks.doors) do if d[1]==tbl.x and d[2]==tbl.y then tbl.lock=d[3] or 1 break end end
    key.set_variant(tbl,tbl.lock)
   end
   return entity.new(self,tbl)
@@ -607,7 +608,7 @@ sign=entity:inherit({
 
  -- constructor
  new=function(self,tbl)
-  for d in all(data_signs) do if d.x==tbl.x and d.y==tbl.y then tbl.message=d.message break end end
+  for d in all(data_signs) do if d[1]==tbl.x and d[2]==tbl.y then tbl.message=d[3] break end end
   return entity.new(self,tbl)
  end,
 
@@ -767,7 +768,7 @@ key=possession:inherit({
 
  -- lookup key data for a given map coordinate
  get_data=function(tbl)
-  for d in all(data_locks.keys) do if d.x==tbl.x and d.y==tbl.y then tbl.item_data["lock"]=d.lock or 1 break end end 
+  for d in all(data_locks.keys) do if d[1]==tbl.x and d[2]==tbl.y then tbl.item_data["lock"]=d[3] or 1 break end end 
   key.set_variant(tbl,tbl.item_data.lock)
  end,
 

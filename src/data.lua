@@ -79,17 +79,18 @@ data_floors={
 -------------------------------------------------------------------------------
 data_locks = {
  doors={
-  {x=111,y=35,lock=1},
-  {x=99,y=52,lock=2},
-  {x=52,y=35,lock=3},
-  {x=33,y=20,lock=3},
-  --{x=?,y=?,lock=1},
+  -- x,y,lock
+  split"111,35,1",
+  split"99,52,2",
+  split"52,35,3",
+  split"33,20,3",
+  --split"?,?,1",
  },
+ -- x,y,lock
  keys={
-  {x=112,y=34,lock=2},
-  {x=83,y=46,lock=1},
-  --{x=?,y=?,lock=3},
-  --{x=?,y=?,lock=3},
+  split"112,34,2",
+  split"83,46,1",
+  --split"?,?,3",
  },
 }
 
@@ -107,7 +108,8 @@ data_chests = {
 -- signs
 -------------------------------------------------------------------------------
 data_signs = {
- {x=5,y=58,message="welcome to\nthyng village"},
+ -- x,y,message
+ split"5,58,welcome to\nthyng village",
 }
 
 
