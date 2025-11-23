@@ -110,7 +110,21 @@ init={
 
  -- look state
  look=function(sel)
-  sel_look={spell=0,x=player.x,y=player.y}
+  sel_look={spell=0,x=player.x,y=player.y,tiles={}}
+  for i=1,8 do local check=false for j=1,12 do
+   local pos=vec2_add(player,
+    (i==8 and {x=-j,y=-j}) or 
+    (i==7 and {x=-j,y=j}) or 
+    (i==6 and {x=j,y=j}) or 
+    (i==5 and {x=j,y=-j}) or 
+    (i==4 and {x=-j,y=0}) or 
+    (i==3 and {x=0,y=j}) or 
+    (i==2 and {x=j,y=0}) or 
+    {x=0,y=-j}
+    )
+   check=collision(pos.x,pos.y,true) or check
+   if(not check)add(sel_look.tiles,pos)
+  end end
   set_look()
  end,
 
@@ -353,6 +367,11 @@ draw={
   -- draw map, entities and selection
   draw.game()
   if(state==state_look)draw.monochrome()
+  if(sel_look.spell>0) then
+   pal(1,2)
+   for pos in all(sel_look.tiles) do spr(1,pos_to_screen(pos).x,pos_to_screen(pos).y) end
+   pal()
+  end
   player:draw()
   if(sel_look.entity)sel_look.entity:draw()
   if(state==state_look)vec2_spr(2,pos_to_screen(sel_look))
@@ -687,9 +706,9 @@ function populate_map()
 end
 
 -- check for collision
-function collision(x,y)
+function collision(x,y,exclude_creatures)
  if(x<0 or x==103 or x==128 or y<0 or y==64 or fget(mget(x,y),flag_collision))return true
- for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y)return true end
+ for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y and (not exclude_creatures or (exclude_creatures and e.parent_class~=creature.class)))return true end
  return false
 end
 
@@ -747,7 +766,7 @@ function set_look()
  if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil
  if(e) then
   e:look_at(sel_look)
-  if(sel_look.spell>0)sel_look.usable=true
+  if(sel_look.spell>0)sel_look.usable=vec2_in_tbl(sel_look,sel_look.tiles)
  end
  if(sel_look.spell>0)sel_look.text="cast"
 end

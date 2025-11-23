@@ -2,7 +2,8 @@
 -- todo
 -------------------------------------------------------------------------------
 -- restrict spellcasting to line of sight
--- multiple targets (queue)
+-- spellcasting animation
+-- multiple targets (queue system)
 -- add sound
 -- add music
 -- add more sprites:
@@ -14,7 +15,7 @@
 -- add 4 tomes
 -- add ending
 
-x various improvements, trimmed tokens, removed character tab
+
 
 -------------------------------------------------------------------------------
 -- maybe
