@@ -221,10 +221,10 @@ creature=entity:inherit({
    entity.draw(self,offset,self:screen_pos(),sprite)
    if(sprite~=0 and sprite~=3) then
      local pos={x=x,y=y}
-     if(self:check_status(status_charmed))vec2_spr(55,pos) pos.x+=6
-     if(self:check_status(status_sleeping))vec2_spr(54,pos) pos.x+=4
-     if(self:check_status(status_scared))vec2_spr(56,pos) pos.x+=3
-     if(self:check_status(status_poisoned))vec2_spr(53,pos) pos.x+=4
+     if(self:check_status(status_charmed))vec2_spr(15,pos) pos.x+=6
+     if(self:check_status(status_sleeping))vec2_spr(47,pos) pos.x+=4
+     if(self:check_status(status_scared))vec2_spr(31,pos) pos.x+=3
+     if(self:check_status(status_poisoned))vec2_spr(63,pos) pos.x+=4
    end
    return true
   end
@@ -490,6 +490,7 @@ enemy = creature:inherit({
  ap=1,
  max_hp=5,
  xp=1,
+ seen_player=0,
 
  -- look at enemy
  look_at=function(self,tbl)
@@ -507,8 +508,11 @@ enemy = creature:inherit({
  do_turn=function(self)
   if self.status & status_charmed==status_charmed then companion.do_turn(self)
   elseif creature.do_turn(self) then
-   if self.status & status_scared==status_scared then self:move_towards(player,true)
-   else self:move_towards_and_attack(player) end
+   if(in_sight(self,player))self.seen_player=turn
+   if (self.seen_player+timer_seen_player>turn) then
+    if self.status & status_scared==status_scared then self:move_towards(player,true)
+    else self:move_towards_and_attack(player) end
+   end
   end
  end,
 })
@@ -531,7 +535,9 @@ door=entity:inherit({
    for d in all(data_locks.doors) do if d[1]==tbl.x and d[2]==tbl.y then tbl.lock=d[3] or 1 break end end
    key.set_variant(tbl,tbl.lock)
   end
-  return entity.new(self,tbl)
+  local tbl=entity.new(self,tbl)
+  if(tbl.collision)mset(tbl.x,tbl.y,2)
+  return tbl
  end,
 
  -- look at door
@@ -552,6 +558,7 @@ door=entity:inherit({
  interact=function(self)
   self.collision=not self.collision
   self.sprite=self.collision and 82 or 81
+  mset(self.x,self.y,self.collision and 2 or 1)
   if self.lock>0 then
    self.lock=0
    self.pal_swap_enable=false

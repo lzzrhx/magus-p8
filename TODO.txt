@@ -1,13 +1,11 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- restrict spellcasting to line of sight
--- spellcasting animation
--- multiple targets (queue system)
 -- add sound
 -- add music
+-- add tome (quest item)
+-- add more consumables (dumpling and ramen bowl)
 -- add more sprites:
-    -- tome (quest item)
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
@@ -20,6 +18,8 @@
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
+-- (?) spellcasting animation
+-- (?) multiple targets (queue system)
 -- (?) xp and level up
 -- (?) traps
 -- (?) equippable items

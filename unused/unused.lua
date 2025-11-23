@@ -46,3 +46,8 @@ function get_k(tbl,v0)
  for k,v1 in pairs(tbl) do if(v0==v1)return k end
  return 0
 end
+
+function vec2_in_tbl(a,tbl)
+ for b in all(tbl) do if(a.x==b.x and a.y==b.y)return true end
+ return false
+end

@@ -4,6 +4,7 @@
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
 timer_target=24 -- timeout for target (turns)
+timer_seen_player=5 -- timeout for enemy following player when no longer visible
 timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 timer_effect=16 -- effect timer for most status effects (turns)
 timer_effect_poison=6 -- effect timer for poison (turns)
@@ -31,7 +32,8 @@ statuses=split"0b0001,0b0010,0b0100,0b1000"
 
 -- sprite flags
 flag_collision=0
-flag_entity=1
+flag_block_view=1
+flag_entity=2
 
 -- vars
 state=nil -- game state
@@ -110,21 +112,7 @@ init={
 
  -- look state
  look=function(sel)
-  sel_look={spell=0,x=player.x,y=player.y,tiles={}}
-  for i=1,8 do local check=false for j=1,12 do
-   local pos=vec2_add(player,
-    (i==8 and {x=-j,y=-j}) or 
-    (i==7 and {x=-j,y=j}) or 
-    (i==6 and {x=j,y=j}) or 
-    (i==5 and {x=j,y=-j}) or 
-    (i==4 and {x=-j,y=0}) or 
-    (i==3 and {x=0,y=j}) or 
-    (i==2 and {x=j,y=0}) or 
-    {x=0,y=-j}
-    )
-   check=collision(pos.x,pos.y,true) or check
-   if(not check)add(sel_look.tiles,pos)
-  end end
+  sel_look={spell=0,x=player.x,y=player.y}
   set_look()
  end,
 
@@ -367,14 +355,9 @@ draw={
   -- draw map, entities and selection
   draw.game()
   if(state==state_look)draw.monochrome()
-  if(sel_look.spell>0) then
-   pal(1,2)
-   for pos in all(sel_look.tiles) do spr(1,pos_to_screen(pos).x,pos_to_screen(pos).y) end
-   pal()
-  end
   player:draw()
   if(sel_look.entity)sel_look.entity:draw()
-  if(state==state_look)vec2_spr(2,pos_to_screen(sel_look))
+  if(state==state_look)vec2_spr(14,pos_to_screen(sel_look))
   -- ui elements
   draw.window_frame()
   local btn_x=sel_look.text.." ❎"
@@ -706,9 +689,9 @@ function populate_map()
 end
 
 -- check for collision
-function collision(x,y,exclude_creatures)
+function collision(x,y)
  if(x<0 or x==103 or x==128 or y<0 or y==64 or fget(mget(x,y),flag_collision))return true
- for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y and (not exclude_creatures or (exclude_creatures and e.parent_class~=creature.class)))return true end
+ for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y)return true end
  return false
 end
 
@@ -753,6 +736,25 @@ function cast_spell(i,e)
  if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do e:clear_status(status_charmed) break end
 end
 
+-- check if map coordinate is in sight or blocked
+function in_sight(a,b)
+ local dx,dy=b.x-a.x,b.y-a.y
+ local step=abs(dx)>=abs(dy) and abs(dx) or abs(dy)
+ dx=dx/step
+ dy=dy/step
+ local x,y,prev_x,prev_y=a.x,a.y,a.x,a.y
+ local blocked,prev_blocked = false,false
+ for i=1,step+1 do
+  blocked = (fget(mget(x,prev_y),flag_block_view) and fget(mget(prev_x,y),flag_block_view)) or fget(mget(x,y),flag_block_view) or prev_blocked
+  if(blocked)return false
+  prev_blocked = blocked
+  prev_x,prev_y=x,y
+  x,y=a.x+flr(dx*i+0.5),a.y+flr(dy*i+0.5)
+  i+=1
+ end
+ return true
+end
+
 
 
 -- look state
@@ -766,7 +768,7 @@ function set_look()
  if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil
  if(e) then
   e:look_at(sel_look)
-  if(sel_look.spell>0)sel_look.usable=vec2_in_tbl(sel_look,sel_look.tiles)
+  if(sel_look.spell>0)sel_look.usable=in_sight(player,sel_look)
  end
  if(sel_look.spell>0)sel_look.text="cast"
 end

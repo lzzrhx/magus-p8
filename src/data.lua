@@ -26,8 +26,6 @@ data_entities={
  [9]={class="door",lock=1},
  [10]={class="item",item_class="key",item_data={lock=1}},
  [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
- --[49]={class="item",item_class="consumable",name="green potion",item_data={status=4}},
- --[50]={class="item",item_class="consumable",name="yellow potion",item_data={}},
 }
 
 
@@ -56,13 +54,13 @@ data_floors={
   [6]=split"104,22,2,5",
   [7]=split"100,57,nil,8",
   [8]=split"113,8,3,7",
-  [9]=split"34,38,nil,10",
+  [9]=split"33,38,nil,10",
   [10]=split"110,3,4,9",
   [11]=split"32,22,nil,12",
   [12]=split"104,26,5,11",
   [13]=split"32,26,nil,14",
   [14]=split"104,30,5,13",
-  [15]=split"34,26,nil,16",
+  [15]=split"34,27,nil,16",
   [16]=split"125,25,6,15",
   [17]=split"20,32,nil,18",
   [18]=split"109,31,6,17",

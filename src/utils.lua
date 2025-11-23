@@ -63,11 +63,6 @@ function vec2_scale(a,b)
  return {x=a.x*b,y=a.y*b}
 end
 
-function vec2_in_tbl(a,tbl)
- for b in all(tbl) do if(a.x==b.x and a.y==b.y)return true end
- return false
-end
-
 -- draw sprite with 2d vector screen coordinate
 function vec2_spr(s,pos)
  palt(0,false)
