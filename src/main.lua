@@ -4,7 +4,7 @@
 -- constants
 timer_corpse=20 -- timeout for grave (turns)
 timer_target=24 -- timeout for target (turns)
-timer_seen_player=5 -- timeout for enemy following player when no longer visible
+timer_seen_player=5 -- timeout for enemy following player when no longer visible (turns)
 timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 timer_effect=16 -- effect timer for most status effects (turns)
 timer_effect_poison=6 -- effect timer for poison (turns)
