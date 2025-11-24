@@ -20,12 +20,16 @@ data_entities={
  [3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
  [4]={class="sign"},
  [11]={class="chest"},
- [13]={class="item",item_class="consumable",name="tome",item_data={}},
  [82]={class="door"},
  [81]={class="door",collision=false},
- [9]={class="door",lock=1},
- [10]={class="item",item_class="key",item_data={lock=1}},
- [48]={class="item",item_class="consumable",name="red potion",item_data={dhp=15}},
+ [48]={class="door",lock=1},
+ [49]={class="door",lock=2},
+ [50]={class="door",lock=3},
+ [54]={class="item",type=1}, -- tome
+ [51]={class="item",type=2,value=1}, -- key 1
+ [52]={class="item",type=2,value=2}, -- key 2
+ [53]={class="item",type=2,value=3}, -- key 3
+ [55]={class="item",type=3,value=1}, -- potion
 }
 
 
@@ -73,32 +77,11 @@ data_floors={
 
 
 
--- locks
--------------------------------------------------------------------------------
-data_locks = {
- doors={
-  -- x,y,lock
-  split"111,35,1",
-  split"99,52,2",
-  split"52,35,3",
-  split"33,20,3",
-  --split"?,?,1",
- },
- -- x,y,lock
- keys={
-  split"112,34,2",
-  split"83,46,1",
-  --split"?,?,3",
- },
-}
-
-
-
 -- chests
 -------------------------------------------------------------------------------
 data_chests = {
- {x=125,y=2,content={{sprite=48},{sprite=10,item_data={lock=1}},{sprite=13}}},
- {x=118,y=22,content={{sprite=48},{sprite=10,item_data={lock=3}},{sprite=13}}},
+ {x=125,y=2,content=split"51,54"},
+ {x=125,y=2,content=split"53,54"},
 }
 
 

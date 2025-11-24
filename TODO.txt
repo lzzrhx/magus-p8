@@ -1,17 +1,15 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
+-- add spell description
 -- add sound
 -- add music
--- add tome (quest item)
 -- add more consumables (dumpling and ramen bowl)
 -- add more sprites:
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
 -- add dialogue
--- add 4 tomes
--- add ending
 
 
 

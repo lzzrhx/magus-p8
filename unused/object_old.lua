@@ -25,6 +25,13 @@ drawable=object:inherit({
  sprite=0,
  flipped=false,
  flash_frame=0,
+ pal_swap=split"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+ pal_swap_enable=false,
+
+ -- (static) get drawable data from entity data
+ data_from_entity=function(e)
+  return {sprite=e.sprite or drawable.sprite, pal_swap=e.pal_swap or drawable.pal_swap, pal_swap_enable=e.pal_swap_enable or drawable.pal_swap_enable}
+ end,
 
  vec2_spr=function(self,pos,sprite)
   local sprite=sprite or self.sprite
@@ -32,15 +39,17 @@ drawable=object:inherit({
  end,
 
  -- draw at given screen position
- spr=function(self,x,y,sprite)
+ spr=function(self,x,y,sprite,no_flip)
   local sprite=sprite or self.sprite
   if self.flash_frame>0 then
    self.flash_frame-=1
    pal_all(7)
+  elseif self.pal_swap_enable then
+   pal_set(self.pal_swap)
   end
   palt(0,false)
   palt(15,true)
-  spr(sprite,x,y,1,1,self.flipped)
+  spr(sprite,x,y,1,1,no_flip and false or self.flipped)
   pal_set()
  end,
 })
@@ -64,6 +73,11 @@ entity=drawable:inherit({
  interactable=true,
  interact_text="interact",
  turn=0,
+
+ -- (static) get name or class name of any entity
+ entity_name=function(e)
+  return(e.name and e.name) or (e.item_class and e.item_class) or e.class
+ end,
 
  -- (static) get entity at coordinate
  entity_at=function(x,y)
@@ -119,7 +133,7 @@ entity=drawable:inherit({
 
  -- get name or class name of this entity
  get_name=function(self)
-  return(self.name and self.name) or (self.item_class and self.item_class) or self.class
+  return entity.entity_name(self)
  end,
 
  -- look at entity
@@ -318,6 +332,7 @@ creature=entity:inherit({
   msg.add(self:get_name().." attacked "..other:get_name())
   if other:take_dmg(flr(self.ap*(0.5+rnd())+0.5)) then
    msg.add(self:get_name().." killed "..other:get_name())
+   if(other~=player)player.xp+=other.xp
   else 
    other.target=self
    self.target=other
@@ -381,6 +396,7 @@ player=creature:new({
  name="you",
 
  -- vars
+ xp=0,
  max_hp=20,
  followers={},
 
@@ -473,6 +489,7 @@ enemy = creature:inherit({
  -- vars
  ap=1,
  max_hp=5,
+ xp=1,
  seen_player=0,
 
  -- look at enemy
@@ -514,6 +531,10 @@ door=entity:inherit({
 
  -- constructor
  new=function(self,tbl)
+  if tbl.lock and tbl.lock>0 then
+   for d in all(data_locks.doors) do if d[1]==tbl.x and d[2]==tbl.y then tbl.lock=d[3] or 1 break end end
+   key.set_variant(tbl,tbl.lock)
+  end
   local tbl=entity.new(self,tbl)
   if(tbl.collision)mset(tbl.x,tbl.y,2)
   return tbl
@@ -527,8 +548,8 @@ door=entity:inherit({
   else
    tbl.text,tbl.name="unlock","locked "..tbl.name
    if tbl.usable then
-    tbl.key=self.lock
-    tbl.usable=keys[self.lock]>0 and true or false
+    tbl.usable=false
+    for itm in all(inventory.items) do if itm.class==key.class and itm.lock==self.lock then tbl_merge(tbl,{usable=true,possession=itm}) break end end
    end
   end
  end,
@@ -540,6 +561,7 @@ door=entity:inherit({
   mset(self.x,self.y,self.collision and 2 or 1)
   if self.lock>0 then
    self.lock=0
+   self.pal_swap_enable=false
    msg.add("unlocked door")
   else
    msg.add((self.collision and "closed" or "opened").." door")
@@ -625,10 +647,15 @@ chest=entity:inherit({
   for d in all(data_chests) do
    if d.x==tbl.x and d.y==tbl.y then
     tbl.content={}
-    for sprite in all(d.content) do add(tbl.content,tbl_merge_new({sprite=sprite},data_entities[sprite])) end
+    for itm in all(d.content) do
+     local e_data=tbl_merge_new(data_entities[itm.sprite],itm)
+     if(e_data.item_class==key.class)key.set_variant(e_data,e_data.item_data.lock)
+     add(tbl.content,possession.new_from_entity(e_data))
+    end
     return entity.new(self,tbl)
    end 
   end
+  return nil
  end,
 
  -- look at chest
@@ -647,7 +674,8 @@ chest=entity:inherit({
   local sel={entity=self,anim_frame={}}
   for itm in all(self.content) do 
    add(sel.anim_frame,60)
-   msg.add("got "..add_to_inventory(itm))
+   inventory.add_possession(itm)
+   msg.add("got "..itm.name)
   end
   change_state(state_chest,sel)
  end,
@@ -689,11 +717,90 @@ item = entity:inherit({
  collision=false,
  interact_text="pick up",
 
+ -- constructor
+ new=function(self,tbl)
+  tbl.item_data=tbl.item_data and tbl_copy(tbl.item_data) or {}
+  if(tbl.item_class==key.class)key.get_data(tbl)
+  return entity.new(self,tbl)
+ end,
+
  -- interact action
  interact=function(self)
-  msg.add("picked up "..add_to_inventory(self))
+  msg.add("picked up "..self:get_name())
+  inventory.add_item(self)
   self:destroy()
   change_state(state_game)
  end,
 
+})
+
+
+
+-- possession (item in inventory)
+-------------------------------------------------------------------------------
+possession=drawable:inherit({
+ -- static vars
+ class="possession",
+ parent_class=drawable.class,
+ num=0,
+
+ -- vars
+ name=nil,
+ interactable=true,
+
+ -- constructor
+ new=function(self,tbl)
+  tbl=self:inherit(tbl)
+  possession.num=possession.num+1
+  tbl["id"]=possession.num
+  return tbl
+ end,
+
+ -- create new possession from data
+ new_from_entity=function(e)
+  return _ENV[e.item_class]:new(tbl_merge_new(tbl_merge_new({name=entity.entity_name(e)},drawable.data_from_entity(e)),e.item_data))
+ end,
+})
+
+
+
+-- key
+-------------------------------------------------------------------------------
+key=possession:inherit({
+ -- static vars
+ class="key",
+ parent_class=possession.class,
+ interactable=false,
+ colors={split"steel,6,13",split"gold,10,9",split"green,11,3",},
+
+ -- lookup key data for a given map coordinate
+ get_data=function(tbl)
+  for d in all(data_locks.keys) do if d[1]==tbl.x and d[2]==tbl.y then tbl.item_data["lock"]=d[3] or 1 break end end 
+  key.set_variant(tbl,tbl.item_data.lock)
+ end,
+
+ -- set entity color swap to match key color
+ set_variant=function(tbl,i)
+  if i>1 then
+   tbl["pal_swap_enable"]=true
+   tbl["pal_swap"]={[key.colors[1][2]]=key.colors[i][2],[key.colors[1][3]]=key.colors[i][3]}
+  end
+  if(entity.entity_name(tbl)=="key")tbl.name=key.colors[i][1].." key"
+ end,
+})
+
+
+
+-- consumable
+-------------------------------------------------------------------------------
+consumable=possession:inherit({
+ class="consumable",
+ parent_class=possession.class,
+
+ -- interact with consumable
+ interact=function(self)
+  msg.add("consumed "..self.name)
+  --if(self.status)player:add_status(self.status)
+  if(self.dhp) then player:take_dmg(-self.dhp) end
+ end,
 })

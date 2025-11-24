@@ -21,7 +21,7 @@ state_look="look"
 state_dialogue="dialogue"
 state_chest="chest"
 state_read="read"
-state_dead="dead"
+state_game_over="game_over"
 
 -- status effects
 status_charmed=0b0001
@@ -59,7 +59,16 @@ title_effect_num=96
 title_effect_colors=split"8,9,10,11,12,13,14,15"
 title_text=split(data_story_intro,"\n")
 spells=split"befriend,scare,sleep,poison"
-spells_cd=split"0,0,0,0"
+spell_cd=split"0,0,0,0"
+spells_desc=split"???\n???\n???\n???,???\n???\n???\n???,???\n???\n???\n???,???\n???\n???\n???"
+
+tomes=0
+max_tomes=4
+keys=split"0,0,0"
+key_names=split"iron key,gold key,green key"
+consumables=split"0"
+consumable_names=split"potion"
+consumable_values=split"15"
 
 
 
@@ -177,10 +186,10 @@ update={
   input.read()
  end,
 
- -- dead state
- dead=function()
+ -- game over state
+ game_over=function()
   for e in all(entity.entities) do e:update() end
-  input.dead()
+  input.game_over()
  end,
 }
 
@@ -313,7 +322,7 @@ draw={
   clip(msg.frame,0,(msg.frame>msg.width-3 and msg.width-msg.frame) or 3,128)
   print(msg.txt,2,112,7)
   clip()
-  if(state==state_game or state==state_dead)msg.anim_step()
+  if(state==state_game or state==state_game_over)msg.anim_step()
  end,
 
  -- menu state
@@ -322,31 +331,43 @@ draw={
   draw.game()
   draw.monochrome()
   -- bg box
-  line(30,22,96,22,6)
-  line(30,88,96,88,6)
-  line(29,23,29,87,6)
-  line(97,23,97,87,6)
-  rectfill(30,22,96,28,6)
+  line(32,21,94,21,6)
+  line(32,90,94,90,6)
+  line(31,22,31,89,6)
+  line(95,22,95,89,6)
+  rectfill(32,21,94,27,6)
+  line(32,59,94,59,6)
   -- button legend
   local btns="cancel 🅾️  use ❎"
-  print(btns,29,97,5)
-  clip(24,0,(sel_menu.tab==0 and spells_cd[sel_menu.i]==0 and 80) or (sel_menu.tab==1 and inventory.num>0 and inventory.items[sel_menu.i].interactable and 80) or 40,128)
-  print(btns,29,96,6)
+  print(btns,30,99,5)
+  clip(30,0,((sel_menu.tab==0 and spell_cd[sel_menu.i]==0) or (sel_menu.tab==1 and tbl_sum(consumables)>0)) and 80 or 40,128)
+  print(btns,30,98,6)
   clip()
   -- magic tab
   if sel_menu.tab==0 then
-   print("⬅️ magick ➡️",40,23,0)
-   print("▶",33,25+sel_menu.i*7,6)
-   for i=1,tbl_len(spells) do print((spells_cd[i]>0 and "("..spells_cd[i]..") " or (i==1 and #player.followers>=max_followers and "(max) " or ""))..spells[i],38,25+i*7,sel_menu.i==i and 6 or 5) end
+   print("⬅️ magick ➡️",40,22,0)
+   print("▶",34,24+sel_menu.i*7,6)
+   for i=1,tbl_len(spells) do
+    local pre=spell_cd[i]>0 and "("..spell_cd[i]..") " or (i==1 and #player.followers>=max_followers and "(max) ") or ""
+    local y=24+i*7
+    print(pre..spells[i],39,y,sel_menu.i==i and spell_cd[i]==0 and 6 or 5)
+    if(spell_cd[i]>0)line(37+str_width(pre),y+1,39+str_width(pre)+str_width(spells[i]),y+3,5)
+    end
+   local txt = split(spells_desc[sel_menu.i],"\n")
+   for i=1,tbl_len(txt) do print(txt[i],34,55+i*7,6) end
   -- inventory tab
   elseif sel_menu.tab==1 then
-   print("⬅️ inventory ➡️",34,23,0)
-   if inventory.num==0 do
-    print("empty",35,32,5)
+   print("⬅️ inventory ➡️",34,22,0)
+   if tbl_sum(consumables)==0 do
+    print("nothing",36,31,5)
    else
-    print("▶",33,25+sel_menu.i*7,6)
-    for i=1,inventory.num do print(inventory.items[i].name,38,25+i*7,sel_menu.i==i and 6 or 5) end
+    print("▶",34,24+sel_menu.i*7,6)
+    for i=1,#consumables do if(consumables[i]>0)print((consumables[i]>1 and "("..consumables[i]..") " or "")..consumable_names[i],39,24+i*7,sel_menu.i==i and 6 or 5) end 
    end
+   print("tomes:      "..tomes.."/"..max_tomes,34,62,6)
+   print(key_names[1].."s:    "..keys[1],34,69,6)
+   print(key_names[2].."s:    "..keys[2],34,76,6)
+   print(key_names[3].."s:   "..keys[3],34,83,6)
   end
  end,
 
@@ -432,7 +453,7 @@ draw={
        flash_frame=2
       end
      -- draw the item bobbing up and down after the popping out of chest animation has finished
-     elseif not chest.anim_playing or blink then itm:spr(target_pos.x,target_pos.y+wavy()) end
+     elseif not chest.anim_playing or blink then vec2_spr(itm.sprite,vec2_add(target_pos,{x=0,y=wavy()})) end
     end
    end
   end
@@ -457,12 +478,21 @@ draw={
   s_print("continue ❎",42,85+exp)
  end,
 
- -- dead state
- dead=function()
+ -- game over state
+ game_over=function()
   draw.game()
   draw.monochrome()
-  wavy_print("g a m e   o v e r",26,61,8,1)
-  if(frame==0)s_print("restart ❎",44,85)
+  if(tomes==max_tomes) then
+   local s=split"you won!,congratulations!"
+   for i=1,#s do
+    local l=s[i]
+    for j=1,#l do s_print(sub(l,j,j),64-#l*3+(j-1)*6,i*12+32+j*1.5+wavy(j,3),true,true,10,13)
+    end
+   end
+  else
+   wavy_print("g a m e   o v e r",26,55,8,1)
+   if(frame==0)s_print("restart ❎",44,85)
+  end
  end,
 }
 
@@ -504,16 +534,22 @@ input={
   elseif btnp(4) then change_state(state_game)
   elseif sel_menu.tab==0 then
    if btnp(3) and sel_menu.i<tbl_len(spells) then sel_menu.i+=1
-   elseif btnp(5) and spells_cd[sel_menu.i]==0 then 
+   elseif btnp(5) and spell_cd[sel_menu.i]==0 then 
     change_state(state_look)
     sel_look.spell=sel_menu.i
     set_look()
    end
   elseif sel_menu.tab==1 then
-   if btnp(3) and sel_menu.i<inventory.num then sel_menu.i+=1
-   elseif btnp(5) and inventory.num>0 and inventory.items[sel_menu.i].interactable then
-    inventory.items[sel_menu.i]:interact()
-    inventory.remove(inventory.items[sel_menu.i])
+   if btnp(3) and sel_menu.i<tbl_len_nonzero(consumables) then sel_menu.i+=1
+   elseif btnp(5) and tbl_sum(consumables)>0 then
+    local n=sel_menu.i
+    for i=1,tbl_len(consumables) do 
+     if(consumables[i]>0)n-=1
+     if(n==0)n=i break
+    end
+    msg.add("consumed "..consumable_names[n])
+    player:take_dmg(-consumable_values[n])
+    consumables[n]-=1
     change_state(state_game)
    end
   end
@@ -530,13 +566,13 @@ input={
    return false
   elseif btnp(5) and sel_look.spell==0 and sel_look.usable then
    sel_look.entity:interact()
-   inventory.remove(sel_look.possession)
+   if(sel_look.key>0)keys[sel_look.key]-=1
    return false
   elseif btnp(5) and sel_look.spell>0 and sel_look.usable then
    change_state(state_game)
    cast_spell(sel_look.spell,sel_look.entity)
    do_turn()
-   spells_cd[sel_look.spell]=sel_look.spell==1 and timer_spell_charm or timer_spell
+   spell_cd[sel_look.spell]=sel_look.spell==1 and timer_spell_charm or timer_spell
    return false
   end
   return true
@@ -555,6 +591,7 @@ input={
   if btnp(5) then
    sel_chest.entity.anim_frame=0
    if chest.anim_playing then for i=1,tbl_len(sel_chest.anim_frame) do sel_chest.anim_frame[i]=1 end
+   elseif tomes==max_tomes then change_state(state_game_over)
    else change_state(state_game) end
   end
  end,
@@ -564,9 +601,9 @@ input={
   if(btnp(5))change_state(state_game)
  end,
 
- -- dead state
- dead=function()
-  if(btnp(5))reset()
+ -- game over state
+ game_over=function()
+  if(btnp(5) and tomes~=max_tomes)reset()
  end,
 }
 
@@ -604,34 +641,6 @@ msg={
  anim_step=function()
   if msg.frame>=msg.width then msg.frame=msg.width if #msg.queue>0 then msg.delay-=1 if msg.delay<=0 then msg.txt_set(deli(msg.queue,1)) end end else msg.frame+=3 end 
  end,
-}
-
-
-
--- inventory
--------------------------------------------------------------------------------
-inventory={
- items={},
- num=0,
-
- -- convert item (from world) to possession and add to inventory
- add_item=function(e)
-  inventory.add_possession(possession.new_from_entity(e))
- end,
-
- -- add possession to inventory
- add_possession=function(itm)
-  add(inventory.items,itm)
-  inventory.num+=1
- end,
-
- -- remove possession from inventory
- remove=function(itm)
-  if itm then
-   del(inventory.items,itm)
-   inventory.num-=1
-  end
- end
 }
 
 
@@ -702,7 +711,7 @@ end
 
 -- perform turn
 function do_turn()
- for i=1,tbl_len(spells) do spells_cd[i]=max(0,spells_cd[i]-1) end
+ for i=1,tbl_len(spells) do spell_cd[i]=max(0,spell_cd[i]-1) end
  for e in all(entity.entities) do e:do_turn() end
  turn+=1
 end
@@ -755,6 +764,15 @@ function in_sight(a,b)
  return true
 end
 
+-- add item to inventory
+function add_to_inventory(itm)
+  local t=itm.type
+  local v=itm.value
+  if(t==1)tomes+=1 return "tome"
+  if(t==2)keys[v]+=1 return key_names[v]
+  if(t==3)consumables[v]+=1 return consumable_names[v]
+end
+
 
 
 -- look state
@@ -762,7 +780,7 @@ end
 
 -- change look target
 function set_look()
- tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,possession=nil})
+ tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,key=0})
  sel_look.entity=nil
  local e=entity.entity_at(sel_look.x,sel_look.y)
  if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil

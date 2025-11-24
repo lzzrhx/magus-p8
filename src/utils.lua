@@ -92,3 +92,15 @@ function s_print(s,x,y,c1e,c0e,c0,c1)
  if(c1e~=false)print(s,x,y+1,c1)
  if(c0e~=false)print(s,x,y,c0)
 end
+
+function tbl_sum(tbl)
+ local n=0
+ for i in all(tbl) do n+=i end
+ return n
+end
+
+function tbl_len_nonzero(tbl)
+ local n=0
+ for sub_tbl in all(tbl) do if(sub_tbl>0)n+=1 end
+ return n
+end
