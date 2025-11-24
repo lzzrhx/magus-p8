@@ -392,7 +392,7 @@ player=creature:new({
  action_dir=function(self,x,y)
   local valid=self:move(x,y)
   for e in all(entity.entities) do
-   if e.x==x and e.y==y do
+   if e.x==x and e.y==y then
     if e.class==enemy.class and not(e:check_status(status_charmed)) and not e.dead then
      self:attack(e)
      valid=true
@@ -455,7 +455,7 @@ npc=creature:inherit({
   -- interact action
  interact=function(self)
   local sel={entity=self,text=split(data_dialogue[self.sprite],"\n"),anim_frame={},pos=1}
-  for line in all(sel.text) do add(sel.anim_frame,timer_dialog_line+#line*4) end
+  for l in all(sel.text) do add(sel.anim_frame,timer_dialog_line+#l*4) end
   change_state(state_dialogue,sel)
  end,
 })
@@ -563,16 +563,7 @@ stairs=entity:inherit({
  trigger=function(self)
   local stair=nil
   for e in all(data_floors.stairs) do if(e[1]==player.x and e[2]==player.y) stair=e break end
-  local target_stair=data_floors.stairs[stair[4]]
-  local prev_z=(room and room[1]) or 0
-  room=data_floors.rooms[target_stair[3]]
-  local delta_z=((room and room[1]) or 0) - prev_z
-  cam_x_min,cam_y_min=(room and target_stair[1]-player.x) or 0,(room and target_stair[2]-player.y) or 0
-  cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
-  player.x,player.y=target_stair[1],target_stair[2]
-  cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
-  msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
-  draw.play_fade(change_room,room)
+  draw.play_fade(change_room,stair)
  end,
 })
 

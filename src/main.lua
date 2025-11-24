@@ -85,7 +85,7 @@ function _update()
   blink_frame=(blink_frame+1)%2
   blink=blink_frame%2==0
   prev_frame=frame
-  frame=flr(t()*2%2)
+  frame=flr(time()*2%2)
   update[state]()
  end
 end
@@ -203,7 +203,7 @@ draw={
  -- perform fade animation step
  fade_step=function()
   if fade_frame>0 then
-   if fade_frame==3 do rectfill(0,0,128,128,0)
+   if fade_frame==3 then rectfill(0,0,128,128,0)
    else for j=0,15 do for k=0,15 do print("\014"..fade_chars[fade_frame>#fade_chars and 6-fade_frame or fade_frame],j*8,k*8,0) end end end
    fade_frame-=1
    if(fade_frame==3 and fade_action)fade_action.func(fade_action.param)
@@ -249,13 +249,16 @@ draw={
   camera(0,title_pos)
   -- title effect
   for i=1,title_effect_num do
-   local x=cos(t()/8+i/title_effect_num)*56
-   local y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
+   local x=cos(time()/8+i/title_effect_num)*56
+   local y=sin(time()/8+i/title_effect_num)*16+sin(time()+i*(1/title_effect_num)*5)*4
    local c=title_effect_colors[i%#title_effect_colors+1]
    for j=1,3 do pset(62+x+j,50+y+j,c) end
   end
-  -- main title
-  s_print("\014magus magicus",13,45,true,true,7,4)
+  clip(0,46-title_pos,128,8) --this is a fix for the fake-8 emulator
+  poke(0x5f58,0x81)
+  s_print("magus magicus",13,45,true,true,7,4)
+  poke(0x5f58,0)
+  clip()
   print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
   -- intro text
   if not title_idle then
@@ -348,17 +351,18 @@ draw={
     local y=24+i*7
     print(pre..spell_names[i],39,y,sel_menu.i==i and spell_cooldown[i]==0 and 6 or 5)
     if(spell_cooldown[i]>0)line(37+str_width(pre),y+1,39+str_width(pre)+str_width(spell_names[i]),y+3,5)
-    end
+   end
    local txt = split(spell_txt[sel_menu.i],"\n")
    for i=1,tbl_len(txt) do print(txt[i],34,55+i*7,6) end
   -- inventory tab
   elseif sel_menu.tab==1 then
    print("⬅️ inventory ➡️",34,22,0)
-   if tbl_sum(consumables)==0 do
+   if tbl_sum(consumables)==0 then
     print("nothing",36,31,5)
    else
     print("▶",34,24+sel_menu.i*7,6)
-    for i=1,#consumables do if(consumables[i]>0)print((consumables[i]>1 and "("..consumables[i]..") " or "")..consumable_names[i],39,24+i*7,sel_menu.i==i and 6 or 5) end 
+    local j=1
+    for i=1,#consumables do if(consumables[i]>0)print((consumables[i]>1 and "("..consumables[i]..") " or "")..consumable_names[i],39,24+j*7,sel_menu.i==j and 6 or 5) j+=1 end 
    end
    print("tomes:      "..tomes.."/"..max_tomes,34,62,6)
    print(key_names[1].."s:    "..keys[1],34,69,6)
@@ -731,7 +735,15 @@ function update_camera()
 end
 
 -- change room
-function change_room(new_room)
+function change_room(stair)
+ local target_stair=data_floors.stairs[stair[4]]
+ local new_room=data_floors.rooms[target_stair[3]]
+ local delta_z=((new_room and new_room[1]) or 0) - ((room and room[1]) or 0)
+ cam_x_min,cam_y_min=(new_room and target_stair[1]-player.x) or 0,(new_room and target_stair[2]-player.y) or 0
+ cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
+ player.x,player.y=target_stair[1],target_stair[2]
+ cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
+ msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
  room=new_room
 end
 
