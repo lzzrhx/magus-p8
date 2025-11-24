@@ -1,3 +1,11 @@
+-- spells and items
+-------------------------------------------------------------------------------
+spell_names=split"befriend,terrify,slumber,venom"
+spell_txt=split"turn foe to\nfriend. max 5.\nlasts until\nmax exceeded.,drive creature\nto flee in fear\nfor 16 turns.\nopen to dmg.,lull creature\ninto deep sleep\nfor 24 turns.\nwoken by dmg.,inflict poison\nupon creature.\ndealing dmg for\n3 turns."
+key_names=split"iron key,gold key,green key"
+consumable_names=split"cherries,orange,potion"
+consumable_values=split"5,10,15"
+
 -- entities
 -------------------------------------------------------------------------------
 data_entities={
@@ -6,13 +14,13 @@ data_entities={
  [18]={class="companion",name="dog"},
  [19]={class="npc",name="balthasar"},
  [20]={class="npc",name="dardanius"},
- [24]={class="enemy",name="slime",xp=1,max_hp=2,ap=1},
- [25]={class="enemy",name="hobgoblin",xp=3,max_hp=8,ap=3},
- [28]={class="enemy",name="bat",xp=2,max_hp=4,ap=2},
- [27]={class="enemy",name="ghoul",xp=5,max_hp=8,ap=6},
- [26]={class="enemy",name="skully",xp=4,max_hp=6,ap=4},
- [29]={class="enemy",name="vampire",xp=7,max_hp=14,ap=8},
- [30]={class="enemy",name="demon",xp=9,max_hp=16,ap=14},
+ [24]={class="enemy",name="slime",max_hp=2,ap=1},
+ [25]={class="enemy",name="hobgoblin",max_hp=8,ap=3},
+ [28]={class="enemy",name="bat",max_hp=4,ap=2},
+ [27]={class="enemy",name="ghoul",max_hp=8,ap=6},
+ [26]={class="enemy",name="skully",max_hp=6,ap=4},
+ [29]={class="enemy",name="vampire",max_hp=14,ap=8},
+ [30]={class="enemy",name="demon",max_hp=16,ap=14},
  [5]={class="stairs"},
  [6]={class="stairs"},
  [7]={class="stairs"},
@@ -29,7 +37,9 @@ data_entities={
  [51]={class="item",type=2,value=1}, -- key 1
  [52]={class="item",type=2,value=2}, -- key 2
  [53]={class="item",type=2,value=3}, -- key 3
- [55]={class="item",type=3,value=1}, -- potion
+ [55]={class="item",type=3,value=1}, -- carrot
+ [56]={class="item",type=3,value=2}, -- food 2
+ [57]={class="item",type=3,value=3}, -- potion
 }
 
 
@@ -81,7 +91,7 @@ data_floors={
 -------------------------------------------------------------------------------
 data_chests = {
  {x=125,y=2,content=split"51,54"},
- {x=125,y=2,content=split"53,54"},
+ {x=118,y=22,content=split"53,54"},
 }
 
 
@@ -98,11 +108,42 @@ data_signs = {
 -- dialogue
 -------------------------------------------------------------------------------
 data_dialogue={
-[19]=[[hello]],
+[19]=[[greetings my dear friend magus
+1.............................
+1.............................
+what? the dark lords? tomes?
+this is distressing news for
+sure. i heard tales of those
+mystic tomes many years ago.
+3.............................
+3.............................
+4.............................
+4.............................
+4.............................
+5.............................
+5.............................
+5.............................
+6.............................
+6.............................
+6.............................]],
 [20]=[[salutations, friend.
-this is a multiline dialogue.
-abcdefghijklmnopqrstuvwxyz12345
-abcdefghijklmnopqrstuvwxyz12345]],
+1.............................
+1.............................
+the cursed undead armies you
+say? oh dear lord!
+2.............................
+3.............................
+3.............................
+3.............................
+4.............................
+4.............................
+4.............................
+5.............................
+5.............................
+5.............................
+6.............................
+6.............................
+6.............................]],
 }
 
 

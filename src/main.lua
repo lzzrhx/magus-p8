@@ -7,10 +7,12 @@ timer_target=24 -- timeout for target (turns)
 timer_seen_player=5 -- timeout for enemy following player when no longer visible (turns)
 timer_dialog_line=24 -- timeout for next line in dialogue (frames)
 timer_effect=16 -- effect timer for most status effects (turns)
-timer_effect_poison=6 -- effect timer for poison (turns)
+timer_effect_sleeping=24 -- effect timer for sleep (turns)
+timer_effect_poisoned=3 -- effect timer for poison (turns)
 timer_spell=24 -- cooldown for casting spells (turns)
 timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 max_followers=5
+max_tomes=4
 
 -- game states
 state_reset="reset"
@@ -58,17 +60,11 @@ cam_y_diff=0
 title_effect_num=96
 title_effect_colors=split"8,9,10,11,12,13,14,15"
 title_text=split(data_story_intro,"\n")
-spells=split"befriend,scare,sleep,poison"
-spell_cd=split"0,0,0,0"
-spells_desc=split"???\n???\n???\n???,???\n???\n???\n???,???\n???\n???\n???,???\n???\n???\n???"
-
-tomes=0
-max_tomes=4
+spell_cooldown=split"0,0,0,0"
 keys=split"0,0,0"
-key_names=split"iron key,gold key,green key"
-consumables=split"0"
-consumable_names=split"potion"
-consumable_values=split"15"
+consumables=split"0,0,0"
+tomes=0
+
 
 
 
@@ -340,20 +336,20 @@ draw={
   -- button legend
   local btns="cancel 🅾️  use ❎"
   print(btns,30,99,5)
-  clip(30,0,((sel_menu.tab==0 and spell_cd[sel_menu.i]==0) or (sel_menu.tab==1 and tbl_sum(consumables)>0)) and 80 or 40,128)
+  clip(30,0,((sel_menu.tab==0 and spell_cooldown[sel_menu.i]==0) or (sel_menu.tab==1 and tbl_sum(consumables)>0)) and 80 or 40,128)
   print(btns,30,98,6)
   clip()
   -- magic tab
   if sel_menu.tab==0 then
    print("⬅️ magick ➡️",40,22,0)
    print("▶",34,24+sel_menu.i*7,6)
-   for i=1,tbl_len(spells) do
-    local pre=spell_cd[i]>0 and "("..spell_cd[i]..") " or (i==1 and #player.followers>=max_followers and "(max) ") or ""
+   for i=1,tbl_len(spell_names) do
+    local pre=spell_cooldown[i]>0 and "("..spell_cooldown[i]..") " or (i==1 and #player.followers>=max_followers and "(max) ") or ""
     local y=24+i*7
-    print(pre..spells[i],39,y,sel_menu.i==i and spell_cd[i]==0 and 6 or 5)
-    if(spell_cd[i]>0)line(37+str_width(pre),y+1,39+str_width(pre)+str_width(spells[i]),y+3,5)
+    print(pre..spell_names[i],39,y,sel_menu.i==i and spell_cooldown[i]==0 and 6 or 5)
+    if(spell_cooldown[i]>0)line(37+str_width(pre),y+1,39+str_width(pre)+str_width(spell_names[i]),y+3,5)
     end
-   local txt = split(spells_desc[sel_menu.i],"\n")
+   local txt = split(spell_txt[sel_menu.i],"\n")
    for i=1,tbl_len(txt) do print(txt[i],34,55+i*7,6) end
   -- inventory tab
   elseif sel_menu.tab==1 then
@@ -382,7 +378,7 @@ draw={
   -- ui elements
   draw.window_frame()
   local btn_x=sel_look.text.." ❎"
-  s_print(sel_look.spell==0 and "target:" or "cast "..spells[sel_look.spell].." on:",2,113,state==state_look)
+  s_print(sel_look.spell==0 and "target:" or "cast "..spell_names[sel_look.spell].." on:",2,113,state==state_look)
   s_print(sel_look.name,2,120,state==state_look,sel_look.entity~=nil,sel_look.color,sel_look.entity and sel_look.entity.parent_class==creature.class and 0 or 5)
   s_print("cancel 🅾️",90,113,state==state_look)
   s_print(btn_x,126-str_width(btn_x),120,state==state_look,sel_look.usable)
@@ -533,8 +529,8 @@ input={
   elseif btnp(2) and sel_menu.i>1 then sel_menu.i-=1
   elseif btnp(4) then change_state(state_game)
   elseif sel_menu.tab==0 then
-   if btnp(3) and sel_menu.i<tbl_len(spells) then sel_menu.i+=1
-   elseif btnp(5) and spell_cd[sel_menu.i]==0 then 
+   if btnp(3) and sel_menu.i<tbl_len(spell_names) then sel_menu.i+=1
+   elseif btnp(5) and spell_cooldown[sel_menu.i]==0 then 
     change_state(state_look)
     sel_look.spell=sel_menu.i
     set_look()
@@ -572,7 +568,7 @@ input={
    change_state(state_game)
    cast_spell(sel_look.spell,sel_look.entity)
    do_turn()
-   spell_cd[sel_look.spell]=sel_look.spell==1 and timer_spell_charm or timer_spell
+   spell_cooldown[sel_look.spell]=sel_look.spell==1 and timer_spell_charm or timer_spell
    return false
   end
   return true
@@ -581,7 +577,9 @@ input={
  -- dialogue state
  dialogue=function()
   if btnp(5) then
-   if sel_dialogue.pos+2<#sel_dialogue.text then sel_dialogue.pos+=3
+   local n=min(sel_dialogue.pos+2,#sel_dialogue.text)
+   if sel_dialogue.anim_frame[n]>0 then for i=sel_dialogue.pos,n do sel_dialogue.anim_frame[i]=0 end
+   elseif sel_dialogue.pos+2<#sel_dialogue.text then sel_dialogue.pos+=3
    else change_state(state_game) end
   end
  end,
@@ -591,7 +589,7 @@ input={
   if btnp(5) then
    sel_chest.entity.anim_frame=0
    if chest.anim_playing then for i=1,tbl_len(sel_chest.anim_frame) do sel_chest.anim_frame[i]=1 end
-   elseif tomes==max_tomes then change_state(state_game_over)
+   elseif tomes==max_tomes then change_state(state_game_over) flash_frame=2
    else change_state(state_game) end
   end
  end,
@@ -711,7 +709,7 @@ end
 
 -- perform turn
 function do_turn()
- for i=1,tbl_len(spells) do spell_cd[i]=max(0,spell_cd[i]-1) end
+ for i=1,tbl_len(spell_names) do spell_cooldown[i]=max(0,spell_cooldown[i]-1) end
  for e in all(entity.entities) do e:do_turn() end
  turn+=1
 end
@@ -739,7 +737,7 @@ end
 
 -- cast spell
 function cast_spell(i,e)
- msg.add("casted "..spells[i])
+ msg.add("casted "..spell_names[i])
  status=statuses[i]
  e:add_status(status)
  if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do e:clear_status(status_charmed) break end

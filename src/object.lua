@@ -327,7 +327,7 @@ creature=entity:inherit({
  end,
 
  add_status=function(self,status)
-  self.status_timer[status]=status==status_poisoned and timer_effect_poison or timer_effect
+  self.status_timer[status]=(status==status_poisoned and timer_effect_poisoned) or (status==status_sleeping and timer_effect_sleeping) or timer_effect
   if(status==status_scared)self:clear_status(status_charmed | status_sleeping)
   if(status==status_charmed or status==status_sleeping)self:clear_status(status_scared)
   if(status==status_charmed)self.collision=false self.interactable=false add(player.followers,self)
@@ -364,7 +364,7 @@ creature=entity:inherit({
   self.dead=true
   self.collision=false
   del(player.followers,self)
-  if(self==player)change_state(state_dead)
+  if(self==player)change_state(state_game_over)
  end,
 })
 

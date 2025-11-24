@@ -1,22 +1,23 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- add spell description
+-- rewrite intro text
+-- add npc dialogue
 -- add sound
 -- add music
--- add more consumables (dumpling and ramen bowl)
 -- add more sprites:
     -- house interior objects: bed, jug
     -- ruins: cobwebs
     -- other: flowers
--- add dialogue
+-- finish map
+-- add spellcasting animation
+-- make end game (win) screen prettier (add confetti background animation)
 
 
 
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
--- (?) spellcasting animation
 -- (?) multiple targets (queue system)
 -- (?) xp and level up
 -- (?) traps
