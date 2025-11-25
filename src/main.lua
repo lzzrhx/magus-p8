@@ -720,9 +720,9 @@ end
 function update_camera()
  local x,y=cam_x,cam_y
  local p_x,p_y=player.x,player.y
- if (p_x-cam_x>15-cam_offset and (room or cam_x<87)) x=p_x-15+cam_offset
+ if (p_x-cam_x>15-cam_offset and (cam_x-cam_x_diff)<87) x=p_x-15+cam_offset
  if (p_x-cam_x<cam_offset and cam_x>cam_x_min) x=p_x-cam_offset
- if (p_y-cam_y>13-cam_offset and cam_y<50) y=p_y-13+cam_offset
+ if (p_y-cam_y>13-cam_offset and (cam_y-cam_y_diff)<50) y=p_y-13+cam_offset
  if (p_y-cam_y<cam_offset and cam_y>cam_y_min) y=p_y-cam_offset
  if (room==nil and cam_x<cam_x_min)x=cam_x_min
  if (room==nil and cam_y<cam_y_min)y=cam_y_min
@@ -738,7 +738,8 @@ function change_room(stair)
  local new_room=data_floors.rooms[target_stair[3]]
  local delta_z=((new_room and new_room[1]) or 0) - ((room and room[1]) or 0)
  cam_x_min,cam_y_min=(new_room and target_stair[1]-player.x) or 0,(new_room and target_stair[2]-player.y) or 0
- cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
+ cam_x_diff,cam_y_diff=0,0
+ if(new_room)cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
  player.x,player.y=target_stair[1],target_stair[2]
  cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
  msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
