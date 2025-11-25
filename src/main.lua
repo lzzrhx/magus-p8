@@ -85,7 +85,7 @@ function _update()
   blink_frame=(blink_frame+1)%2
   blink=blink_frame%2==0
   prev_frame=frame
-  frame=flr(time()*2%2)
+  frame=flr(t()*2%2)
   update[state]()
  end
 end
@@ -249,16 +249,14 @@ draw={
   camera(0,title_pos)
   -- title effect
   for i=1,title_effect_num do
-   local x=cos(time()/8+i/title_effect_num)*56
-   local y=sin(time()/8+i/title_effect_num)*16+sin(time()+i*(1/title_effect_num)*5)*4
+   local x=cos(t()/8+i/title_effect_num)*56
+   local y=sin(t()/8+i/title_effect_num)*16+sin(t()+i*(1/title_effect_num)*5)*4
    local c=title_effect_colors[i%#title_effect_colors+1]
    for j=1,3 do pset(62+x+j,50+y+j,c) end
   end
-  clip(0,46-title_pos,128,8) --this is a fix for the fake-8 emulator
   poke(0x5f58,0x81)
   s_print("magus magicus",13,45,true,true,7,4)
   poke(0x5f58,0)
-  clip()
   print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
   -- intro text
   if not title_idle then
@@ -792,11 +790,13 @@ end
 function set_look()
  tbl_merge(sel_look,{name="none",usable=false,text="interact",color=5,key=0})
  sel_look.entity=nil
- local e=entity.entity_at(sel_look.x,sel_look.y)
- if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil
- if(e) then
-  e:look_at(sel_look)
-  if(sel_look.spell>0)sel_look.usable=in_sight(player,sel_look)
+ if (room==nil or (sel_look.x-cam_x>room[2]-cam_x and sel_look.x-cam_x<room[4]-cam_x and sel_look.y-cam_y>room[3]-cam_y and sel_look.y-cam_y<room[5]-cam_y)) then
+  local e=entity.entity_at(sel_look.x,sel_look.y)
+  if(e and sel_look.spell>0)e=e.class==enemy.class and not e.dead and not e:check_status(status_charmed) and e or nil
+  if(e) then
+   e:look_at(sel_look)
+   if(sel_look.spell>0)sel_look.usable=in_sight(player,sel_look)
+  end
  end
  if(sel_look.spell>0)sel_look.text="cast"
 end
