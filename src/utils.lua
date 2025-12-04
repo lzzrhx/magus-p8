@@ -16,24 +16,18 @@ function str_height(s)
  return tbl_len(split(s,"\n"))
 end
 
--- copy a table
-function tbl_copy(a)
- local tbl={}
- for k,v in pairs(a) do tbl[k]=v end
- return tbl
-end
-
 -- merge table a and b into a new table
 function tbl_merge_new(a,b)
  local tbl={}
- for k,v in pairs(a) do tbl[k]=v end
- for k,v in pairs(b) do tbl[k]=v end
+ tbl_merge(tbl,a)
+ tbl_merge(tbl,b)
  return tbl
 end
 
 -- merge table b into table a
 function tbl_merge(a,b)
- for k,v in pairs(b) do a[k]=v end return a
+ for k,v in pairs(b) do a[k]=v end
+ return a
 end
 
 -- get length of table
@@ -82,7 +76,7 @@ function wavy(i,h,s,o)
 end
 
 -- wavy text
-function wavy_print(s,x,y,c0,c1,h)
+function wavy_s_print(s,x,y,c0,c1,h)
  for i=1,#s do s_print(sub(s,i,i),x+i*4,y+wavy(i,h),true,true,c0,c1) end
 end
 
@@ -93,12 +87,14 @@ function s_print(s,x,y,c1e,c0e,c0,c1)
  if(c0e~=false)print(s,x,y,c0)
 end
 
+-- sum all values in table
 function tbl_sum(tbl)
  local n=0
  for i in all(tbl) do n+=i end
  return n
 end
 
+-- count non-zero values in table
 function tbl_len_nonzero(tbl)
  local n=0
  for sub_tbl in all(tbl) do if(sub_tbl>0)n+=1 end

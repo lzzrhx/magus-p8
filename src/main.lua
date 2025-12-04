@@ -12,7 +12,7 @@ timer_effect_poisoned=3 -- effect timer for poison (turns)
 timer_spell=24 -- cooldown for casting spells (turns)
 timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 max_followers=5
-max_tomes=4
+max_tomes=3
 
 -- game states
 state_reset="reset"
@@ -320,6 +320,7 @@ draw={
   print(msg.txt,2,112,7)
   clip()
   if(state==state_game or state==state_game_over)msg.anim_step()
+  print(turn,0,0,7)
  end,
 
  -- menu state
@@ -456,7 +457,7 @@ draw={
    end
   end
   -- wavy button press text
-  if(not chest.anim_playing)wavy_print("take items ❎",38,85)
+  if(not chest.anim_playing)wavy_s_print("take items ❎",38,85)
  end,
 
  -- read state
@@ -488,7 +489,7 @@ draw={
     end
    end
   else
-   wavy_print("g a m e   o v e r",26,55,8,1)
+   wavy_s_print("g a m e   o v e r",26,55,8,1)
    if(frame==0)s_print("restart ❎",44,85)
   end
  end,

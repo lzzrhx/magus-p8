@@ -34,7 +34,7 @@ drawable=object:inherit({
  -- draw at given screen position
  spr=function(self,x,y,sprite)
   local sprite=sprite or self.sprite
-  if self.flash_frame>0 then
+  if self.flash_frame>0 and flash_frame<=0 then
    self.flash_frame-=1
    pal_all(7)
   end
@@ -136,6 +136,7 @@ entity=drawable:inherit({
  -- check if entity is on screen
  in_frame=function(self,offset)
   local pos=vec2_add(self,offset or {x=0,y=0})
+  if(room and (pos.x<=room[2] or pos.x>=room[4] or pos.y<=room[3] or pos.y>=room[5]))return false
   return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+15)
  end,
 
@@ -238,19 +239,21 @@ creature=entity:inherit({
   if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
   if(self.target and (self.target.dead or turn>self.target_turn+timer_target or self.target:check_status(status_charmed)))self.target=nil
   -- poisoned status
-  if self:check_status(status_poisoned) then
-   if(self==player)msg.add(self:get_name().." took poison damage")
-   self:take_dmg(flr(2*(0.5+rnd())+0.5))
-  end
-  for i=2,4 do
-   local status=statuses[i]
-   if(self:check_status(status)) then
-    if(self.status_timer[status]<=0)self:clear_status(status)
-    self.status_timer[status]-=1
+  if not self.dead then
+   if self:check_status(status_poisoned) then
+    if(self==player)msg.add(self:get_name().." took poison damage")
+    self:take_dmg(flr(2*(0.5+rnd())+0.5))
    end
+   for i=2,4 do
+    local status=statuses[i]
+    if(self:check_status(status)) then
+     if(self.status_timer[status]<=0)self:clear_status(status)
+     self.status_timer[status]-=1
+    end
+   end
+   self.turn=turn
+   self.followed=false
   end
-  self.turn=turn
-  self.followed=false
   return not self.dead and self:in_frame() and not self:check_status(status_sleeping)
  end,
 
@@ -269,7 +272,6 @@ creature=entity:inherit({
    x,y=self.anim_x1,self.anim_y1
    if self.target then
     if(self.anim_frame==self.anim[1] and self.target==player)flash_frame=2
-    if(self.anim_frame==self.anim[1]-3)self.target.flash_frame=2
    end
   end
   self.anim_x=self.anim[2]*anim_pos*((x<-0.1 and -1) or (x>0.1 and 1) or 0)
@@ -347,6 +349,7 @@ creature=entity:inherit({
  take_dmg=function(self,dmg)
   self:clear_status(status_sleeping)
   if(dmg<0)self:clear_status(status_poisoned)
+  if(dmg>0)self.flash_frame=2
   self.blink_delay=(frame==0 and 2) or 1
   self.attacked=true
   self.dhp=(self.dhp_turn==turn and self.dhp-dmg) or dmg*-1
@@ -429,7 +432,7 @@ companion=creature:new({
  -- perform turn actions
  do_turn=function(self)
   if creature.do_turn(self) then
-    if player.target then
+    if player.target and not player.target.dead then
      self:move_towards_and_attack(player.target)
     else
      local target=self==companion and player or companion

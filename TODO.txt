@@ -6,19 +6,26 @@
 -- add sound
 -- add music
 -- add more sprites:
-    -- house interior objects: bed, jug
-    -- ruins: cobwebs
-    -- other: flowers
--- finish map
--- add spellcasting animation
--- make end game (win) screen prettier (add confetti background animation)
+    -- tome
+    -- house interior objects: bed, jug, stove, table with something on it
+    -- ruins: cobwebs, cobwebs #2, broken table, broken chair
+    -- other: flowers, flowers #2, bush
 
 
 
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
+-- (?) followers do turn actions before enemies
+-- (?) game over after x turns
+-- (?) score system (turns left * 10 + # kills - hp healed)
+-- (?) make end game (win) screen prettier (add confetti background animation)
+-- (?) add spellcasting animation
 -- (?) multiple targets (queue system)
+-- (?) help screen with tips
+-- (?) swap x and z buttons
+-- (?) food and hunger
+-- (?) split entities into multiple tables (to improve performance)
 -- (?) xp and level up
 -- (?) traps
 -- (?) equippable items
@@ -29,17 +36,14 @@
 -- (?) increased movement speed for some enemies (2-3 tiles per turn)
 -- (?) golden chest / mimic chest
 -- (?) portals (teleport)
--- (?) auto inventory sorting (by class and alphabet) & group keys in inventory
 -- (?) debug menu
 -- (?) mouse support
 -- (?) senses (hearing / smell)
 -- (?) movement speed stat
--- (?) food and hunger
 -- (?) pathfinding (a-star)
 -- (?) field of view (shadowcasting)
 -- (?) procedural system for drawing roads and grass with shapes instead of sprites
 -- (?) randomly generated dungeons (underworld)
--- (?) score system
 -- (?) player name
 -- (?) companion name
 
@@ -83,3 +87,6 @@ spells:
     x  poison: cast poison on enemy, lasts 6 turns, 24 turns cooldown
     -  teleport: teleport enemy to random visible location
     -  detect trap: finds traps within a distance of 3 from player
+
+tips:
+    - use "look" mode to attack diagonally
