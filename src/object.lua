@@ -289,6 +289,9 @@ creature=entity:inherit({
   if not collision(x,y) and x>=0 and x<128 and y>=0 and y<64 and (x~=0 or y~=0) then
    if(self.x~=x)self.flipped=self.x>x
    self:play_anim(creature.anims.move,self.x-x,self.y-y)
+   if(self==player) then
+     sfx(63)
+   end
    tbl_merge(self,{prev_x=self.x,prev_y=self.y,x=x,y=y})
    return true
   end
@@ -326,6 +329,7 @@ creature=entity:inherit({
    self.target_turn,other.target_turn=turn,turn
   end
   self:play_anim(creature.anims.attack,0,0,other.x-self.x,other.y-self.y)
+  sfx(60)
  end,
 
  add_status=function(self,status)
@@ -548,6 +552,7 @@ door=entity:inherit({
    msg.add((self.collision and "closed" or "opened").." door")
   end
   change_state(state_game)
+  sfx(62)
  end,
 })
 
@@ -567,6 +572,7 @@ stairs=entity:inherit({
   local stair=nil
   for e in all(data_floors.stairs) do if(e[1]==player.x and e[2]==player.y) stair=e break end
   draw.play_fade(change_room,stair)
+  sfx(61)
  end,
 })
 
@@ -574,6 +580,7 @@ stairs=entity:inherit({
 
 -- sign
 -------------------------------------------------------------------------------
+--[[
 sign=entity:inherit({
  -- static vars
  class="sign",
@@ -596,6 +603,7 @@ sign=entity:inherit({
   change_state(state_read,self)
  end,
 })
+--]]
 
 
 
@@ -644,6 +652,7 @@ chest=entity:inherit({
    msg.add("got "..add_to_inventory(itm))
   end
   change_state(state_chest,sel)
+  sfx(53)
  end,
 
  -- perform animation step
@@ -661,7 +670,7 @@ chest=entity:inherit({
   if entity.draw(self,offset) and (self.anim_this) then
    local x,y=pos_to_screen(self).x,pos_to_screen(self).y
    if(blink)rectfill(x+1,y+2,x+5,y+3,7)
-   if(self.anim_frame>=30 or (self.anim_frame>10 and blink)) then
+   if(self.anim_frame>=30 or (self.anim_frame>2 and blink)) then
     y-=(45-self.anim_frame)*0.25
     clip(x,y,8,5)
     self:spr(x,y,11)
@@ -688,6 +697,7 @@ item = entity:inherit({
   msg.add("picked up "..add_to_inventory(self))
   self:destroy()
   change_state(state_game)
+  sfx(56)
  end,
 
 })

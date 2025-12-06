@@ -3,15 +3,71 @@
 -------------------------------------------------------------------------------
 -- rewrite intro text
 -- add npc dialogue
--- add sound
+-- add sounds
+    -- move
+    -- open door
+    -- go on stairs
+    -- pick up item
+    -- cast spell
+    -- attack
+    -- get hit
+    -- die
+    -- dialogue
+    -- use item
+    -- cancel
+    -- open menu
+    -- start game
 -- add music
+    -- title screen - 
+    -- area 1 dungeon - 
+    -- area 2 - 
+    -- area 2 dungeon - 
+    -- area 3 - 
+    -- area 3 dungeon - 
+    -- game over (dead) - 
+    -- game over (won) - 
 -- add more sprites:
     -- tome
     -- house interior objects: bed, jug, stove, table with something on it
     -- ruins: cobwebs, cobwebs #2, broken table, broken chair
     -- other: flowers, flowers #2, bush
 
+sfx:
+63 move
+62 open door
+61 go on stairs
+60 attack
+59 cast beguile
+58 cast other spell
+57 dialogue
+56 pick up item
+55 start game
+54 consume item
+53 chest opening
+52 item popping out of chest
 
+music:
+4  game_c4 - game
+0  main1 - game over
+20 court1 - title screen
+
+unused:
+drama1 (area 3 dungeon) 1/4
+game_c10 (game over, won) 1/2
+game_b4 (normal) 1/2
+game_c5 (area 2) 1/3
+game_b6 (dungeon 2) 1/2
+mystery1 (dead / dungeon)
+game_c2 (area 1)
+game_a2 (area 1)
+game_b1 (area 1)
+game_c1 (area 2)
+game_c8 (won)
+game_c6
+game_c11
+game_b3
+game_b2
+game_a6
 
 -------------------------------------------------------------------------------
 -- maybe
@@ -20,6 +76,7 @@
 -- (?) game over after x turns
 -- (?) score system (turns left * 10 + # kills - hp healed)
 -- (?) make end game (win) screen prettier (add confetti background animation)
+-- (?) add fog effect to area 2 & 3
 -- (?) add spellcasting animation
 -- (?) multiple targets (queue system)
 -- (?) help screen with tips

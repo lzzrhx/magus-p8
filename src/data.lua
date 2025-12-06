@@ -5,6 +5,7 @@ spell_txt=split"turn foe to\nfriend. max 5.\nlasts until\nmax exceeded.,drive cr
 key_names=split"iron key,gold key,green key"
 consumable_names=split"cherries,orange,potion"
 consumable_values=split"5,10,15"
+area_music=split"4,0"
 
 -- entities
 -------------------------------------------------------------------------------
@@ -25,8 +26,8 @@ data_entities={
  [6]={class="stairs"},
  [7]={class="stairs"},
  [8]={class="stairs"},
- [3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
- [4]={class="sign"},
+ --[3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
+ --[4]={class="sign"},
  [11]={class="chest"},
  [82]={class="door"},
  [81]={class="door",collision=false},
@@ -149,11 +150,13 @@ data_chests = {
 
 -- signs
 -------------------------------------------------------------------------------
+--[[
 data_signs = {
  -- x,y,message
  split"5,58,welcome to\nthyng village",
  split"52,31,◀- vangald fortress\n-▶ woodlands",
 }
+]]--
 
 
 

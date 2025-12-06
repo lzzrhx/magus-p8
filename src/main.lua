@@ -22,7 +22,7 @@ state_menu="menu"
 state_look="look"
 state_dialogue="dialogue"
 state_chest="chest"
-state_read="read"
+--state_read="read"
 state_game_over="game_over"
 
 -- status effects
@@ -64,7 +64,8 @@ spell_cooldown=split"0,0,0,0"
 keys=split"0,0,0"
 consumables=split"0,0,0"
 tomes=0
-
+music_q_t=0
+music_q=nil
 
 
 
@@ -87,6 +88,7 @@ function _update()
   prev_frame=frame
   frame=flr(t()*2%2)
   update[state]()
+  if(music_q and t()>music_q_t)music(music_q,1000,6) music_q=nil
  end
 end
 
@@ -132,9 +134,11 @@ init={
  end,
 
  -- read state
+ --[[
  read=function(sel)
   sel_read=sel
  end,
+ --]]
 }
 
 
@@ -178,9 +182,11 @@ update={
  end,
 
  -- read state
+ --[[
  read=function()
   input.read()
  end,
+ --]]
 
  -- game over state
  game_over=function()
@@ -407,7 +413,7 @@ draw={
      clip(#v*4+timer_dialog_line-f,0,3,128)
      print(v,2,y-1,7)
     end
-    if(f>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3
+    if(f>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3 if((#v*4-f)%13<=3)sfx(57)
    end
   end
   clip()
@@ -434,6 +440,7 @@ draw={
      local itm=e.content[i]
      -- play animation for current item
      if f>0 then
+      if(f==60)sfx(52)
       -- stop chest blinking on last item
       if(i==n)e.anim_this=false
       -- set item color to white
@@ -446,10 +453,12 @@ draw={
       -- reset palette and decrement animation frame
       pal_set()
       sel_chest.anim_frame[i]-=1
+      if(sel_chest.anim_frame[i]<=0)sfx(56)
       -- flash the screen and set chest animation to finished after last item animation is done
       if sel_chest.anim_frame[n]<=0 then 
        chest.anim_playing=false
        flash_frame=2
+       
       end
      -- draw the item bobbing up and down after the popping out of chest animation has finished
      elseif not chest.anim_playing or blink then vec2_spr(itm.sprite,vec2_add(target_pos,{x=0,y=wavy()})) end
@@ -461,6 +470,7 @@ draw={
  end,
 
  -- read state
+ --[[
  read=function()
   draw.look()
   draw.monochrome()
@@ -476,6 +486,7 @@ draw={
   end
   s_print("continue ❎",42,85+exp)
  end,
+ --]]
 
  -- game over state
  game_over=function()
@@ -503,8 +514,16 @@ input={
  -- title state
  title=function()
   if btnp(5) then 
-   if title_idle then draw.play_fade(toggle_bool,"title_idle")
-   else draw.play_fade(change_state,state_game) end
+   if title_idle then 
+    draw.play_fade(toggle_bool,"title_idle")
+    music(20,5000,6)
+    sfx(55)
+   else 
+    draw.play_fade(change_state,state_game)
+    music_q_t=t()+1
+    music_q=4
+    music(-1,1000)
+   end
   end
  end,
 
@@ -550,6 +569,7 @@ input={
     player:take_dmg(-consumable_values[n])
     consumables[n]-=1
     change_state(state_game)
+    sfx(54)
    end
   end
  end,
@@ -598,9 +618,11 @@ input={
  end,
 
  -- read state
+ --[[
  read=function()
   if(btnp(5))change_state(state_game)
  end,
+ --]]
 
  -- game over state
  game_over=function()
@@ -753,6 +775,7 @@ function cast_spell(i,e)
  status=statuses[i]
  e:add_status(status)
  if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do e:clear_status(status_charmed) break end
+ sfx(i==1 and 59 or 58)
 end
 
 -- check if map coordinate is in sight or blocked
