@@ -14,7 +14,6 @@
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
--- (?) followers do turn actions before enemies
 -- (?) make end game (win) screen prettier (add confetti background animation)
 -- (?) add fog effect to area 2 & 3
 -- (?) add spellcasting animation
@@ -99,7 +98,7 @@ sfx:
     5 item popping out of chest
 
 music:
-    0  main1, area 2
-    4  game_c4, area 1
     20 court1, title screen
+    4  game_c4, area 1
+    0  main1, area 2
     26 drama1, area 3

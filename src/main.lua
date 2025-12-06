@@ -62,10 +62,9 @@ title_text=split(data_story_intro,"\n")
 spell_cooldown=split"0,0,0,0"
 keys=split"0,0,0"
 consumables=split"0,0,0"
-tomes=0
+tomes=3
 music_q_t=0
 music_q=nil
-area=0
 
 
 
@@ -74,7 +73,7 @@ area=0
 
 -- init
 function _init()
- change_state(state_title)
+ change_state(state_game_over)
  populate_map()
 end
 
@@ -398,7 +397,7 @@ draw={
      clip(#v*4+timer_dialog_line-f,0,3,128)
      print(v,2,y-1,7)
     end
-    if(f>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3 if((#v*4-f)%13<=3)sfx(63,-1,4,2)
+    if(f>0 and (k==sel_dialogue.pos or sel_dialogue.anim_frame[k-1]<=0))sel_dialogue.anim_frame[k]-=3 if((#v*4-f)%13<=3)sfx(63,3,4,2)
    end
   end
   clip()
@@ -425,7 +424,7 @@ draw={
      local itm=e.content[i]
      -- play animation for current item
      if f>0 then
-      if(f==60)sfx(5)
+      if(f==60)sfx(5,2)
       -- stop chest blinking on last item
       if(i==n)e.anim_this=false
       -- set item color to white
@@ -438,7 +437,7 @@ draw={
       -- reset palette and decrement animation frame
       pal_set()
       sel_chest.anim_frame[i]-=1
-      if(sel_chest.anim_frame[i]<=0)sfx(62,-1,8,8)
+      if(sel_chest.anim_frame[i]<=0)sfx(62,3,8,8)
       -- flash the screen and set chest animation to finished after last item animation is done
       if sel_chest.anim_frame[n]<=0 then 
        chest.anim_playing=false
@@ -459,10 +458,10 @@ draw={
   draw.game()
   draw.monochrome()
   if(tomes==max_tomes) then
-   local s=split"you won!,congratulations!"
+   local s=split("you won!,congratulations!,turns used: "..turn)
    for i=1,#s do
     local l=s[i]
-    for j=1,#l do s_print(sub(l,j,j),64-#l*3+(j-1)*6,i*12+32+j*1.5+wavy(j,3),true,true,10,13)
+    for j=1,#l do s_print(sub(l,j,j),64-#l*3+(j-1)*6,i*24+j*1.5+wavy(j,3),true,true,10,13)
     end
    end
   else
@@ -482,11 +481,11 @@ input={
   if btnp(5) then 
    if title_idle then 
     draw.play_fade(toggle_bool,"title_idle")
-    music(20,5000,6)
-    sfx(61)
+    change_music(20)
+    sfx(61,3)
    else 
     draw.play_fade(change_state,state_game)
-    change_area(1)
+    change_music(4)
    end
   end
  end,
@@ -533,7 +532,7 @@ input={
     player:take_dmg(-consumable_values[n])
     consumables[n]-=1
     change_state(state_game)
-    sfx(62,-1,8,8)
+    sfx(62,3,8,8)
    end
   end
  end,
@@ -692,7 +691,10 @@ end
 -- perform turn
 function do_turn()
  for i=1,tbl_len(spell_names) do spell_cooldown[i]=max(0,spell_cooldown[i]-1) end
- for e in all(entity.entities) do e:do_turn() end
+ player:do_turn()
+ companion:do_turn()
+ for e in all(player.followers) do e:do_turn() end
+ for e in all(entity.entities) do if(e.turn<turn)e:do_turn() end
  turn+=1
 end
 
@@ -724,14 +726,17 @@ function change_room(stair)
  cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
  msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
  room=new_room
+ if(target_stair[4]==53)change_music(0)
+ if(target_stair[4]==54)change_music(4)
+ if(target_stair[4]==11)change_music(26)
+ if(target_stair[4]==12)change_music(0)
 end
 
 -- change area
-function change_area(new_area)
- area=new_area
- music_q_t=t()+1
- music_q=area_music[area]
- music(-1,1000)
+function change_music(track)
+ music_q_t=t()+0.25
+ music_q=track
+ music(-1,250)
 end
 
 -- cast spell
@@ -740,7 +745,7 @@ function cast_spell(i,e)
  status=statuses[i]
  e:add_status(status)
  if(status==status_charmed and #player.followers>max_followers)for e in all(player.followers) do e:clear_status(status_charmed) break end
- sfx(i==1 and 6 or 7)
+ sfx(i==1 and 6 or 7,3)
 end
 
 -- check if map coordinate is in sight or blocked

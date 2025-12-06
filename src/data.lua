@@ -5,7 +5,6 @@ spell_txt=split"turn foe to\nfriend. max 5.\nlasts until\nmax exceeded.,drive cr
 key_names=split"iron key,gold key,green key"
 consumable_names=split"cherries,orange,potion"
 consumable_values=split"5,10,15"
-area_music=split"4,0,26"
 
 -- entities
 -------------------------------------------------------------------------------
@@ -56,7 +55,7 @@ data_floors={
   [6]=split"-1,108,24,127,32",
   [7]=split"1,103,33,108,37",
   [8]=split"-1,109,33,119,37",
-  [9]=split"1,119,33,127,37",
+  [9]=split"1,119,33,124,37",
   [10]=split"-1,103,46,107,49",
   [11]=split"1,103,38,119,41",
   [12]=split"-1,123,51,127,62",
@@ -68,6 +67,7 @@ data_floors={
   [18]=split"-1,103,51,112,57",
   [19]=split"-2,113,51,122,57",
   [20]=split"-3,103,57,122,63",
+  [21]=split"-1,125,33,127,38",
  },
  stairs={
   -- x,y,room,target
@@ -123,6 +123,10 @@ data_floors={
   [50]=split"114,52,19,49",
   [51]=split"114,56,19,52",
   [52]=split"104,58,20,51",
+  [53]=split"52,36,nil,54",
+  [54]=split"126,37,21,53",
+  [55]=split"126,34,21,56",
+  [56]=split"52,33,nil,55",
  },
 }
 
