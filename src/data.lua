@@ -5,7 +5,7 @@ spell_txt=split"turn foe to\nfriend. max 5.\nlasts until\nmax exceeded.,drive cr
 key_names=split"iron key,gold key,green key"
 consumable_names=split"cherries,orange,potion"
 consumable_values=split"5,10,15"
-area_music=split"4,0"
+area_music=split"4,0,26"
 
 -- entities
 -------------------------------------------------------------------------------
@@ -26,8 +26,6 @@ data_entities={
  [6]={class="stairs"},
  [7]={class="stairs"},
  [8]={class="stairs"},
- --[3]={class="sign",name="grave",message="rest in peace",bg=13,fg=6},
- --[4]={class="sign"},
  [11]={class="chest"},
  [82]={class="door"},
  [81]={class="door",collision=false},
@@ -67,7 +65,7 @@ data_floors={
   [15]=split"-2,120,44,127,50",
   [16]=split"1,108,46,112,49",
   [17]=split"-1,113,46,119,49",
-  [18]=split"-1,103,54,112,57",
+  [18]=split"-1,103,51,112,57",
   [19]=split"-2,113,51,122,57",
   [20]=split"-3,103,57,122,63",
  },
@@ -140,9 +138,9 @@ data_chests = {
  {x=121,y=45,content=split"57,53,54"},
  {x=100,y=2,content=split"51"},
  {x=118,y=47,content=split"52"},
- {x=60,y=5,content=split"57,53"},
+ {x=60,y=5,content=split"57,52"},
  {x=119,y=60,content=split"54"},
- {x=26,y=19,content=split"56,52"},
+ {x=26,y=19,content=split"56,51"},
  {x=38,y=36,content=split"51"},
 }
 

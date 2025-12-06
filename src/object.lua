@@ -290,7 +290,9 @@ creature=entity:inherit({
    if(self.x~=x)self.flipped=self.x>x
    self:play_anim(creature.anims.move,self.x-x,self.y-y)
    if(self==player) then
-     sfx(63)
+     sfx(63,-1,0,2)
+     if(player.x==52 and player.y==35)change_area(area==1 and 2 or 1)
+     if(player.x==33 and player.y==20)change_area(area==2 and 3 or 2)
    end
    tbl_merge(self,{prev_x=self.x,prev_y=self.y,x=x,y=y})
    return true
@@ -552,7 +554,7 @@ door=entity:inherit({
    msg.add((self.collision and "closed" or "opened").." door")
   end
   change_state(state_game)
-  sfx(62)
+  sfx(63,-1,24,5)
  end,
 })
 
@@ -572,38 +574,9 @@ stairs=entity:inherit({
   local stair=nil
   for e in all(data_floors.stairs) do if(e[1]==player.x and e[2]==player.y) stair=e break end
   draw.play_fade(change_room,stair)
-  sfx(61)
+  sfx(63,-1,8,10)
  end,
 })
-
-
-
--- sign
--------------------------------------------------------------------------------
---[[
-sign=entity:inherit({
- -- static vars
- class="sign",
- parent_class=entity.class,
-
- --vars
- interact_text="read",
- message="...",
- bg=15,
- fg=0,
-
- -- constructor
- new=function(self,tbl)
-  for d in all(data_signs) do if d[1]==tbl.x and d[2]==tbl.y then tbl.message=d[3] break end end
-  return entity.new(self,tbl)
- end,
-
- -- interact action
- interact=function(self)
-  change_state(state_read,self)
- end,
-})
---]]
 
 
 
@@ -652,7 +625,7 @@ chest=entity:inherit({
    msg.add("got "..add_to_inventory(itm))
   end
   change_state(state_chest,sel)
-  sfx(53)
+  sfx(4)
  end,
 
  -- perform animation step
@@ -697,7 +670,7 @@ item = entity:inherit({
   msg.add("picked up "..add_to_inventory(self))
   self:destroy()
   change_state(state_game)
-  sfx(56)
+  sfx(62,-1,0,8)
  end,
 
 })
