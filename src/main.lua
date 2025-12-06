@@ -62,7 +62,7 @@ title_text=split(data_story_intro,"\n")
 spell_cooldown=split"0,0,0,0"
 keys=split"0,0,0"
 consumables=split"0,0,0"
-tomes=3
+tomes=0
 music_q_t=0
 music_q=nil
 
@@ -73,7 +73,7 @@ music_q=nil
 
 -- init
 function _init()
- change_state(state_game_over)
+ change_state(state_title)
  populate_map()
 end
 
