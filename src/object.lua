@@ -38,8 +38,7 @@ drawable=object:inherit({
    self.flash_frame-=1
    pal_all(7)
   end
-  palt(0,false)
-  palt(15,true)
+  palt(0b0000000000000001)
   spr(sprite,x,y,1,1,self.flipped)
   pal_set()
  end,
@@ -67,9 +66,7 @@ entity=drawable:inherit({
 
  -- (static) get entity at coordinate
  entity_at=function(x,y)
-  for e in all(entity.entities) do if (e.class==item.class and e.x==x and e.y==y) return e end
-  for e in all(entity.entities) do if (e.class==enemy.class and e.x==x and e.y==y and not e:check_status(status_charmed) and not e.dead) return e end
-  for e in all(entity.entities) do if (e.x==x and e.y==y) return e end
+  for i=1,3 do for e in all(entity.entities) do if((i==1 and e.class==item.class and e.x==x and e.y==y) or (i==2 and e.class==enemy.class and e.x==x and e.y==y and not e:check_status(status_charmed) and not e.dead) or (i==3 and e.x==x and e.y==y)) return e end end
   return nil
  end,
 
@@ -119,7 +116,7 @@ entity=drawable:inherit({
 
  -- get name or class name of this entity
  get_name=function(self)
-  return(self.name and self.name) or (self.item_class and self.item_class) or self.class
+  return(self.name and self.name) or (self.class==item.class and (self.type==3 and consumable_names[self.value]) or (self.type==2 and key_names[self.value])) or self.class
  end,
 
  -- look at entity
@@ -240,13 +237,10 @@ creature=entity:inherit({
   if(self.target and (self.target.dead or turn>self.target_turn+timer_target or self.target:check_status(status_charmed)))self.target=nil
   -- poisoned status
   if not self.dead then
-   if self:check_status(status_poisoned) then
-    if(self==player)msg.add(self:get_name().." took poison damage")
-    self:take_dmg(flr(2*(0.5+rnd())+0.5))
-   end
+   if(self:check_status(status_poisoned))self:take_dmg(flr(2*(0.5+rnd())+0.5))
    for i=2,4 do
     local status=statuses[i]
-    if(self:check_status(status)) then
+    if self:check_status(status) then
      if(self.status_timer[status]<=0)self:clear_status(status)
      self.status_timer[status]-=1
     end
@@ -332,7 +326,7 @@ creature=entity:inherit({
 
  add_status=function(self,status)
   self.status_timer[status]=(status==status_poisoned and timer_effect_poisoned) or (status==status_sleeping and timer_effect_sleeping) or timer_effect
-  if(status==status_scared)self:clear_status(status_charmed | status_sleeping)
+  if(status==status_scared)self:clear_status(status_sleeping)
   if(status==status_charmed or status==status_sleeping)self:clear_status(status_scared)
   if(status==status_charmed)self.collision=false self.interactable=false add(player.followers,self)
   self.status=self.status | status
@@ -350,7 +344,6 @@ creature=entity:inherit({
  -- take damage
  take_dmg=function(self,dmg)
   self:clear_status(status_sleeping)
-  if(dmg<0)self:clear_status(status_poisoned)
   if(dmg>0)self.flash_frame=2
   self.blink_delay=(frame==0 and 2) or 1
   self.attacked=true
@@ -610,10 +603,7 @@ chest=entity:inherit({
 
  -- interact action
  interact = function(self)
-  self.open=true
-  self.sprite=12
-  self.anim_frame=45
-  self.anim_this=true
+  self.open,self.anim_this,self.sprite,self.anim_frame=true,true,12,45
   chest.anim_playing=true
   local sel={entity=self,anim_frame={}}
   for itm in all(self.content) do 

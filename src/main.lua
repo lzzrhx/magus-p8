@@ -332,28 +332,30 @@ draw={
   -- button legend
   local btns="cancel 🅾️  use ❎"
   print(btns,30,99,5)
-  clip(30,0,((sel_menu.tab==0 and spell_cooldown[sel_menu.i]==0) or (sel_menu.tab==1 and tbl_sum(consumables)>0)) and 80 or 40,128)
+  local sel_t = sel_menu.tab
+  local sel_i = sel_menu.i
+  clip(30,0,((sel_t==0 and spell_cooldown[sel_i]==0) or (sel_t==1 and tbl_sum(consumables)>0)) and 80 or 40,128)
   print(btns,30,98,6)
   clip()
   -- magic tab
-  if sel_menu.tab==0 then
+  if sel_t==0 then
    print("⬅️ magick ➡️",40,22,0)
-   print("▶",34,24+sel_menu.i*7,6)
+   print("▶",34,24+sel_i*7,6)
    for i=1,tbl_len(spell_names) do
     local pre=spell_cooldown[i]>0 and "("..spell_cooldown[i]..") " or (i==1 and #player.followers>=max_followers and "(max) ") or ""
     local y=24+i*7
-    print(pre..spell_names[i],39,y,sel_menu.i==i and spell_cooldown[i]==0 and 6 or 5)
+    print(pre..spell_names[i],39,y,sel_i==i and spell_cooldown[i]==0 and 6 or 5)
     if(spell_cooldown[i]>0)line(37+str_width(pre),y+1,39+str_width(pre)+str_width(spell_names[i]),y+3,5)
    end
-   local txt = split(spell_txt[sel_menu.i],"\n")
+   local txt = split(spell_txt[sel_i],"\n")
    for i=1,tbl_len(txt) do print(txt[i],34,55+i*7,6) end
   -- inventory tab
-  elseif sel_menu.tab==1 then
+  elseif sel_t==1 then
    print("⬅️ inventory ➡️",34,22,0)
    if tbl_sum(consumables)==0 then
     print("nothing",36,31,5)
    else
-    print("▶",34,24+sel_menu.i*7,6)
+    print("▶",34,24+sel_i*7,6)
     local j=1
     for i=1,#consumables do if(consumables[i]>0)print((consumables[i]>1 and "("..consumables[i]..") " or "")..consumable_names[i],39,24+j*7,sel_menu.i==j and 6 or 5) j+=1 end 
    end
@@ -757,8 +759,7 @@ end
 function in_sight(a,b,view_mode)
  local dx,dy=b.x-a.x,b.y-a.y
  local step=abs(dx)>=abs(dy) and abs(dx) or abs(dy)
- dx=dx/step
- dy=dy/step
+ dx,dy=dx/step,dy/step
  local x,y,prev_x,prev_y=a.x,a.y,a.x,a.y
  local blocked,prev_blocked = false,false
  for i=1,step+1 do

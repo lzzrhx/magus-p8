@@ -2,12 +2,8 @@
 -- todo
 -------------------------------------------------------------------------------
 -- rewrite intro text
--- add npc dialogue
--- add more sprites:
-    -- tome
-    -- house interior objects: bed, jug, stove, table with something on it
-    -- ruins: cobwebs, cobwebs #2, broken table, broken chair
-    -- other: flowers, flowers #2, bush
+-- write npc dialogue
+
 
 
 -------------------------------------------------------------------------------

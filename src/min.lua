@@ -22,16 +22,16 @@ s_print("menu 🅾️",98,113,state==state_game)s_print("look ❎",98,120,state=
 ?msg.txt,2,113,6
 clip(msg.frame,0,msg.frame>msg.width-3and msg.width-msg.frame or 3,128)?msg.txt,2,112,7
 clip()if(state==state_game or state==state_game_over)msg.anim_step()
-end,menu=function()draw.game()draw.monochrome()line(32,21,94,21,6)line(32,90,94,90,6)line(31,22,31,89,6)line(95,22,95,89,6)rectfill(32,21,94,27,6)line(32,59,94,59,6)local n="cancel 🅾️  use ❎"?n,30,99,5
-clip(30,0,(sel_menu.tab==0and spell_cooldown[sel_menu.i]==0or sel_menu.tab==1and tbl_sum(consumables)>0)and 80or 40,128)?n,30,98,6
-clip()if sel_menu.tab==0do?"⬅️ magick ➡️",40,22,0
-?"▶",34,24+sel_menu.i*7,6
-for n=1,tbl_len(spell_names)do local e,d=spell_cooldown[n]>0and"("..spell_cooldown[n]..") "or n==1and#player.followers>=max_followers and"(max) "or"",24+n*7?e..spell_names[n],39,d,sel_menu.i==n and spell_cooldown[n]==0and 6or 5
-if(spell_cooldown[n]>0)line(37+str_width(e),d+1,39+str_width(e)+str_width(spell_names[n]),d+3,5)
-end local n=split(spell_txt[sel_menu.i],"\n")for e=1,tbl_len(n)do?n[e],34,55+e*7,6
-end elseif sel_menu.tab==1do?"⬅️ inventory ➡️",34,22,0
+end,menu=function()draw.game()draw.monochrome()line(32,21,94,21,6)line(32,90,94,90,6)line(31,22,31,89,6)line(95,22,95,89,6)rectfill(32,21,94,27,6)line(32,59,94,59,6)local d="cancel 🅾️  use ❎"?d,30,99,5
+local n,e=sel_menu.tab,sel_menu.i clip(30,0,(n==0and spell_cooldown[e]==0or n==1and tbl_sum(consumables)>0)and 80or 40,128)?d,30,98,6
+clip()if n==0do?"⬅️ magick ➡️",40,22,0
+?"▶",34,24+e*7,6
+for n=1,tbl_len(spell_names)do local d,o=spell_cooldown[n]>0and"("..spell_cooldown[n]..") "or n==1and#player.followers>=max_followers and"(max) "or"",24+n*7?d..spell_names[n],39,o,e==n and spell_cooldown[n]==0and 6or 5
+if(spell_cooldown[n]>0)line(37+str_width(d),o+1,39+str_width(d)+str_width(spell_names[n]),o+3,5)
+end local n=split(spell_txt[e],"\n")for e=1,tbl_len(n)do?n[e],34,55+e*7,6
+end elseif n==1do?"⬅️ inventory ➡️",34,22,0
 if tbl_sum(consumables)==0do?"nothing",36,31,5
-else?"▶",34,24+sel_menu.i*7,6
+else?"▶",34,24+e*7,6
 local e=1for n=1,#consumables do if(consumables[n]>0)print((consumables[n]>1and"("..consumables[n]..") "or"")..consumable_names[n],39,24+e*7,sel_menu.i==e and 6or 5)e+=1end end?"tomes:      "..tomes.."/"..max_tomes,34,62,6
 ?key_names[1].."s:    "..keys[1],34,69,6
 ?key_names[2].."s:    "..keys[2],34,76,6
@@ -77,7 +77,7 @@ player.x,player.y,cam_x,cam_y=d,o,cam_x+d-f,cam_y+o-i msg.add("went "..(t>0and"u
 if(n==54)change_music(4)
 if(n==11)change_music(26)
 end function change_music(n)music_q_t,music_q=t()+.25,n music(-1,250)end function cast_spell(n,e)msg.add("casted "..spell_names[n])status=statuses[n]e:add_status(status)if(status==status_charmed and#player.followers>max_followers)for n in all(player.followers)do n:clear_status(status_charmed)break end
-sfx(n==1and 6or 7,3)end function in_sight(n,e,u)local e,d=e.x-n.x,e.y-n.y local i=abs(e)>=abs(d)and abs(e)or abs(d)e,d=e/i,d/i local o,f,a,r,t,l=n.x,n.y,n.x,n.y,false,false for i=1,i+1do t=fget(mget(o,r),flag_block_view_and_spell)and fget(mget(a,f),flag_block_view_and_spell)or fget(mget(o,f),flag_block_view_and_spell)or u and fget(mget(o,f),flag_block_view)or l if(t)return false
+sfx(n==1and 6or 7,3)end function in_sight(n,e,c)local e,d=e.x-n.x,e.y-n.y local i=abs(e)>=abs(d)and abs(e)or abs(d)e,d=e/i,d/i local o,f,a,r,t,l=n.x,n.y,n.x,n.y,false,false for i=1,i+1do t=fget(mget(o,r),flag_block_view_and_spell)and fget(mget(a,f),flag_block_view_and_spell)or fget(mget(o,f),flag_block_view_and_spell)or c and fget(mget(o,f),flag_block_view)or l if(t)return false
 l,a,r,o,f=t,o,f,n.x+flr(e*i+.5),n.y+flr(d*i+.5)i+=1end return true end function add_to_inventory(n)local e,n=n.type,n.value if(e==1)tomes+=1return"tome"
 if(e==2)keys[n]+=1return key_names[n]
 if(e==3)consumables[n]+=1return consumable_names[n]
@@ -85,9 +85,9 @@ end function set_look()tbl_merge(sel_look,{name="none",usable=false,text="intera
 if(n)n:look_at(sel_look)if(sel_look.spell>0)sel_look.usable=in_sight(player,sel_look)
 end if(sel_look.spell>0)sel_look.text="cast"
 end object={class="object",parent_class=nil,inherit=function(n,e)return setmetatable(e or{},{__index=n})end}drawable=object:inherit({class="drawable",parent_class=object.class,sprite=0,flipped=false,flash_frame=0,vec2_spr=function(n,e,d)local d=d or n.sprite n:spr(e.x,e.y,d)end,spr=function(n,e,d,o)local o=o or n.sprite if(n.flash_frame>0and flash_frame<=0)n.flash_frame-=1pal_all(7)
-palt(0,false)palt(15,true)spr(o,e,d,1,1,n.flipped)pal_set()end})entity=drawable:inherit({class="entity",parent_class=drawable.class,entities={},num=0,x=0,y=0,name=nil,collision=true,interactable=true,interact_text="interact",turn=0,entity_at=function(e,d)for n in all(entity.entities)do if(n.class==item.class and n.x==e and n.y==d)return n end for n in all(entity.entities)do if(n.class==enemy.class and n.x==e and n.y==d and not n:check_status(status_charmed)and not n.dead)return n end for n in all(entity.entities)do if(n.x==e and n.y==d)return n end return nil end,entity_spawn=function(o,e,d)mset(e,d,1)local n,o={x=e,y=d,sprite=o},data_entities[o]if(o)if(o.class==player.class)tbl_merge(player,n)local n=rnd()>.5and 17or 18tbl_merge(companion,tbl_merge_new({x=e,y=d,sprite=n},data_entities[n]))else tbl_merge(n,o)_𝘦𝘯𝘷[n.class]:new(n)
+palt(1)spr(o,e,d,1,1,n.flipped)pal_set()end})entity=drawable:inherit({class="entity",parent_class=drawable.class,entities={},num=0,x=0,y=0,name=nil,collision=true,interactable=true,interact_text="interact",turn=0,entity_at=function(e,d)for o=1,3do for n in all(entity.entities)do if(o==1and n.class==item.class and n.x==e and n.y==d or o==2and n.class==enemy.class and n.x==e and n.y==d and not n:check_status(status_charmed)and not n.dead or o==3and n.x==e and n.y==d)return n end end return nil end,entity_spawn=function(o,e,d)mset(e,d,1)local n,o={x=e,y=d,sprite=o},data_entities[o]if(o)if(o.class==player.class)tbl_merge(player,n)local n=rnd()>.5and 17or 18tbl_merge(companion,tbl_merge_new({x=e,y=d,sprite=n},data_entities[n]))else tbl_merge(n,o)_𝘦𝘯𝘷[n.class]:new(n)
 end,new=function(n,e)local n=n:inherit(e)entity.num=entity.num+1n["id"]=entity.num n["prev_x"],n["prev_y"]=n.x,n.y add(entity.entities,n)return n end,destroy=function(n)del(entity.entities,n)end,update=function(n)end,draw=function(n,e,d,o)if(n:in_frame(e))n:vec2_spr(vec2_add(d or pos_to_screen(n),vec2_scale(e or{x=0,y=0},8)),o)return true
-return false end,get_name=function(n)return n.name and n.name or n.item_class and n.item_class or n.class end,look_at=function(n,e)tbl_merge(e,{entity=n,name=n:get_name(),color=6,text=n.interact_text,usable=n.interactable and in_reach(player,n)})end,interact=function(n)end,do_turn=function(n)end,in_frame=function(n,e)local n=vec2_add(n,e or{x=0,y=0})if(room and(n.x<=room[2]or n.x>=room[4]or n.y<=room[3]or n.y>=room[5]))return false
+return false end,get_name=function(n)return n.name and n.name or(n.class==item.class and(n.type==3and consumable_names[n.value])or n.type==2and key_names[n.value])or n.class end,look_at=function(n,e)tbl_merge(e,{entity=n,name=n:get_name(),color=6,text=n.interact_text,usable=n.interactable and in_reach(player,n)})end,interact=function(n)end,do_turn=function(n)end,in_frame=function(n,e)local n=vec2_add(n,e or{x=0,y=0})if(room and(n.x<=room[2]or n.x>=room[4]or n.y<=room[3]or n.y>=room[5]))return false
 return n.x>=cam_x-1and n.x<cam_x+17and n.y>=cam_y-1and n.y<cam_y+15end})creature=entity:inherit({class="creature",parent_class=entity.class,anims={move=split"4,8",attack=split"5,6"},anim_queue={},anim_playing=false,dead=false,attacked=false,blink_delay=0,anim=nil,anim_frame=0,anim_x=0,anim_y=0,anim_x1=0,anim_y1=0,dhp=0,dhp_turn=0,target=nil,target_turn=0,status=0,status_timer={},followed=false,max_hp=10,ap=2,new=function(n,e)local n=entity.new(n,e)n["hp"]=n.max_hp return n end,update=function(n)if n.anim_frame>0do for e in all(creature.anim_queue)do if(e==n)n:anim_step()
 if(e.anim==creature.anims.attack)break
 end elseif prev_frame~=frame and n.blink_delay>0do n.blink_delay-=1end end,draw=function(n,d)if n:in_frame(d)do local e,o,f=n.sprite+frame*16,n:screen_pos().x,n:screen_pos().y if n.anim_frame<=0do if n.dead do e=frame==1and turn-n.dhp_turn<=1and n.blink_delay<=0and not creature.anim_playing and 0or 3elseif n.attacked and frame==1and n.blink_delay<=0and not creature.anim_playing do e=0if(state==state_game)?abs(n.dhp),o+4-str_width(abs(n.dhp))*.5,f+1,n.dhp<0and 8or 11
@@ -99,8 +99,8 @@ end return true end return false end,screen_pos=function(n)return vec2_add(pos_t
 return false end,do_turn=function(n)if(turn>n.dhp_turn)n.attacked=false
 if(n.dead and turn-n.dhp_turn>timer_corpse)n:destroy()
 if(n.target and(n.target.dead or turn>n.target_turn+timer_target or n.target:check_status(status_charmed)))n.target=nil
-if not n.dead do if n:check_status(status_poisoned)do if(n==player)msg.add(n:get_name().." took poison damage")
-n:take_dmg(flr(2*(.5+rnd())+.5))end for e=2,4do local e=statuses[e]if n:check_status(e)do if(n.status_timer[e]<=0)n:clear_status(e)
+if not n.dead do if(n:check_status(status_poisoned))n:take_dmg(flr(2*(.5+rnd())+.5))
+for e=2,4do local e=statuses[e]if n:check_status(e)do if(n.status_timer[e]<=0)n:clear_status(e)
 n.status_timer[e]-=1end end n.turn,n.followed=turn,false end return not n.dead and n:in_frame()and not n:check_status(status_sleeping)and fade_frame<=0end,play_anim=function(e,n,d,o,f,i)tbl_merge(e,{anim=n,anim_frame=n[1],anim_x=d*n[2],anim_y=o*n[2],anim_x1=(f or 0)*n[2],anim_y1=(i or 0)*n[2]})add(creature.anim_queue,e)creature.anim_playing=true end,anim_step=function(n)local o,e,d=smoothstep(n.anim_frame/n.anim[1]),n.anim_x,n.anim_y if n.anim==creature.anims.attack do e,d=n.anim_x1,n.anim_y1 if(n.target)if(n.anim_frame==n.anim[1]and n.target==player)flash_frame=2
 end n.anim_x=n.anim[2]*o*(e<-.1and-1or e>.1and 1or 0)n.anim_y=n.anim[2]*o*(d<-.1and-1or d>.1and 1or 0)n.anim_frame-=1if n.anim_frame<=0do del(creature.anim_queue,n)if(#creature.anim_queue==0)creature.anim_playing=false
 n.anim_x,n.anim_y=0end end,move=function(n,e,d)if not collision(e,d)and e>=0and e<128and d>=0and d<64and(e~=0or d~=0)do if(n.x~=e)n.flipped=n.x>e
@@ -108,12 +108,11 @@ n:play_anim(creature.anims.move,n.x-e,n.y-d)if(n==player)sfx(63,2,0,2)
 tbl_merge(n,{prev_x=n.x,prev_y=n.y,x=e,y=d})return true end return false end,follow=function(e,n)if(in_reach(e,{x=n.prev_x,y=n.prev_y}))e:move(n.prev_x,n.prev_y)else e:move_towards(n)
 n.followed=true end,move_towards_and_attack=function(n,e)if(in_reach(n,e))n:attack(e)else n:move_towards(e)
 end,move_towards=function(n,e,d)local e,d=d and n.x-e.x or e.x-n.x,d and n.y-e.y or e.y-n.y local f,o=e>0and 1or e<0and-1or 0,d>0and 1or d<0and-1or 0return abs(e)<abs(d)and n:move(n.x,n.y+o)or(n:move(n.x+f,n.y)or n:move(n.x,n.y+o))end,attack=function(n,e)msg.add(n:get_name().." attacked "..e:get_name())if(e:take_dmg(flr(n.ap*(.5+rnd())+.5)))msg.add(n:get_name().." killed "..e:get_name())else e.target=n n.target,n.target_turn,e.target_turn=e,turn,turn
-n:play_anim(creature.anims.attack,0,0,e.x-n.x,e.y-n.y)sfx(60,3,0,10)end,add_status=function(n,e)n.status_timer[e]=e==status_poisoned and timer_effect_poisoned or e==status_sleeping and timer_effect_sleeping or timer_effect if(e==status_scared)n:clear_status(status_charmed|status_sleeping)
+n:play_anim(creature.anims.attack,0,0,e.x-n.x,e.y-n.y)sfx(60,3,0,10)end,add_status=function(n,e)n.status_timer[e]=e==status_poisoned and timer_effect_poisoned or e==status_sleeping and timer_effect_sleeping or timer_effect if(e==status_scared)n:clear_status(status_sleeping)
 if(e==status_charmed or e==status_sleeping)n:clear_status(status_scared)
 if(e==status_charmed)n.collision,n.interactable=false,false add(player.followers,n)
 n.status=n.status|e end,clear_status=function(n,e)n.status=n.status&~e if(e==status_charmed)n.collision,n.interactable=true,true del(player.followers,n)
-end,check_status=function(e,n)return e.status&n==n end,take_dmg=function(n,e)n:clear_status(status_sleeping)if(e<0)n:clear_status(status_poisoned)
-if(e>0)n.flash_frame=2
+end,check_status=function(e,n)return e.status&n==n end,take_dmg=function(n,e)n:clear_status(status_sleeping)if(e>0)n.flash_frame=2
 n.blink_delay,n.attacked,n.dhp,n.dhp_turn,n.hp=frame==0and 2or 1,true,n.dhp_turn==turn and n.dhp-e or e*-1,turn,min(max(n.hp-e,0),n.max_hp)if(n.hp<=0)n:kill()return true
 return false end,kill=function(n)n.dead,n.collision=true,false del(player.followers,n)if(n==player)change_state(state_game_over)
 end})player=creature:new({class="player",parent_class=creature.class,interactable=false,collision=false,name="you",max_hp=20,followers={},look_at=function(n,e)end,action_dir=function(f,e,d)local o=f:move(e,d)for n in all(entity.entities)do if(n.x==e and n.y==d)if n.class==enemy.class and not n:check_status(status_charmed)and not n.dead do f:attack(n)o=true elseif n.class==stairs.class do n:trigger(e,d)o=true end
@@ -124,7 +123,7 @@ end end})door=entity:inherit({class="door",parent_class=entity.class,lock=0,new=
 return n end,look_at=function(e,n)entity.look_at(e,n)if(e.lock==0)n.text=e.collision and"open"or"close"else n.text,n.name="unlock","locked "..n.name if(n.usable)n.key=e.lock n.usable=keys[e.lock]>0and true or false
 end,interact=function(n)n.collision=not n.collision n.sprite=n.collision and 82or 81mset(n.x,n.y,n.collision and 2or 1)if(n.lock>0)n.lock=0msg.add"unlocked door"else msg.add((n.collision and"closed"or"opened").." door")
 change_state(state_game)sfx(63,3,24,5)end})stairs=entity:inherit({class="stairs",parent_class=entity.class,interactable=false,collision=true,trigger=function(n,d,o)local e=nil for n in all(data_floors.stairs)do if(n[1]==d and n[2]==o)e=n break end draw.play_fade(change_room,e)sfx(63,3,8,10)end})chest=entity:inherit({class="chest",parent_class=entity.class,interact_text="open",anim_playing=false,anim_frame=0,anim_this=false,open=false,content={},new=function(d,n)for e in all(data_chests)do if(e.x==n.x and e.y==n.y)n.content={}for e in all(e.content)do add(n.content,tbl_merge_new({sprite=e},data_entities[e]))end return entity.new(d,n)
-end end,look_at=function(e,n)entity.look_at(e,n)n.usable=n.usable and not e.open end,interact=function(n)n.open,n.sprite,n.anim_frame,n.anim_this,chest.anim_playing=true,12,45,true,true local e={entity=n,anim_frame={}}for n in all(n.content)do add(e.anim_frame,60)msg.add("got "..add_to_inventory(n))end change_state(state_chest,e)sfx(4,2)end,anim_step=function(n)if(n.anim_frame>0)n.anim_frame-=1
+end end,look_at=function(e,n)entity.look_at(e,n)n.usable=n.usable and not e.open end,interact=function(n)n.open,n.anim_this,n.sprite,n.anim_frame,chest.anim_playing=true,true,12,45,true local e={entity=n,anim_frame={}}for n in all(n.content)do add(e.anim_frame,60)msg.add("got "..add_to_inventory(n))end change_state(state_chest,e)sfx(4,2)end,anim_step=function(n)if(n.anim_frame>0)n.anim_frame-=1
 end,item_anim_pos=function(e,n,d)return{x=lerp(n+sin(n*-.5)*.75,pos_to_screen(e).x,d.x),y=lerp(n+cos(n*.9+.1)*.3-.3,pos_to_screen(e).y,d.y)}end,draw=function(n,e)if entity.draw(n,e)and n.anim_this do local d,e=pos_to_screen(n).x,pos_to_screen(n).y if(blink)rectfill(d+1,e+2,d+5,e+3,7)
 if(n.anim_frame>=30or n.anim_frame>2and blink)e-=(45-n.anim_frame)*.25clip(d,e,8,5)n:spr(d,e,11)clip()
 end end})item=entity:inherit({class="item",parent_class=entity.class,collision=false,interact_text="pick up",interact=function(n)msg.add("picked up "..add_to_inventory(n))n:destroy()change_state(state_game)sfx(62,3,0,8)end})

@@ -59,8 +59,7 @@ end
 
 -- draw sprite with 2d vector screen coordinate
 function vec2_spr(s,pos)
- palt(0,false)
- palt(15,true)
+ palt(0b0000000000000001)
  spr(s,pos.x,pos.y)
  palt()
 end
