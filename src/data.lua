@@ -150,18 +150,6 @@ data_chests = {
 
 
 
--- signs
--------------------------------------------------------------------------------
---[[
-data_signs = {
- -- x,y,message
- split"5,58,welcome to\nthyng village",
- split"52,31,◀- vangald fortress\n-▶ woodlands",
-}
-]]--
-
-
-
 -- dialogue
 -------------------------------------------------------------------------------
 data_dialogue={

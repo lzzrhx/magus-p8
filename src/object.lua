@@ -254,7 +254,7 @@ creature=entity:inherit({
    self.turn=turn
    self.followed=false
   end
-  return not self.dead and self:in_frame() and not self:check_status(status_sleeping)
+  return not self.dead and self:in_frame() and not self:check_status(status_sleeping) and fade_frame<=0
  end,
 
  -- start playing animation
@@ -402,7 +402,7 @@ player=creature:new({
      self:attack(e)
      valid=true
     elseif e.class==stairs.class then
-     e:trigger()
+     e:trigger(x,y)
      valid=true
     end
    end
@@ -496,7 +496,7 @@ enemy = creature:inherit({
  do_turn=function(self)
   if self.status & status_charmed==status_charmed then companion.do_turn(self)
   elseif creature.do_turn(self) then
-   if(in_sight(self,player))self.seen_player=turn
+   if(in_sight(self,player,true))self.seen_player=turn
    if (self.seen_player+timer_seen_player>turn) then
     if self.status & status_scared==status_scared then self:move_towards(player,true)
     else self:move_towards_and_attack(player) end
@@ -563,12 +563,12 @@ stairs=entity:inherit({
  class="stairs",
  parent_class=entity.class,
  interactable=false,
- collision=false,
+ collision=true,
 
  -- trigger action
- trigger=function(self)
+ trigger=function(self,x,y)
   local stair=nil
-  for e in all(data_floors.stairs) do if(e[1]==player.x and e[2]==player.y) stair=e break end
+  for e in all(data_floors.stairs) do if(e[1]==x and e[2]==y) stair=e break end
   draw.play_fade(change_room,stair)
   sfx(63,3,8,10)
  end,
@@ -621,7 +621,7 @@ chest=entity:inherit({
    msg.add("got "..add_to_inventory(itm))
   end
   change_state(state_chest,sel)
-  sfx(4,3)
+  sfx(4,2)
  end,
 
  -- perform animation step

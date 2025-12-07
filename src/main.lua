@@ -13,6 +13,7 @@ timer_spell=24 -- cooldown for casting spells (turns)
 timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 max_followers=5
 max_tomes=3
+version=1
 
 -- game states
 state_reset="reset"
@@ -33,8 +34,9 @@ statuses=split"0b0001,0b0010,0b0100,0b1000"
 
 -- sprite flags
 flag_collision=0
-flag_block_view=1
-flag_entity=2
+flag_block_view_and_spell=1
+flag_block_view=2
+flag_entity=3
 
 -- vars
 state=nil -- game state
@@ -141,7 +143,7 @@ update={
  -- title state
  title=function()
   if(not title_idle)title_pos+=0.2
-  if(title_pos>=str_height(data_story_intro)*8+85 and fade_frame==0)draw.play_fade(change_state,state_game)
+  if(title_pos>=str_height(data_story_intro)*8+85 and fade_frame==0)draw.play_fade(change_state,state_game) change_music(4)
   input.title()
  end,
 
@@ -149,7 +151,7 @@ update={
  game=function()
   for e in all(entity.entities) do e:update() end
   update_camera()
-  if(not creature.anim_playing and input.game())do_turn()
+  if(not creature.anim_playing and fade_frame<=0 and input.game())do_turn()
  end,
 
  -- menu state
@@ -251,12 +253,14 @@ draw={
   print("ˇˇˇˇˇˇˇˇˇˇˇˇ",19,54,6)
   -- intro text
   if not title_idle then
-   for k,v in pairs(title_text) do
-    print(v,64-(str_width(v))*0.5,78+k*8,5)
-    print(v,64-(str_width(v))*0.5,77+k*8,6)
-   end
+   for k,v in pairs(title_text) do s_print(v,64-(str_width(v))*0.5,77+k*8,6) end
   -- button legend
-  elseif frame==0 then s_print("start game ❎",38,85) end
+  else
+   if(frame==0)s_print("start game ❎",39,85)
+   s_print("warning:",48,100)
+   s_print("this game contains",28,108)
+   s_print("bright flashing images",20,115)
+  end
   camera(0,0)
   -- text fade effect
   for i=0,1 do for j=0,15 do
@@ -575,7 +579,7 @@ input={
   if btnp(5) then
    sel_chest.entity.anim_frame=0
    if chest.anim_playing then for i=1,tbl_len(sel_chest.anim_frame) do sel_chest.anim_frame[i]=1 end
-   elseif tomes==max_tomes then change_state(state_game_over) flash_frame=2
+   elseif tomes==max_tomes then change_state(state_game_over) flash_frame=2 sfx(61,3)
    else change_state(state_game) end
   end
  end,
@@ -719,17 +723,18 @@ function change_room(stair)
  local target_stair=data_floors.stairs[stair[4]]
  local new_room=data_floors.rooms[target_stair[3]]
  local delta_z=((new_room and new_room[1]) or 0) - ((room and room[1]) or 0)
- cam_x_min,cam_y_min=(new_room and target_stair[1]-player.x) or 0,(new_room and target_stair[2]-player.y) or 0
- cam_x_diff,cam_y_diff=0,0
- if(new_room)cam_x_diff,cam_y_diff=target_stair[1]-stair[1],target_stair[2]-stair[2]
- player.x,player.y=target_stair[1],target_stair[2]
- cam_x,cam_y=cam_x+target_stair[1]-stair[1],cam_y+target_stair[2]-stair[2]
+ local x,y,t_x,t_y=stair[1],stair[2],target_stair[1],target_stair[2]
+ cam_x_min,cam_y_min=(new_room and t_x-player.x) or 0,(new_room and t_y-player.y) or 0
+ if(new_room==nil)cam_x_diff,cam_y_diff=0,0
+ if(new_room and room==nil)cam_x_diff,cam_y_diff=t_x-x,t_y-y
+ player.x,player.y=t_x,t_y
+ cam_x,cam_y=cam_x+t_x-x,cam_y+t_y-y
  msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
  room=new_room
- if(target_stair[4]==53)change_music(0)
- if(target_stair[4]==54)change_music(4)
- if(target_stair[4]==11)change_music(26)
- if(target_stair[4]==12)change_music(0)
+ local stair_id=target_stair[4]
+ if(stair_id==53 or stair_id==12)change_music(0)
+ if(stair_id==54)change_music(4)
+ if(stair_id==11)change_music(26)
 end
 
 -- change area
@@ -749,7 +754,7 @@ function cast_spell(i,e)
 end
 
 -- check if map coordinate is in sight or blocked
-function in_sight(a,b)
+function in_sight(a,b,view_mode)
  local dx,dy=b.x-a.x,b.y-a.y
  local step=abs(dx)>=abs(dy) and abs(dx) or abs(dy)
  dx=dx/step
@@ -757,7 +762,7 @@ function in_sight(a,b)
  local x,y,prev_x,prev_y=a.x,a.y,a.x,a.y
  local blocked,prev_blocked = false,false
  for i=1,step+1 do
-  blocked = (fget(mget(x,prev_y),flag_block_view) and fget(mget(prev_x,y),flag_block_view)) or fget(mget(x,y),flag_block_view) or prev_blocked
+  blocked = (fget(mget(x,prev_y),flag_block_view_and_spell) and fget(mget(prev_x,y),flag_block_view_and_spell)) or fget(mget(x,y),flag_block_view_and_spell) or (view_mode and fget(mget(x,y),flag_block_view)) or prev_blocked
   if(blocked)return false
   prev_blocked = blocked
   prev_x,prev_y=x,y

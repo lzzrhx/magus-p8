@@ -10,13 +10,12 @@
     -- other: flowers, flowers #2, bush
 
 
-
 -------------------------------------------------------------------------------
 -- maybe
 -------------------------------------------------------------------------------
--- (?) make end game (win) screen prettier (add confetti background animation)
--- (?) add fog effect to area 2 & 3
 -- (?) add spellcasting animation
+-- (?) add fog effect to area 2 & 3
+-- (?) make end game (win) screen prettier (add confetti background animation)
 -- (?) game over after x turns
 -- (?) score system (turns left * 10 + # kills - hp healed)
 -- (?) multiple targets (queue system)
