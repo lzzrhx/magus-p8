@@ -154,28 +154,44 @@ data_chests = {
 -------------------------------------------------------------------------------
 data_dialogue={
 [19]=[[ah, ho there, most illustrious
-magus! come in, come in, and
-feast a while. a slice of
-bread? a cup of ale? what ho!
-tomes and undead armies? such
-dreadful news! i did hear
-tales of such tomes from my
-grandfather, aye, many a year
-ago, yet i thought 'em but
-the ramblings of an old man.
-he spoke of a tome of mighty
-power, hidden yonder deep in
-the ruins to the east, yet he
-could never set foot therein,
-for the gate is sealed with a
-lock of purest gold! ah, may
-fortune bless thy quest,
-i pray thy travel both be safe
-and crown'd with conquest.
-and when thou return'st,
-victorious and brimming with
-tales, we shall feast and
-feast, and drink and drink!]],
+magus! enter, i prithee, and
+take thy ease awhile.
+behold me, buried deep within
+my books. for truly, knowledge
+is the wing wherewith we fly
+to heaven! art thou perchance
+beset by hunger's call? may i
+present thee a modest slice of
+bread this shining morn? or a
+cup of ale to cure the dryness
+of thy noble throat?
+what ho! tomes and vile demon
+troops? o horrors dire! tidings
+dark as midnight storms!
+yet now i recollect, my grand
+sire once told tales of such
+tomes hidden in these very
+lands. aye, 'twas many  a year
+ago, i believed em' but the
+ramblings of an old man.
+a tome most mighty hidden oer'
+yonder, deep in the ruins to
+the east. but alas, he could
+never set foot therein, for
+the gate was sealed with a
+lock forged of purest gold.
+so thou wouldst seek these
+fabled tomes thyself? o bravest
+magus, may good fortune guard
+thee on thy perilous quest, for
+all our fragile fates now ride
+upon thy shoulders bare. 
+go forth, i pray, with
+steadfast strength and safety!
+and when thou return'st
+triumphantly in glory, we shall
+make merry, and delight in
+tales of conquests bold!]],
 [20]=[[hail, my cherished friend
 magus. tis' ever a delight to
 cross thy path and engage in
@@ -185,9 +201,9 @@ what is this thou uttered?
 hidden tomes? the wicked
 lords? o gentle heavens,
 such tidings strike terror to
-the heart. alas, dear magus,
+the heart! alas, dear magus,
 what direful plight is this!
-the accursed undead  shuffle
+the accursed undead shuffle
 about, and may, ere long,
 encircle our noble village,
 vexing us with their most
@@ -244,14 +260,14 @@ the lands, and the long
 forsaken, crumbling keeps of
 the vangald dynasty stand
 eerily silent in state of
-decay. aye, it was in that
+decay. aye, 'twas in that
 province thou were appointed
 as keeper of the sage-house,
 in the village that beareth
-the name of uhdria. within
+the name of yangu. within
 that house treasured books and
 scrolls of knowledge rare were
-kept. it was thine to guard,
+kept. 'twas thine to guard,
 to teach and share with the
 folk of that fair village.
 furthermore ye were task'd to
@@ -275,27 +291,27 @@ friendships with thy fellows
 have bloomed, and thy heart
 glows with tender warmth from
 laughter shared among comrades
-dear. by knowledge learned
-through books from distant
-realms, sent through the
-network of the sage-guild, new
-learnings has taken root. new
-planting techniques have been
-devised for the farmers and a
-new irrigation system
-contrived by your hand. ah,
-but life is not all peaceful
-bliss in this place. it must
-have been a fortnight past,
-when bandits vile and base 
-encroached, whose trespass
-threaten'd ruin and
-destruction. it was then, with
-thunderous might, thou cast
-forth thy spells, and ye drove
-them from the village gate.
-yet since that day peace
-has enfolded the village.
+dear. by knowledge gained from
+books of distant realms, sent
+swiftly though the sage-guild's
+network, new learnings have
+taken root within these lands.
+new techniques for planting 
+have been devised for the
+farmers, and a cunning
+irrigation system contrived by
+thy hand. ah, but life is not
+all peaceful bliss in this
+place. it must have been a
+fortnight past, when bandits
+vile and base  encroached,
+whose trespass threaten'd ruin
+and destruction. 'twas then,
+with thunderous might, thou
+cast forth thy spells, and ye
+drove them from the village
+gate. yet since that day peace
+has embraced the village.
 
 ~ ⁙ ~
 
@@ -378,7 +394,7 @@ thurras. therefore i beseech
 thee, seek out the hidden
 tomes, secure them swiftly
 before they fall into the
-grips of those lords most
+fingers of those lords most
 vile! yet tread with utmost
 care on your journey, for it
 is a quest most perilous
