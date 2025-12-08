@@ -142,7 +142,7 @@ init={
 update={
  -- title state
  title=function()
-  if(not title_idle)title_pos+=0.2
+  if(not title_idle)title_pos+=0.17
   if(title_pos>=str_height(data_story_intro)*8+83 and fade_frame==0)draw.play_fade(change_state,state_game) change_music(4)
   input.title()
  end,
@@ -464,7 +464,7 @@ draw={
   draw.game()
   draw.monochrome()
   if(tomes==max_tomes) then
-   local s=split("you won!,congratulations!,turns used: "..turn)
+   local s=split("you won! congratulations!,turns used: "..turn)
    for i=1,#s do
     local l=s[i]
     for j=1,#l do s_print(sub(l,j,j),64-#l*3+(j-1)*6,i*24+j*1.5+wavy(j,3),true,true,10,13)
@@ -731,7 +731,7 @@ function change_room(stair)
  if(new_room and room==nil)cam_x_diff,cam_y_diff=t_x-x,t_y-y
  player.x,player.y=t_x,t_y
  cam_x,cam_y=cam_x+t_x-x,cam_y+t_y-y
- msg.add("went "..(delta_z>0 and "up" or "down").." stairs")
+ msg.add((delta_z>0 and "ascended" or "descended").." stairs")
  room=new_room
  local stair_id=target_stair[4]
  if(stair_id==53 or stair_id==12)change_music(0)

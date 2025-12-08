@@ -171,10 +171,10 @@ dark as midnight storms!
 yet now i recollect, my grand
 sire once told tales of such
 tomes hidden in these very
-lands. aye, 'twas many  a year
+lands. aye, 'twas many a year
 ago, i believed em' but the
 ramblings of an old man.
-a tome most mighty hidden oer'
+a tome most mighty hidden o'er
 yonder, deep in the ruins to
 the east. but alas, he could
 never set foot therein, for
@@ -193,7 +193,7 @@ triumphantly in glory, we shall
 make merry, and delight in
 tales of conquests bold!]],
 [20]=[[hail, my cherished friend
-magus. tis' ever a delight to
+magus. 'tis ever a delight to
 cross thy path and engage in
 merry prattle. how dost thou
 fare upon this fairest day?
@@ -226,7 +226,7 @@ blessed magus!]],
 -------------------------------------------------------------------------------
 data_story_intro=[[four long years didst thou
 spend in learning within those
-hallowed halls of the famed
+hallow'd halls of the famed
 kulian academy of magicks.
 thou filled thy eager mind
 with arcane wisdom from the
@@ -234,7 +234,7 @@ masters of that place, olde
 and wise. thereafter, a
 three-year apprentice period
 in the boundless plains didst
-thou serve with ghyle the
+thou serve, with ghyle the
 perceptive as thy mentor.
 together ye journey'd cross
 those plains, decoded the
@@ -245,8 +245,8 @@ them in defeating rulu the
 golem, and yutta the knave,
 such that peace was brought
 upon those lands. and when thy
-trials of tutelage were
-completed the sage-guild
+trials of tutelage hath
+been done, the sage-guild
 assigned thee thy first solo
 posting.
 
@@ -264,71 +264,61 @@ decay. aye, 'twas in that
 province thou were appointed
 as keeper of the sage-house,
 in the village that beareth
-the name of yangu. within
+the name of greenhaven. within
 that house treasured books and
 scrolls of knowledge rare were
 kept. 'twas thine to guard,
 to teach and share with the
 folk of that fair village.
-furthermore ye were task'd to
-serve as guardian and
-protector of that same
-village, and lend the might of
-thy skills in the art of
-magicks, should the need
+thou were tasked to serve as
+guardian and protector of that
+same village, and lend the
+might of thy skills in the 
+arcane arts, should the need
 arise.
 
 ~ ⁙ ~
 
-eight moons have since
-passed. at first thou found
-the place most strange and the
-faces cold, yet time hath
-softened all estrangement, and
-now thou art settled, aye and
-settled proper. sturdy
-friendships with thy fellows
-have bloomed, and thy heart
-glows with tender warmth from
-laughter shared among comrades
-dear. by knowledge gained from
-books of distant realms, sent
-swiftly though the sage-guild's
-network, new learnings have
-taken root within these lands.
-new techniques for planting 
-have been devised for the
-farmers, and a cunning
-irrigation system contrived by
-thy hand. ah, but life is not
-all peaceful bliss in this
-place. it must have been a
-fortnight past, when bandits
-vile and base  encroached,
-whose trespass threaten'd ruin
-and destruction. 'twas then,
-with thunderous might, thou
-cast forth thy spells, and ye
-drove them from the village
-gate. yet since that day peace
-has embraced the village.
+eight moons since hath passed.
+first thou found the place
+most strange and the faces
+cold, yet time didst softened
+all estrangement, and now thou
+art settled, aye, and settled
+proper. sturdy friendships
+with thy fellows hath bloomed,
+and thy heart glows with
+tender warmth from laughter
+shared among comrades dear.
+ah, but life is not all
+peaceful bliss in this place.
+it must have been a fortnight
+past, when bandits vile and
+base encroached, whose
+trespass threaten'd ruin and
+destruction. 'twas then, with
+thunderous might, thou cast
+forth thy spells, and ye drove
+them from the village gate.
+yet since that day peace has
+embraced the village.
 
 ~ ⁙ ~
 
 but lo! upon a morn most calm
 and fair, a scroll guarded by
-a magick seal arrives. the
-seal thou knowest full well!
-it is the mark of master ghyle
+magick seal arrives. the seal
+thou knowest full well!
+'tis the mark of master ghyle
 and thy heart beats rapid with
 excitement! with secret art
 thou breaketh it open and thus
 the letter's message is
 revealed: to thee, dear magus,
-whom i hold in trust, i pen
+whom i hold in trust, i write
 thee now with utmost urgency.
 great peril grips the guild,
-for the four lords of the
+for those four lords of the
 outer rings have made
 discovery of the legend of the
 tomes of edera. know that five
@@ -344,18 +334,18 @@ she ventured underneath the
 world to seek a power, so vast
 it might unmake even the
 divine. for fifty tormented
-years she wandered the dark
+years she wandered that dark
 abyss in search. legend tells
 her journey led to the
 furthest reaches of that
 horrid place, ah, and after
 besting unspeakable terrors in
-battel, the secrets of their
+battell, the secrets of their
 cosmic powers revealed
-themselves to her. she learned
-techniques of divine might,
-such that she could unbind the
-stars themselves and tear the
+themselves. she learned
+techniques of such might,
+that she could unbind even the
+stars themselves, and tear the
 fabric of heaven's veil with
 the power of her spells!
 she returned to our mortal
@@ -364,40 +354,42 @@ world from chaos' grip, and
 slayed that most evil god in
 one swift stroke! yet when her
 triumph's echo died away, she
-vanished to the geanic cost,
+vanished to the geanic coast,
 and lived her days in peace.
 
 ~ ⁙ ~
 
-the secrets of her divine
+the mysteries of her arcane
 powers were deemed forever
-lost. but now we hear that
-what she learned was perhaps
-written down in three great
-tomes. each hid in some secret
-place. yet now the wicked
-lords conspire as one. they
-have sworn to claim these
-tomes, yearning to wield that
-divine power for purposes most
-dark and sinister. their demon
-armies march forth for myga.
-aye, brave magus dear, the
-very same place thou dwellest!
-for they believe the tomes to
-be hidden there in those very
+lost. yet now we hear that
+what she learned was perchance
+inscribed within three great
+tomes, each hid in some secret
+place. and these whispers too
+have reached the sharp ears of
+the wicked lords, who conspire
+as one. they have sworn to
+claim these tomes, yearning to
+wield that divine power for
+purposes most dark and
+sinister. their demon armies
+march forth for myga. aye,
+brave magus dear, the very
+same place thou dwellest! for
+they believe the tomes to be
+hidden there in those very
 lands! the masters of the
 guild and i are presently
-locked in mortal battel deep
-within the fortress of lord
-thurras. therefore i beseech
-thee, seek out the hidden
-tomes, secure them swiftly
-before they fall into the
+locked in mortal battell in
+the cursed outer rings.
+therefore i beseech thee,
+seek out the hidden tomes,
+secure them swiftly before
+they fall into the long
 fingers of those lords most
 vile! yet tread with utmost
-care on your journey, for it
-is a quest most perilous
+care on thy journey, for it
+is a most perilous enterprise
 indeed! and soon, if fate
 allow, i shall make haste and
 join thee in thy quest!

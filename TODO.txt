@@ -1,8 +1,6 @@
 -------------------------------------------------------------------------------
 -- todo
 -------------------------------------------------------------------------------
--- improve intro text
--- improve npc dialogue
 -- (?) add spellcasting animation
 -- (?) add fog effect to area 2 & 3
 -- (?) make end game (win) screen prettier (add confetti background animation)
