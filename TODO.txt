@@ -2,13 +2,7 @@
 -- todo
 -------------------------------------------------------------------------------
 -- improve intro text
--- write npc dialogue
-
-
-
--------------------------------------------------------------------------------
--- maybe
--------------------------------------------------------------------------------
+-- improve npc dialogue
 -- (?) add spellcasting animation
 -- (?) add fog effect to area 2 & 3
 -- (?) make end game (win) screen prettier (add confetti background animation)
@@ -48,8 +42,8 @@
 characters:
     x  magus
     x  cat/dog (companion)
-    x  balthasar (dinosaur)
-    x  dardanius (mushroom man)
+    x  balthasar (mushroom man)
+    x  dardanius (dinosaur)
 
 enemies:
     x  1,slime:1xp,2hp,1dmg
@@ -93,7 +87,7 @@ sfx:
     5 item popping out of chest
 
 music:
-    20 court1, title screen
-    4  game_c4, area 1
-    0  main1, area 2
-    26 drama1, area 3
+    20 title screen, court1, greensleeves
+    4  area 1, game_c4, ballet in d
+    0  area 2, main1, belle qui tiens ma vie
+    26 area 3, drama1, les plaisirs de saint germain en laye

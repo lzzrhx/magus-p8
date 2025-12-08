@@ -12,8 +12,8 @@ data_entities={
  [16]={class="player"},
  [17]={class="companion",name="cat"},
  [18]={class="companion",name="dog"},
- [19]={class="npc",name="balthasar"},
- [20]={class="npc",name="dardanius"},
+ [19]={class="npc",name="dardanius"},
+ [20]={class="npc",name="balthasar"},
  [24]={class="enemy",name="slime",max_hp=2,ap=1},
  [25]={class="enemy",name="hobgoblin",max_hp=8,ap=3},
  [28]={class="enemy",name="bat",max_hp=4,ap=2},
@@ -153,8 +153,31 @@ data_chests = {
 -- dialogue
 -------------------------------------------------------------------------------
 data_dialogue={
-[19]=[[hail, my cherished friend
-magus. it is ever a delight to
+[19]=[[ah, ho there, most illustrious
+magus! come in, come in, and
+feast a while. a slice of
+bread? a cup of ale? what ho!
+tomes and undead armies? such
+dreadful news! i did hear
+tales of such tomes from my
+grandfather, aye, many a year
+ago, yet i thought 'em but
+the ramblings of an old man.
+he spoke of a tome of mighty
+power, hidden yonder deep in
+the ruins to the east, yet he
+could never set foot therein,
+for the gate is sealed with a
+lock of purest gold! ah, may
+fortune bless thy quest,
+i pray thy travel both be safe
+and crown'd with conquest.
+and when thou return'st,
+victorious and brimming with
+tales, we shall feast and
+feast, and drink and drink!]],
+[20]=[[hail, my cherished friend
+magus. tis' ever a delight to
 cross thy path and engage in
 merry prattle. how dost thou
 fare upon this fairest day?
@@ -164,17 +187,21 @@ lords? o gentle heavens,
 such tidings strike terror to
 the heart. alas, dear magus,
 what direful plight is this!
-the accursed undead may, ere
-long encircle our noble
-village, hemming us with
-dread! thou art our sole
-and steadfast hope,
-good friend, for salvation
-from the woeful company of
-these rude, and most
-ill-mannered undead soldiers.
-pray, godspeed on thy journey!]],
-[20]=[[...]],
+the accursed undead  shuffle
+about, and may, ere long,
+encircle our noble village,
+vexing us with their most
+ill-mannered and woeful
+company! what say'st thou?
+thou wilt tramp o'er hill and
+hollow, to seek out those
+fabled tomes, and smite those
+undead armies? 
+a marvel 'tis to hear!
+i pray peace will return to
+gladden these afflicted lands!
+godspeed on thy journey,
+blessed magus!]],
 }
 
 
@@ -360,5 +387,4 @@ allow, i shall make haste and
 join thee in thy quest!
 
 thy friend forever,
-ghyle.
-]]
+ghyle.]]
