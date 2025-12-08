@@ -195,165 +195,186 @@ say? oh dear lord!
 
 -- story
 -------------------------------------------------------------------------------
-data_story_intro=[[you spent four years attending
-classes from the old masters
-at the kulian academy of
-magicks, followed by a three
-year apprentice period in the
-boundless plains with ghyle
-the perceptive as your mentor.
-together you journeyed cross
-the plains, decoded the
+data_story_intro=[[four long years didst thou
+spend in learning within those
+hallowed halls of the famed
+kulian academy of magicks,
+thou filled thy eager mind
+with arcane wisdom from the
+masters of that place, olde
+and wise. thereafter, a
+three-year apprentice period
+in the boundless plains didst
+thou serve with ghyle the
+perceptive as thy mentor.
+together ye journey'd cross
+those plains, decoded the
 mystery of the eulian scrolls,
 befriended the ancient
 plain-dwellers and assisted
-them in defeating yutta the
-knave and rulu the golem.
+them in defeating rulu the
+golem, and yutta the knave,
+such that peace was brought
+upon those lands. and when thy
+trials of tutelage were
+completed the sage-guild
+assigned thee thy first solo
+posting.
 
 ~ ⁙ ~
 
-however, after completing the
-apprentice period, you got
-assigned your first solo
-posting in the province of
-myga, where you were appointed
-as keeper of the sage-house in
-the small village of thyng.
-the house contains a rich
-library and your duty is to
-curate the selection and share
-knowledge with the locals, as
-well as to make use of your
-wizardly skills in whatever
-assistance is needed.
+the province of myga, rich
+with fertile soil and
+bountiful rivers. where
+overgrown woodlands blanket
+the lands, and long forsaken,
+crumbling keeps of the vangald
+dynasty stand eerily silent in
+state of decay. aye, it was in
+that province thou were
+appointed as keeper of the
+sage-house, in the village
+that beareth the name of
+uhdria. within that house
+treasured books and scrolls of
+knowledge rare were kept, it
+was thine to guard, to teach
+and share with the folk of
+that fair village. furthermore
+ye were task'd to serve as
+guardian and protector of that
+same village, and lend the
+might of thy skills in the art
+of magicks, should the need
+arise.
 
 ~ ⁙ ~
 
-eight months have passed, and
-while at first you felt unsure
-in these unfamiliar
-surroundings, you have now
-grown custom to the place and
-have built sturdy friendships
-with your fellow villagers.
-over these past months you 
-have requested numerous
-books from distant libraries,
-and you have shared precious
-learnings, that has resulted
-in the introduction of new
-tools, new planting
-techniques, and an improved
-irrigation system for the
-farmers in the village. a few
-weeks back you even had to use
-your magical abilities in a
-explosive display to fend off
-a gang of wandering bandits
-encroaching on the village.
+eight moons have since
+passed. at first thou found
+the place most strange and the
+faces cold, yet time hath
+softened all estrangement, and
+now thou art settled, aye and
+settled proper. sturdy
+friendships with thy fellows
+have bloomed, and thy heart
+glows with tender warmth from
+laughter shared among comrades
+dear. by knowledge learned
+through books from distant
+realms, sent through the
+network of the sage-guild, new
+learning has taken root. new
+planting techniques have been
+devised for the farmers and a
+new irrigation system
+contrived by your hand. ah,
+but life is not all peaceful
+bliss in this place. it must
+have been a fortnight past,
+when bandits vile and base 
+encroached, whose trespass
+threaten'd ruin and
+destruction. it was then, with
+thunderous might, thou cast
+forth thy spells, and ye drove
+them from the village gate.
+yet since that day peace
+has enfolded the village.
 
 ~ ⁙ ~
 
-lately things have been quiet
-though, and you are really
-starting to feel at ease with
-the daily routine of your
-posting. a sense of feeling at
-home in the sage-house is
-starting to build, and the
-friendships gained with your
-fellows brings you great joy.
+but lo! upon a morn most calm
+and fair, a scroll guarded by
+a magick seal arrives. the
+seal thou knowest full well!
+it is the mark of master ghyle
+and thy heart beats rapid with
+excitement! with secret art
+thou breaketh it open and thus
+the letter's message is
+revealed: to thee, dear magus,
+whom i hold in trust, i pen
+thee now with utmost urgency.
+great peril grips the guild,
+for the four lords of the
+outer rings have made
+discovery of the legend of the
+tomes of edera. know that five
+thousand years have come and
+gone since the age of chaos,
+when mighty edera, the
+grandest of mage, did stand
+against fearu, god of dread.
 
 ~ ⁙ ~
 
-then one day an encrypted
-letter arrives. you recognize
-the encryption from your
-former mentor. you decrypt it
-with the secret technique, and
-the letter reads: "dear magus,
-i am writing you this letter
-of utmost urgency as the
-sage-guild finds itself in a
-state of great distress. the
-four lords of the outer rings
-have discovered the legend of
-the tomes of edera.
+she ventured underneath the
+world to seek a power, so vast
+it might unmake even the
+divine. for fifty tormented
+years she wandered the dark
+abyss in search. legend tells
+her journey led to the
+furthest reaches of that
+horrid place, ah, and after
+besting unspeakable terrors in
+battel, the secrets of their
+cosmic powers revealed
+themselves to her. she learned
+techniques of divine might,
+such that she could unbind the
+stars themselves and tear the
+fabric of heaven's veil with
+the power of her spells!
+she returned to our mortal
+realms, and behold! saved the
+world from chaos' grip, and
+slayed that most evil god in
+one swift stroke she did! yet
+when her triumph's echo died
+away, she vanished to the
+geanic cost, and lived her
+days in peace.
 
 ~ ⁙ ~
 
-legend has it that the grand
-wizard edera battled the evil
-god fearu five thousand years
-ago during the age of chaos.
-edera ventured to the
-underrealms and spent fifty
-torturous years in search of a
-legendary magickal technique
-powerful enough to defeat a
-god. when she returned to the
-mortal realms she had had
-aquired magickal powers far
-beyond what was thought
-possible. she could move
-planets out of their alignment
-and tear holes in the cosmic
-fabric. when she faced the
-vile god fearu in battle he
-was slayed in a moment, and
-his evil plans put to rest.
-what became of the secrets to
-the powerful sorcery she had
-discovered remained unknown,
-and the knowledge of how to
-perform the all-powerful
-magickal techniques were
-considered lost. but
-information has now surfaced
-leading us to believe that
-what she had learned in the
-underrealms was written down
-on four tomes that were safely
-secured and hidden at some
-unknown locations.
+the secrets of her divine
+powers were deemed forever
+lost. but now we hear that
+what she learned was perhaps
+written down in three great
+tomes. each hid in some secret
+place. yet now the wicked
+lords conspire as one. they
+have sworn to claim these
+tomes, yearning to wield that
+divine power for purposes most
+dark and sinister, and have
+sent their demon armies forth
+to claim those tomes.
+presently they march for myga,
+aye, brave magus dear, the
+very place thou dwellest! for
+they believe the tomes to be
+hidden there in those very
+lands! the masters of the
+guild and i are presently
+locked in mortal battel deep
+within the fortress of lord
+thurras. therefore i beseech
+thee, seek out the hidden
+tomes, secure them swiftly
+before they fall into the
+grips of those lords most
+vile, yet tread with utmost
+care on your journey, for it
+is a quest most perilous
+indeed! and soon, if fate
+allow, i shall make haste and
+join thee in thy quest!
 
-~ ⁙ ~
-
-the wicked lords have joined
-forces in order to obtain the
-tomes and plan to use its
-powers for most sinister
-purposes. they have sent their
-demon armies to myga quite
-close to where you are
-presently located, where they
-believe the four fragments to
-be hidden.
-
-~ ⁙ ~
-
-i and the other masters of the
-sage-guild are currently quite
-preocupied in a vicous battle
-in the fortress of lord
-thurras of the outer rings,
-but i will make haste and
-journey to myra as soon as the
-situation permits.
-
-~ ⁙ ~
-
-i'm sending you this letter of
-utmost urgency to ask you to
-seek out the tomes if you can,
-and secure them before they
-fall in the hands of the
-undead armies of the four
-lords. but please, pick your
-battles wisely and do not
-engange in any situation that
-put your life in peril. i will
-be with you soon to offer my
-assistance.
-
-your dear friend, ghyle."]]
+thy friend forever,
+ghyle.
+]]

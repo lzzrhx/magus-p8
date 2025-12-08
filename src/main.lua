@@ -143,7 +143,7 @@ update={
  -- title state
  title=function()
   if(not title_idle)title_pos+=0.2
-  if(title_pos>=str_height(data_story_intro)*8+85 and fade_frame==0)draw.play_fade(change_state,state_game) change_music(4)
+  if(title_pos>=str_height(data_story_intro)*8+83 and fade_frame==0)draw.play_fade(change_state,state_game) change_music(4)
   input.title()
  end,
 
