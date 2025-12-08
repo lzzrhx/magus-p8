@@ -464,7 +464,7 @@ draw={
   draw.game()
   draw.monochrome()
   if(tomes==max_tomes) then
-   local s=split("you won! congratulations!,turns used: "..turn)
+   local s=split("you won!,congratulations!,turns used: "..turn)
    for i=1,#s do
     local l=s[i]
     for j=1,#l do s_print(sub(l,j,j),64-#l*3+(j-1)*6,i*24+j*1.5+wavy(j,3),true,true,10,13)
