@@ -153,42 +153,28 @@ data_chests = {
 -- dialogue
 -------------------------------------------------------------------------------
 data_dialogue={
-[19]=[[greetings my dear friend magus
-1.............................
-1.............................
-what? the dark lords? tomes?
-this is distressing news for
-sure. i heard tales of those
-mystic tomes many years ago.
-3.............................
-3.............................
-4.............................
-4.............................
-4.............................
-5.............................
-5.............................
-5.............................
-6.............................
-6.............................
-6.............................]],
-[20]=[[salutations, friend.
-1.............................
-1.............................
-the cursed undead armies you
-say? oh dear lord!
-2.............................
-3.............................
-3.............................
-3.............................
-4.............................
-4.............................
-4.............................
-5.............................
-5.............................
-5.............................
-6.............................
-6.............................
-6.............................]],
+[19]=[[hail, my cherished friend
+magus. it is ever a delight to
+cross thy path and engage in
+merry prattle. how dost thou
+fare upon this fairest day?
+what is this thou uttered?
+hidden tomes? the wicked
+lords? o gentle heavens,
+such tidings strike terror to
+the heart. alas, dear magus,
+what direful plight is this!
+the accursed undead may, ere
+long encircle our noble
+village, hemming us with
+dread! thou art our sole
+and steadfast hope,
+good friend, for salvation
+from the woeful company of
+these rude, and most
+ill-mannered undead soldiers.
+pray, godspeed on thy journey!]],
+[20]=[[...]],
 }
 
 
@@ -198,7 +184,7 @@ say? oh dear lord!
 data_story_intro=[[four long years didst thou
 spend in learning within those
 hallowed halls of the famed
-kulian academy of magicks,
+kulian academy of magicks.
 thou filled thy eager mind
 with arcane wisdom from the
 masters of that place, olde
@@ -227,25 +213,26 @@ the province of myga, rich
 with fertile soil and
 bountiful rivers. where
 overgrown woodlands blanket
-the lands, and long forsaken,
-crumbling keeps of the vangald
-dynasty stand eerily silent in
-state of decay. aye, it was in
-that province thou were
-appointed as keeper of the
-sage-house, in the village
-that beareth the name of
-uhdria. within that house
-treasured books and scrolls of
-knowledge rare were kept, it
-was thine to guard, to teach
-and share with the folk of
-that fair village. furthermore
-ye were task'd to serve as
-guardian and protector of that
-same village, and lend the
-might of thy skills in the art
-of magicks, should the need
+the lands, and the long
+forsaken, crumbling keeps of
+the vangald dynasty stand
+eerily silent in state of
+decay. aye, it was in that
+province thou were appointed
+as keeper of the sage-house,
+in the village that beareth
+the name of uhdria. within
+that house treasured books and
+scrolls of knowledge rare were
+kept. it was thine to guard,
+to teach and share with the
+folk of that fair village.
+furthermore ye were task'd to
+serve as guardian and
+protector of that same
+village, and lend the might of
+thy skills in the art of
+magicks, should the need
 arise.
 
 ~ ⁙ ~
@@ -265,7 +252,7 @@ dear. by knowledge learned
 through books from distant
 realms, sent through the
 network of the sage-guild, new
-learning has taken root. new
+learnings has taken root. new
 planting techniques have been
 devised for the farmers and a
 new irrigation system
@@ -332,11 +319,10 @@ she returned to our mortal
 realms, and behold! saved the
 world from chaos' grip, and
 slayed that most evil god in
-one swift stroke she did! yet
-when her triumph's echo died
-away, she vanished to the
-geanic cost, and lived her
-days in peace.
+one swift stroke! yet when her
+triumph's echo died away, she
+vanished to the geanic cost,
+and lived her days in peace.
 
 ~ ⁙ ~
 
@@ -351,14 +337,12 @@ lords conspire as one. they
 have sworn to claim these
 tomes, yearning to wield that
 divine power for purposes most
-dark and sinister, and have
-sent their demon armies forth
-to claim those tomes.
-presently they march for myga,
+dark and sinister. their demon
+armies march forth for myga.
 aye, brave magus dear, the
-very place thou dwellest! for
-they believe the tomes to be
-hidden there in those very
+very same place thou dwellest!
+for they believe the tomes to
+be hidden there in those very
 lands! the masters of the
 guild and i are presently
 locked in mortal battel deep
@@ -368,7 +352,7 @@ thee, seek out the hidden
 tomes, secure them swiftly
 before they fall into the
 grips of those lords most
-vile, yet tread with utmost
+vile! yet tread with utmost
 care on your journey, for it
 is a quest most perilous
 indeed! and soon, if fate
