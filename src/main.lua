@@ -727,8 +727,8 @@ function change_room(stair)
  local delta_z=((new_room and new_room[1]) or 0) - ((room and room[1]) or 0)
  local x,y,t_x,t_y=stair[1],stair[2],target_stair[1],target_stair[2]
  cam_x_min,cam_y_min=(new_room and t_x-player.x) or 0,(new_room and t_y-player.y) or 0
- if(new_room==nil)cam_x_diff,cam_y_diff=0,0
- if(new_room and room==nil)cam_x_diff,cam_y_diff=t_x-x,t_y-y
+ if new_room==nil  then cam_x_diff,cam_y_diff=0,0
+ elseif room==nil then cam_x_diff,cam_y_diff=t_x-x,t_y-y end
  player.x,player.y=t_x,t_y
  cam_x,cam_y=cam_x+t_x-x,cam_y+t_y-y
  msg.add((delta_z>0 and "ascended" or "descended").." stairs")

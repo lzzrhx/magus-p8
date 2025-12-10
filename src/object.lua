@@ -133,7 +133,6 @@ entity=drawable:inherit({
  -- check if entity is on screen
  in_frame=function(self,offset)
   local pos=vec2_add(self,offset or {x=0,y=0})
-  if(room and (pos.x<=room[2] or pos.x>=room[4] or pos.y<=room[3] or pos.y>=room[5]))return false
   return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+15)
  end,
 
@@ -232,6 +231,7 @@ creature=entity:inherit({
 
  -- perform turn actions
  do_turn=function(self)
+  if(room and (self.x<=room[2] or self.x>=room[4] or self.y<=room[3] or self.y>=room[5]))return false
   if(turn>self.dhp_turn)self.attacked=false
   if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
   if(self.target and (self.target.dead or turn>self.target_turn+timer_target or self.target:check_status(status_charmed)))self.target=nil
