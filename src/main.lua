@@ -13,7 +13,7 @@ timer_spell=24 -- cooldown for casting spells (turns)
 timer_spell_charm=48 -- cooldown for casting befriend spell (turns)
 max_followers=5
 max_tomes=3
-version=1
+version="1.0.1"
 
 -- game states
 state_reset="reset"
@@ -31,12 +31,6 @@ status_scared=0b0010
 status_sleeping=0b0100
 status_poisoned=0b1000
 statuses=split"0b0001,0b0010,0b0100,0b1000"
-
--- sprite flags
-flag_collision=0
-flag_block_view_and_spell=1
-flag_block_view=2
-flag_entity=3
 
 -- vars
 state=nil -- game state
@@ -677,21 +671,21 @@ end
 -- iterate through all map tiles and find entities
 function populate_map()
  for x=0,127 do for y=0,67 do
-  if(fget(mget(x,y),flag_entity))entity.entity_spawn(mget(x,y),x,y)
+  if(fget(mget(x,y),3))entity.entity_spawn(mget(x,y),x,y)
   if(mget(x,y)==0)mset(x,y,1)
  end end
 end
 
 -- check for collision
 function collision(x,y)
- if(x<0 or x==103 or x==128 or y<0 or y==64 or fget(mget(x,y),flag_collision))return true
+ if(x<0 or x==103 or x==128 or y<0 or y==64 or fget(mget(x,y),0))return true
  for e in all(entity.entities) do if(e.collision and e.x==x and e.y==y)return true end
  return false
 end
 
 -- check if neighbour tile is in reach
-function in_reach(a,b)
- return dist(a,b)<=1 and ((a.x==b.x or a.y==b.y) or (not collision(a.x,b.y)) or (not collision(b.x,a.y)))
+function in_reach(a,b,diagonal)
+ return dist(a,b)<=1 and ((a.x==b.x or a.y==b.y) or (diagonal and ((not collision(a.x,b.y)) or (not collision(b.x,a.y)))))
 end
 
 -- perform turn
@@ -763,7 +757,7 @@ function in_sight(a,b,view_mode)
  local x,y,prev_x,prev_y=a.x,a.y,a.x,a.y
  local blocked,prev_blocked = false,false
  for i=1,step+1 do
-  blocked = (fget(mget(x,prev_y),flag_block_view_and_spell) and fget(mget(prev_x,y),flag_block_view_and_spell)) or fget(mget(x,y),flag_block_view_and_spell) or (view_mode and fget(mget(x,y),flag_block_view)) or prev_blocked
+  blocked = (fget(mget(x,prev_y),1) and fget(mget(prev_x,y),1)) or fget(mget(x,y),1) or (view_mode and fget(mget(x,y),2)) or prev_blocked
   if(blocked)return false
   prev_blocked = blocked
   prev_x,prev_y=x,y

@@ -133,6 +133,7 @@ entity=drawable:inherit({
  -- check if entity is on screen
  in_frame=function(self,offset)
   local pos=vec2_add(self,offset or {x=0,y=0})
+  if(offset==nil and room and (pos.x<=room[2] or pos.x>=room[4] or pos.y<=room[3] or pos.y>=room[5]))return false
   return (pos.x>=cam_x-1 and pos.x<cam_x+17 and pos.y>=cam_y-1 and pos.y<cam_y+15)
  end,
 
@@ -231,24 +232,23 @@ creature=entity:inherit({
 
  -- perform turn actions
  do_turn=function(self)
-  if(room and (self.x<=room[2] or self.x>=room[4] or self.y<=room[3] or self.y>=room[5]))return false
   if(turn>self.dhp_turn)self.attacked=false
-  if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
   if(self.target and (self.target.dead or turn>self.target_turn+timer_target or self.target:check_status(status_charmed)))self.target=nil
-  -- poisoned status
+  local was_incapacitated=self:check_status(status_sleeping)
   if not self.dead then
    if(self:check_status(status_poisoned))self:take_dmg(flr(2*(0.5+rnd())+0.5))
    for i=2,4 do
     local status=statuses[i]
     if self:check_status(status) then
-     if(self.status_timer[status]<=0)self:clear_status(status)
+     if(self.status_timer[status]<=0)self:clear_status(status) if(status==status_scared)was_incapacitated=true
      self.status_timer[status]-=1
     end
    end
    self.turn=turn
    self.followed=false
   end
-  return not self.dead and self:in_frame() and not self:check_status(status_sleeping) and fade_frame<=0
+  if(self.dhp_turn==turn)self:clear_status(status_sleeping)
+  return not self.dead and self:in_frame() and not was_incapacitated and fade_frame<=0
  end,
 
  -- start playing animation
@@ -292,14 +292,14 @@ creature=entity:inherit({
 
  -- follow another entity
  follow=function(self,other)
-  if in_reach(self,{x=other.prev_x,y=other.prev_y}) then self:move(other.prev_x,other.prev_y)
+  if in_reach(self,{x=other.prev_x,y=other.prev_y},true) then self:move(other.prev_x,other.prev_y)
   else self:move_towards(other) end
   other.followed=true
  end,
 
  -- move towards another creature and attack when close
  move_towards_and_attack=function(self,other)
-  if in_reach(self,other) then self:attack(other)
+  if in_reach(self,other,true) then self:attack(other)
   else self:move_towards(other) end
  end,
 
@@ -343,7 +343,6 @@ creature=entity:inherit({
 
  -- take damage
  take_dmg=function(self,dmg)
-  self:clear_status(status_sleeping)
   if(dmg>0)self.flash_frame=2
   self.blink_delay=(frame==0 and 2) or 1
   self.attacked=true
@@ -426,7 +425,9 @@ companion=creature:new({
 
  -- perform turn actions
  do_turn=function(self)
-  if creature.do_turn(self) then
+  if(not self:in_frame()) then 
+    self.x,self.y=player.prev_x,player.prev_y
+  elseif creature.do_turn(self) then
     if player.target and not player.target.dead then
      self:move_towards_and_attack(player.target)
     else
@@ -434,8 +435,6 @@ companion=creature:new({
      for e in all(player.followers) do if(e~=self and e.turn==turn and not e.followed)target=e break end
      self:follow(target)
     end
-  elseif not self:in_frame() then
-   self.x,self.y=player.prev_x,player.prev_y
   end
  end,
 })
@@ -462,7 +461,7 @@ npc=creature:inherit({
 
 -- enemy
 -------------------------------------------------------------------------------
-enemy = creature:inherit({
+enemy=creature:inherit({
  -- static vars
  class="enemy",
  parent_class=creature.class,
@@ -487,8 +486,9 @@ enemy = creature:inherit({
 
  -- perform turn actions
  do_turn=function(self)
+  if(self.dead and turn-self.dhp_turn>timer_corpse)self:destroy()
   if self.status & status_charmed==status_charmed then companion.do_turn(self)
-  elseif creature.do_turn(self) then
+  elseif self:in_frame() and creature.do_turn(self) then
    if(in_sight(self,player,true))self.seen_player=turn
    if (self.seen_player+timer_seen_player>turn) then
     if self.status & status_scared==status_scared then self:move_towards(player,true)

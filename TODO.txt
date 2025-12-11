@@ -32,7 +32,13 @@
 -- (?) player name
 -- (?) companion name
 
-
+-------------------------------------------------------------------------------
+-- changelog
+-------------------------------------------------------------------------------
+1.0.1
+    -- fixed issue with entities on lower floor not rendering when player is on second floor
+    -- removed ability for the player to attack diagonally through the "look" menu
+    -- enemies have to wait until next turn to perform attack when woken from sleep or fear
 
 -------------------------------------------------------------------------------
 -- plan
